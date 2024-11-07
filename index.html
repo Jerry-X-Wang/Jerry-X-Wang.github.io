@@ -295,19 +295,18 @@
             }
         });
 
+        fadeTime = 0.3 // once you release the key, the time for the sound to fade
         window.addEventListener('keyup', (event) => {
             const key = event.key;
             if (oscillators[key]) {
                 // 开始独立衰减
-                gainNodes[key].gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2); // 在0.5秒内衰减至0
-                oscillators[key].stop(audioContext.currentTime + 0.2); // 0.5秒后停止振荡器
+                gainNodes[key].gain.linearRampToValueAtTime(0, audioContext.currentTime + fadeTime);
+                oscillators[key].stop(audioContext.currentTime + fadeTime);
                 delete oscillators[key];
                 delete gainNodes[key];
                 activeKeys.delete(key);
                 updateFrequencyDisplay();
             }
-
-            document.activeElement.blur();
         });
         
         document.getElementById('volume').addEventListener('input', (event) => {
