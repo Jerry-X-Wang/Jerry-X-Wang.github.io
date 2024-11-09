@@ -14,7 +14,7 @@
         }
 
         .title {
-            font-size: 28px; 
+            font-size: 32px; 
             margin-bottom: 20px; 
             font-family: sans-serif; 
             text-align: center; 
@@ -571,6 +571,12 @@
         document.getElementById('pedal').addEventListener('mouseleave', () => {
             releasePedal();
         }); 
+        document.getElementById('pedal').addEventListener('touchstart', () => {
+            pressPedal();
+        });
+        document.getElementById('pedal').addEventListener('touchend', () => {
+            releasePedal();
+        });
         document.getElementById('pedal').addEventListener('contextmenu', (event) => {
             event.preventDefault();
         });
