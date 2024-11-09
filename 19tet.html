@@ -10,7 +10,7 @@
             font-family: Arial;
             text-align: center;
             margin: 0; /* Remove default margin */
-            padding-top: 30px; /* Top padding */
+            padding-top: 30px; 
         }
 
         .title {
@@ -22,8 +22,8 @@
         }
     
         .container {
-            width: 400px; /* Set container width */
-            margin: 0 auto; /* Center alignment */
+            width: 400px; 
+            margin: 0 auto; 
         }
     
         .control {
@@ -36,17 +36,17 @@
     
         .control label {
             margin-right: 10px; /* Space between label and input */
-            flex-basis: 200px; /* Label width */
-            text-align: right; /* Right align label */
+            flex-basis: 200px; 
+            text-align: right; 
         }
     
         .control input[type="number"], 
         .control input[type="range"] {
-            width: 50px; /* Input width */
-            height: 20px; /* Input height */
-            text-align: center; /* Center align input text */
-            border-radius: 0; /* No rounding */
-            border: 2px solid #bbb; /* Add border */
+            width: 50px; 
+            height: 20px; 
+            text-align: center; 
+            border-radius: 0; 
+            border: 2px solid #bbb; 
             padding: 0;
         }
     
@@ -137,6 +137,21 @@
             border-radius: 0; 
             padding: 0; 
         }
+
+        #pedal {
+            user-select: false;
+            position: absolute;
+            bottom: 5px;
+            width: 95%; 
+            height: 60px;
+            background-color: #eee; 
+            color: black; 
+            font-size: 24px; 
+            border: none; 
+            cursor: pointer;
+            margin-left: 2.5%;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -185,9 +200,14 @@
             </select>
         </div>
     </div>
-    <p class="display" id="frequency">
-        Press some keys to play sound
-    </p>
+    <div class="display" id="frequency">
+        Press some keys to play sound.
+    </div>
+    <div class="control">
+        <button id="pedal">
+           Pedal
+        </button>
+    </div>
     
     <script>
         const toneNumber = 19; // 19-Tone equal temperament
@@ -355,6 +375,21 @@
             updateFrequencyDisplay();
         }
 
+        function pressPedal() {
+            pedal = true;
+            document.getElementById('pedal').style.backgroundColor = '#bbb';
+        }
+
+        function releasePedal() {
+            pedal = false;
+            document.getElementById('pedal').style.backgroundColor = '#eee';
+            for (key in oscillators) {
+                if (!activeKeys.has(key)) {
+                    stopSound(key);
+                }
+            }
+        }
+
         
         window.addEventListener('keydown', (event) => {
             if (event.target.tagName.toLowerCase() === 'input') {
@@ -372,7 +407,7 @@
                     activeKeys.add(key);
 
                     if (oscillators[key]) {
-                        stopSound(key); // if the key is extended by the pedal, stop the sound first, then we can start the new sound
+                        stopSound(key); // if the key is extended by the key, stop the sound first, then we can start the new sound
                     }
 
                     playSound(key);   
@@ -393,7 +428,7 @@
                         updateActiveFrequencies(); 
                         break;
                     case ' ':
-                        pedal = true;
+                        pressPedal();
                         break;
                 }
             }
@@ -404,12 +439,7 @@
 
             switch (key) {
                 case ' ':
-                    pedal = false;
-                    for(oscillator in oscillators) {
-                        if (!activeKeys.has(oscillator)) {
-                            stopSound(oscillator);
-                        }
-                    }
+                    releasePedal();
                     break;
             }
 
@@ -532,6 +562,17 @@
             });
         });
 
+        document.getElementById('pedal').addEventListener('mousedown', () => {
+            pressPedal();
+        });
+
+        document.getElementById('pedal').addEventListener('mouseup', () => {
+            releasePedal();
+        });
+
+        document.getElementById('pedal').addEventListener('mouseleave', () => {
+            releasePedal();
+        });
     </script>
 </body>
 </html>
