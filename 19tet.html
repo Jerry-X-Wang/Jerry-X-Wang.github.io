@@ -7,18 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial;
             text-align: center;
             margin: 0; /* Remove default margin */
             padding-top: 30px; /* Top padding */
         }
 
         .title {
-            font-size: 32px; 
+            font-size: 28px; 
             margin-bottom: 20px; 
-            font-family: 'Times New Roman', Times, serif; 
+            font-family: sans-serif; 
             text-align: center; 
-            font-style: italic; 
             font-weight: bold;
         }
     
@@ -88,7 +87,7 @@
             -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
             appearance: none; /* Remove default style */
             width: 12px;
-            height: 20px; 
+            height: 22px; 
             border-radius: 0; 
         }
 
@@ -96,7 +95,7 @@
             -webkit-appearance: none; /* Remove default style */
             appearance: none; /* Remove default style */
             width: 12px;
-            height: 20px; 
+            height: 22px; 
             background: #bbb; 
             border-radius: 0; 
             cursor: pointer; 
@@ -104,7 +103,7 @@
 
         .control input[type="range"]::-moz-range-thumb {
             width: 12px; 
-            height: 20px; 
+            height: 22px; 
             background: #bbb; 
             border-radius: 0;
             cursor: pointer; 
@@ -112,7 +111,7 @@
 
         .control input[type="range"]::-ms-thumb {
             width: 12px;
-            height: 20px; 
+            height: 22px; 
             background: #bbb; 
             border-radius: 0;
             cursor: pointer;
@@ -141,11 +140,11 @@
     </style>
 </head>
 <body>
-    <a href="/" style="position: absolute; top: 10px; left: 10px;">
+    <a href="/" style="position: absolute; top: 5px; left: 5px;">
         <img src="home.png" alt="Home" style="width: 30px; height: 30px;">
     </a>
     <div class="title">
-        19-Tone Equal Temperament
+        19-Tone Equal Temperament Instrument
     </div>
     <div class="container"> 
 
@@ -186,7 +185,9 @@
             </select>
         </div>
     </div>
-    <p class="display"><span id="frequency"></span></p>
+    <p class="display" id="frequency">
+        Press some keys to play sound
+    </p>
     
     <script>
         const toneNumber = 19; // 19-Tone equal temperament
@@ -202,6 +203,8 @@
 
         let soundMode = "piano"; // Sound mode: piano or strings
         document.getElementById('soundMode').value = soundMode;
+
+        let pedal = false; // Whether the pedal is pressed or not
         
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillators = {};
@@ -285,12 +288,50 @@
         }
 
         function updateActiveFrequencies() {
-            activeKeys.forEach(activeKey => {
-                const activeFrequency = frequency(keys[activeKey]);
-                if (oscillators[activeKey]) {
-                    oscillators[activeKey].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
+            activeKeys.forEach(key => {
+                const activeFrequency = frequency(keys[key]);
+                if (oscillators[key]) {
+                    oscillators[key].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
                 }
             });
+        }
+
+        function playSound(key) {
+            const freq = frequency(keys[key]);
+            
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = volumeCurve(parseFloat(document.getElementById('volume').value)); // set gain value
+            gainNode.connect(audioContext.destination);
+            gainNodes[key] = gainNode;
+
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = waveType; // wave type
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            oscillator.connect(gainNode); // connect oscillator to gain node
+            oscillator.start();
+
+            switch (soundMode) {
+                case 'piano':
+                    const currentGain = gainNodes[key].gain.value;
+                    const halfLife = 1.5; // unit: second
+                    const currentTime = audioContext.currentTime;
+                    let gain = currentGain;
+
+                    const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
+                    let time = 0
+                    for (; gain >= 0.001; time += 0.01) { // set the gains from now on, until it's too quiet
+                        gain = gainCurve(time);
+                        gainNodes[key].gain.setValueAtTime(gain, currentTime + time);
+                    }
+                    oscillators[key] = oscillator;
+                    oscillators[key].stop(currentTime + time);
+                    break;
+                case 'strings':
+                    oscillators[key] = oscillator;
+                    break;
+                default:
+                    console.error(`Invalid sound mode: ${soundMode}`);
+            } 
         }
 
         function stopSound(key) {
@@ -311,10 +352,10 @@
             oscillators[key].stop(currentTime + time);
             delete oscillators[key];
             delete gainNodes[key];
-            activeKeys.delete(key);
             updateFrequencyDisplay();
         }
 
+        
         window.addEventListener('keydown', (event) => {
             if (event.target.tagName.toLowerCase() === 'input') {
                 if (event.key === 'Enter') {
@@ -330,45 +371,14 @@
                 if (!activeKeys.has(key)) {
                     activeKeys.add(key);
 
-                    const gainNode = audioContext.createGain();
-                    gainNode.gain.value = volumeCurve(parseFloat(document.getElementById('volume').value)); // set gain value
-                    gainNode.connect(audioContext.destination);
-                    gainNodes[key] = gainNode;
+                    if (oscillators[key]) {
+                        stopSound(key); // if the key is extended by the pedal, stop the sound first, then we can start the new sound
+                    }
 
-                    const oscillator = audioContext.createOscillator();
-                    oscillator.type = waveType; // wave type
-                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-                    oscillator.connect(gainNode); // connect oscillator to gain node
-                    oscillator.start();
-
-                    switch (soundMode) {
-                        case 'piano':
-                            const currentGain = gainNodes[key].gain.value;
-                            const halfLife = 2; // unit: second
-                            const currentTime = audioContext.currentTime;
-                            let gain = currentGain;
-
-                            const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
-                            let time = 0
-                            for (; gain >= 0.001; time += 0.01) { // set the gains from now on, until it's too quiet
-                                gain = gainCurve(time);
-                                gainNodes[key].gain.setValueAtTime(gain, currentTime + time);
-                            }
-                            oscillators[key] = oscillator;
-                            oscillators[key].stop(currentTime + time);
-                            break;
-                        case 'strings':
-                            oscillators[key] = oscillator;
-                            break;
-                        default:
-                            console.error(`Invalid sound mode: ${soundMode}`);
-                    } 
-
+                    playSound(key);   
                 } else {
-                    // 更新已按下键的频率
                     oscillators[key].frequency.setValueAtTime(freq, audioContext.currentTime);
                 }
-
                 updateFrequencyDisplay();
             } else {
                 switch (key) {
@@ -376,13 +386,14 @@
                         octave--;
                         document.getElementById('octave').value = octave; 
                         updateActiveFrequencies(); 
-                        updateFrequencyDisplay(); 
                         break;
                     case 'ArrowUp': 
                         octave++;
                         document.getElementById('octave').value = octave; 
                         updateActiveFrequencies(); 
-                        updateFrequencyDisplay(); 
+                        break;
+                    case ' ':
+                        pedal = true;
                         break;
                 }
             }
@@ -390,8 +401,27 @@
 
         window.addEventListener('keyup', (event) => {
             const key = event.key;
-            if (oscillators[key]) {
-                stopSound(key);
+
+            switch (key) {
+                case ' ':
+                    pedal = false;
+                    for(oscillator in oscillators) {
+                        if (!activeKeys.has(oscillator)) {
+                            stopSound(oscillator);
+                        }
+                    }
+                    break;
+            }
+
+            if (!pedal) {
+                if (oscillators[key]) {
+                    stopSound(key);
+                }
+            }
+
+            if (activeKeys.has(key)) {
+                activeKeys.delete(key);
+                updateFrequencyDisplay();
             }
         });
 
