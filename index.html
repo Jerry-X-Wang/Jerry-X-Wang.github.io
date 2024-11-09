@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" href="favicon.png" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -9,6 +10,15 @@
             text-align: center;
             margin: 0; /* Remove default margin */
             padding-top: 50px; /* Top padding */
+        }
+
+        .title {
+            font-size: 32px; 
+            margin-bottom: 20px; 
+            font-family: 'Times New Roman', Times, serif; 
+            text-align: center; 
+            font-style: italic; 
+            font-weight: bold;
         }
     
         .container {
@@ -20,7 +30,8 @@
             display: flex;
             justify-content: flex-start; /* Left align */
             align-items: center;
-            margin-top: 20px;
+            margin-top: 8px;
+            margin-bottom: 8px;
         }
     
         .control label {
@@ -33,7 +44,6 @@
         .control input[type="range"] {
             width: 50px; /* Input width */
             height: 20px; /* Input height */
-            margin: 0 5px; /* Input left and right margin */
             text-align: center; /* Center align input text */
             border-radius: 0; /* No rounding */
             border: 2px solid #bbb; /* Add border */
@@ -49,7 +59,7 @@
             color: white;
             font-size: 20px;
             cursor: pointer;
-            margin: 0 5px;
+            margin-left: 10px;
             border-radius: 0;
             padding: 0;
         }
@@ -62,45 +72,49 @@
             outline: none;
             width: 118px;
             height: 12px;
+            margin-left: 0px;
+            margin-top: 5px;
+            margin-bottom: 5px;
         }
     
-        .frequency {
+        .display {
             font-size: 24px;
-            margin-top: 20px;
+            margin-top: 10px;
             white-space: pre-line;
         }
+        
         .control input[type="range"] {
             -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
             appearance: none; /* Remove default style */
-            width: 100%; /* Set to 100% width */
-            height: 20px; /* Set height */
-            border-radius: 0; /* Ensure no rounding */
+            width: 12px;
+            height: 20px; 
+            border-radius: 0; 
         }
 
         .control input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none; /* Remove default style */
             appearance: none; /* Remove default style */
-            width: 12px; /* Custom thumb width */
-            height: 20px; /* Custom thumb height */
-            background: #bbb; /* Custom thumb background color */
-            border-radius: 0; /* Ensure no rounding */
-            cursor: pointer; /* Custom cursor */
+            width: 12px;
+            height: 20px; 
+            background: #bbb; 
+            border-radius: 0; 
+            cursor: pointer; 
         }
 
         .control input[type="range"]::-moz-range-thumb {
-            width: 12px; /* Custom thumb width */
-            height: 20px; /* Custom thumb height */
-            background: #bbb; /* Custom thumb background color */
-            border-radius: 0; /* Ensure no rounding */
-            cursor: pointer; /* Custom cursor */
+            width: 12px; 
+            height: 20px; 
+            background: #bbb; 
+            border-radius: 0;
+            cursor: pointer; 
         }
 
         .control input[type="range"]::-ms-thumb {
-            width: 12px; /* Custom thumb width */
-            height: 20px; /* Custom thumb height */
-            background: #bbb; /* Custom thumb background color */
-            border-radius: 0; /* Ensure no rounding */
-            cursor: pointer; /* Custom cursor */
+            width: 12px;
+            height: 20px; 
+            background: #bbb; 
+            border-radius: 0;
+            cursor: pointer;
         }
 
         /* Hide number input's up and down arrows */
@@ -115,22 +129,32 @@
             -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
             appearance: none; /* Remove default style */
         }
+
+        .control select {
+            width: 122px; 
+            height: 25px;
+            border: 2px solid #bbb; 
+            border-radius: 0; 
+            padding: 0; 
+        }
     </style>
 </head>
 <body>
-    <h1>19-Tone Equal Temperament</h1>
+    <div class="title">
+        19-Tone Equal Temperament
+    </div>
     <div class="container"> 
 
         <div class="control">
             <label for="reference">Reference Frequency (Hz)</label>
-            <input type="number" id="reference" step="1" min="1">
+            <input type="number" id="reference" min="1" pattern="[0-9]*">
             <button id="refIncrease">+</button>
             <button id="refDecrease">-</button>
         </div>
 
         <div class="control">
             <label for="octave">Octave</label>
-            <input type="number" id="octave" step="1">
+            <input type="number" id="octave" step="1" pattern="[0-9]*">
             <button id="octaveIncrease">+</button>
             <button id="octaveDecrease">-</button>
         </div>
@@ -140,37 +164,45 @@
             <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
         </div>
 
-        <p class="frequency"><span id="frequency"></span></p>
-    </div>
+        <div class="control">
+            <label for="waveType">Wave Type</label>
+            <select id="waveType">
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="sawtooth">Sawtooth</option>
+                <option value="triangle">Triangle</option>
+            </select>
+        </div>
 
+        <div class="control">
+            <label for="soundMode">Sound Mode</label>
+            <select id="soundMode">
+                <option value="piano">Piano</option>
+                <option value="strings">Strings</option>
+            </select>
+        </div>
+    </div>
+    <p class="display"><span id="frequency"></span></p>
+    
     <script>
+        const toneNumber = 19; // 19-Tone equal temperament
+
         let reference = 440; // Reference frequency
         document.getElementById('reference').value = reference;
-        const toneNumber = 19; // 19-Tone equal temperament
+        
         let octave = 4; // Octave number
         document.getElementById('octave').value = octave;
 
-        function frequency(key) {
-            return reference * 2**(key/toneNumber + octave - 4);
-        }
-        
-        function updateFrequencyDisplay() {
-            const activeFrequencies = Array.from(activeKeys)
-                .map(key => Math.round(frequency(keys[key])))
-                .filter(freq => freq !== undefined)
-                .sort((a, b) => a - b);
-            const display = activeFrequencies.map(freq => `${freq} Hz`).join('\n');
-            document.getElementById('frequency').textContent = display;
-        }
+        let waveType = "triangle"; // Wave type: sine, square, sawtooth, or triangle
+        document.getElementById('waveType').value = waveType;
 
-        function updateActiveFrequencies() {
-            activeKeys.forEach(activeKey => {
-                const activeFrequency = frequency(keys[activeKey]);
-                if (oscillators[activeKey]) {
-                    oscillators[activeKey].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
-                }
-            });
-        }
+        let soundMode = "piano"; // Sound mode: piano or strings
+        document.getElementById('soundMode').value = soundMode;
+        
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillators = {};
+        const gainNodes = {}; 
+        const activeKeys = new Set();
 
         const keys = {
             "q": -14,
@@ -215,11 +247,8 @@
             "/": 15,
 
             "]": 16,
-
             "\\": 19,
-
             "`": 22,
-
             "1": 24,
             "2": 27,
             "3": 30,
@@ -234,15 +263,58 @@
             "=": 54,
         };
 
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillators = {};
-        const gainNodes = {};  // 每个音符对应一个独立的 GainNode
-        const activeKeys = new Set();
+        function frequency(key) {
+            return reference * 2**(key/toneNumber + octave - 4);
+        }
+
+        function volumeCurve(rawVolume) {
+            return (rawVolume / 2) ** 2;
+        }
+        
+        function updateFrequencyDisplay() {
+            const activeFrequencies = Array.from(activeKeys)
+                .map(key => Math.round(frequency(keys[key])))
+                .filter(freq => freq !== undefined)
+                .sort((a, b) => a - b);
+            const display = activeFrequencies.map(freq => `${freq} Hz`).join('\n');
+            document.getElementById('frequency').textContent = display;
+        }
+
+        function updateActiveFrequencies() {
+            activeKeys.forEach(activeKey => {
+                const activeFrequency = frequency(keys[activeKey]);
+                if (oscillators[activeKey]) {
+                    oscillators[activeKey].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
+                }
+            });
+        }
+
+        function stopSound(key) {
+            gainNodes[key].gain.cancelScheduledValues(audioContext.currentTime); // cancel the schedule before
+
+            const currentGain = gainNodes[key].gain.value;
+            const halfLife = 0.05; // unit: second
+            const currentTime = audioContext.currentTime;
+            let gain = currentGain;
+
+            const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
+            let time = 0;
+            for (; gain >= 0.001; time += 0.001) { // set the gainNodes from now on, until it's too quiet
+                gain = gainCurve(time);
+                gainNodes[key].gain.setValueAtTime(gain, currentTime + time);
+            }
+
+            oscillators[key].stop(currentTime + time);
+            delete oscillators[key];
+            delete gainNodes[key];
+            activeKeys.delete(key);
+            updateFrequencyDisplay();
+        }
 
         window.addEventListener('keydown', (event) => {
             if (event.target.tagName.toLowerCase() === 'input') {
                 if (event.key === 'Enter') {
-                    event.target.blur(); // 取消选中输入框
+                    event.target.blur();
                     return; 
                 }
             }
@@ -254,21 +326,42 @@
                 if (!activeKeys.has(key)) {
                     activeKeys.add(key);
 
-                    // 创建独立的 GainNode
                     const gainNode = audioContext.createGain();
-                    gainNode.gain.value = parseFloat(document.getElementById('volume').value) ** 2;
+                    gainNode.gain.value = volumeCurve(parseFloat(document.getElementById('volume').value)); // set gain value
                     gainNode.connect(audioContext.destination);
                     gainNodes[key] = gainNode;
 
                     const oscillator = audioContext.createOscillator();
-                    oscillator.type = 'triangle'; // Waveform type
+                    oscillator.type = waveType; // wave type
                     oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-                    oscillator.connect(gainNode); // Connect oscillator to gain node
+                    oscillator.connect(gainNode); // connect oscillator to gain node
                     oscillator.start();
 
-                    oscillators[key] = oscillator;
+                    switch (soundMode) {
+                        case 'piano':
+                            const currentGain = gainNodes[key].gain.value;
+                            const halfLife = 2; // unit: second
+                            const currentTime = audioContext.currentTime;
+                            let gain = currentGain;
+
+                            const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
+                            let time = 0
+                            for (; gain >= 0.001; time += 0.01) { // set the gains from now on, until it's too quiet
+                                gain = gainCurve(time);
+                                gainNodes[key].gain.setValueAtTime(gain, currentTime + time);
+                            }
+                            oscillators[key] = oscillator;
+                            oscillators[key].stop(currentTime + time);
+                            break;
+                        case 'strings':
+                            oscillators[key] = oscillator;
+                            break;
+                        default:
+                            console.error(`Invalid sound mode: ${soundMode}`);
+                    } 
+
                 } else {
-                    // Update frequency of the pressed key
+                    // 更新已按下键的频率
                     oscillators[key].frequency.setValueAtTime(freq, audioContext.currentTime);
                 }
 
@@ -277,47 +370,38 @@
                 switch (key) {
                     case 'ArrowDown': 
                         octave--;
-                        document.getElementById('octave').value = octave;
-                        
-                        // Update the frequency of all active oscillators
-                        updateActiveFrequencies();
-                        updateFrequencyDisplay();
+                        document.getElementById('octave').value = octave; 
+                        updateActiveFrequencies(); 
+                        updateFrequencyDisplay(); 
                         break;
                     case 'ArrowUp': 
                         octave++;
-                        document.getElementById('octave').value = octave;
-                        
-                        // Update the frequency of all active oscillators
-                        updateActiveFrequencies();
-                        updateFrequencyDisplay();
+                        document.getElementById('octave').value = octave; 
+                        updateActiveFrequencies(); 
+                        updateFrequencyDisplay(); 
                         break;
                 }
             }
         });
 
-        fadeTime = 0.3 // once you release the key, the time for the sound to fade
         window.addEventListener('keyup', (event) => {
             const key = event.key;
             if (oscillators[key]) {
-                // 开始独立衰减
-                gainNodes[key].gain.linearRampToValueAtTime(0, audioContext.currentTime + fadeTime);
-                oscillators[key].stop(audioContext.currentTime + fadeTime);
-                delete oscillators[key];
-                delete gainNodes[key];
-                activeKeys.delete(key);
-                updateFrequencyDisplay();
+                stopSound(key);
             }
         });
-        
+
         document.getElementById('volume').addEventListener('input', (event) => {
-            const value = event.target.value ** 2;
+            const rawVolume = parseFloat(event.target.value);
             activeKeys.forEach(key => {
-                if (gainNodes[key]) {
-                    gainNodes[key].gain.value = value; // 更新当前活跃按键的增益
+                if (oscillators[key]) {
+                    if (soundMode === 'strings') {
+                    gainNodes[key].gain.value = volumeCurve(rawVolume); // set gain value
+                    }
                 }
             });
         });
-
+        
         document.getElementById('reference').addEventListener('input', (event) => {
             reference = parseFloat(event.target.value);
             updateActiveFrequencies(); 
@@ -358,29 +442,62 @@
             document.activeElement.blur();
         });
 
+        document.getElementById('waveType').addEventListener('focus', () => {
+            activeKeys.forEach(key => {
+                if (oscillators[key]) {
+                    stopSound(key);
+                }
+            });
+        });
+        document.getElementById('waveType').addEventListener('change', (event) => {
+            waveType = event.target.value;
+        });   
+
+        document.getElementById('soundMode').addEventListener('focus', () => {
+            activeKeys.forEach(key => {
+                if (oscillators[key]) {
+                    stopSound(key);
+                }
+            });
+        });
+        document.getElementById('soundMode').addEventListener('change', (event) => {
+            soundMode = event.target.value;
+        });  
+        
         window.addEventListener('blur', () => {
             activeKeys.forEach(key => {
                 if (oscillators[key]) {
-                    oscillators[key].stop();
-                    delete oscillators[key];
-                    delete gainNodes[key];
+                    stopSound(key);
                 }
             });
-            activeKeys.clear(); 
-            updateFrequencyDisplay(); 
         });
 
         window.addEventListener('contextmenu', (event) => {
             activeKeys.forEach(key => {
                 if (oscillators[key]) {
-                    oscillators[key].stop();
-                    delete oscillators[key];
-                    delete gainNodes[key];
+                    stopSound(key);
                 }
             });
-            activeKeys.clear(); 
-            updateFrequencyDisplay(); 
         });
+
+        const controls = document.querySelectorAll('.control input, .control select, .control button');
+        document.addEventListener('mousemove', (event) => {
+            controls.forEach(control => {
+                const rect = control.getBoundingClientRect(); // get the bounding rect of the control
+                const controlCenterX = rect.left + rect.width / 2; // x center of the control
+                const controlCenterY = rect.top + rect.height / 2; // y center of the control
+                const xDistanceThreshold = rect.width / 2 + 10; 
+                const yDistanceThreshold = rect.height / 2 + 10;
+
+                const xDistance = Math.abs(event.clientX - controlCenterX)
+                const yDistance = Math.abs(event.clientY - controlCenterY)
+
+                if (xDistance > xDistanceThreshold || yDistance > yDistanceThreshold) {
+                    control.blur();
+                }
+            });
+        });
+
     </script>
 </body>
 </html>
