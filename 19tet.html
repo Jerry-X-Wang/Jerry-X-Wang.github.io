@@ -139,11 +139,11 @@
         }
 
         #pedal {
-            user-select: false;
+            user-select: none;
             position: absolute;
             bottom: 5px;
             width: 95%; 
-            height: 60px;
+            height: 80px;
             background-color: #eee; 
             color: black; 
             font-size: 24px; 
@@ -205,7 +205,7 @@
     </div>
     <div class="control">
         <button id="pedal">
-           Pedal
+           Pedal (Space)
         </button>
     </div>
     
@@ -407,7 +407,7 @@
                     activeKeys.add(key);
 
                     if (oscillators[key]) {
-                        stopSound(key); // if the key is extended by the key, stop the sound first, then we can start the new sound
+                        stopSound(key); // if the key is extended by the pedal, stop the sound first, then we can start the new sound
                     }
 
                     playSound(key);   
@@ -557,7 +557,7 @@
                 const yDistance = Math.abs(event.clientY - controlCenterY)
 
                 if (xDistance > xDistanceThreshold || yDistance > yDistanceThreshold) {
-                    control.blur();
+                    control.blur(); // blur the focus if mouse cursor is too far from the control
                 }
             });
         });
@@ -565,14 +565,16 @@
         document.getElementById('pedal').addEventListener('mousedown', () => {
             pressPedal();
         });
-
         document.getElementById('pedal').addEventListener('mouseup', () => {
             releasePedal();
         });
-
         document.getElementById('pedal').addEventListener('mouseleave', () => {
             releasePedal();
+        }); 
+        document.getElementById('pedal').addEventListener('contextmenu', (event) => {
+            event.preventDefault();
         });
+
     </script>
 </body>
 </html>
