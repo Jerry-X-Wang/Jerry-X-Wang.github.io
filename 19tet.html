@@ -372,6 +372,11 @@
             oscillators[key].stop(currentTime + time);
             delete oscillators[key];
             delete gainNodes[key];
+
+            if (activeKeys.has(key)) {
+                activeKeys.delete(key);
+            }
+
             updateFrequencyDisplay();
         }
 
