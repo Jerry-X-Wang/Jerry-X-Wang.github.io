@@ -409,12 +409,11 @@
             
             if (freq) {
                 if (!activeKeys.has(key)) {
-                    activeKeys.add(key);
-
                     if (oscillators[key]) {
                         stopSound(key); // if the key is extended by the pedal, stop the sound first, then we can start the new sound
                     }
 
+                    activeKeys.add(key);
                     playSound(key);   
                 } else {
                     oscillators[key].frequency.setValueAtTime(freq, audioContext.currentTime);
