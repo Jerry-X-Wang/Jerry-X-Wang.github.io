@@ -369,7 +369,7 @@
             switch (soundMode) {
                 case 'piano':
                     const currentGain = gainNodes[keyCode].gain.value;
-                    const halfLife = 0.5; // unit: second
+                    const halfLife = 0.45; // unit: second
                     const currentTime = audioContext.currentTime;
                     let gain = currentGain;
 
