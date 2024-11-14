@@ -357,9 +357,30 @@
             const freq = frequency(keyCodes[keyCode]);
             
             const gainNode = audioContext.createGain();
-            gainNode.gain.value = volumeCurve(parseFloat(document.getElementById('volume').value)); // set gain value
             gainNode.connect(audioContext.destination);
             gainNodes[keyCode] = gainNode;
+            const volume = volumeCurve(parseFloat(document.getElementById('volume').value))
+            switch (waveType) { // set gain value in different cases
+                default:
+                    gainNode.gain.value = volume; 
+                    break;
+                case 'sine':
+                    if (freq >= 440) {
+                        gainNode.gain.value = (440/freq)**0.5 * volume;
+                    } else {
+                        gainNode.gain.value = 440/freq * volume;
+                    }
+                    break;
+                case 'square':
+                    gainNode.gain.value = volume;
+                    break;
+                case 'sawtooth':
+                    gainNode.gain.value = volume;
+                    break;
+                case 'triangle':
+                    gainNode.gain.value = (440/freq)**0.5 * volume;
+                    break;
+            } 
 
             const oscillator = audioContext.createOscillator();
             oscillator.type = waveType; // wave type
