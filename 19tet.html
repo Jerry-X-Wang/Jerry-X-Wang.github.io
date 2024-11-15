@@ -82,6 +82,7 @@
             font-size: 25px;
             margin-top: 10px;
             white-space: pre-line;
+            line-height: 1;
         }
         
         .control input[type="range"] {
@@ -348,7 +349,15 @@
             noteNumbers.sort((a, b) => a - b);
             let display = "";
             for (i in noteNumbers) {
-                display += notes[mod(noteNumbers[i], 19)] + (Math.floor((noteNumbers[i] + 14) / 19) + octave) + "\n";
+                let freq = frequency(noteNumbers[i]);
+                if (freq < 100) {
+                    freq = freq.toPrecision(3);
+                } else {
+                    freq = freq.toFixed();
+                }
+                display += notes[mod(noteNumbers[i], 19)] + (Math.floor((noteNumbers[i] + 14) / 19) + octave) + " " + freq + " Hz" + "\n";
+                //         note name                        octave                        ↓                           frequency
+                //                                                                        14 is because there is 14 semitones between C and A in 19-TET
             }
             document.getElementById("noteDisplay").textContent = display;
         }
@@ -401,11 +410,12 @@
             oscillator.connect(gainNode); // connect oscillator to gain node
             oscillator.start();
 
+            const currentGain = gainNodes[keyCode].gain.value;
+            const currentTime = audioContext.currentTime;
+
             switch (soundMode) {
                 case "piano":
-                    const currentGain = gainNodes[keyCode].gain.value;
                     const halfLife = 0.5 * (440/freq)**0.3; // unit: second
-                    const currentTime = audioContext.currentTime;
                     let gain = currentGain;
 
                     const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** (t**0.5); // exponential function with given halfLife
