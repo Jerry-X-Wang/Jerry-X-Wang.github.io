@@ -82,7 +82,7 @@
             font-size: 25px;
             margin-top: 10px;
             white-space: pre-line;
-            line-height: 1;
+            line-height: 1; /* in case of ♭. if we don't fix line-height, the ♭ will make the line higher */
         }
         
         .control input[type="range"] {
@@ -409,6 +409,7 @@
             oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
             oscillator.connect(gainNode); // connect oscillator to gain node
             oscillator.start();
+            oscillators[keyCode] = oscillator;
 
             const currentGain = gainNodes[keyCode].gain.value;
             const currentTime = audioContext.currentTime;
@@ -424,13 +425,13 @@
                         gain = gainCurve(time);
                         gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
                     }
-                    oscillators[keyCode] = oscillator;
                     oscillators[keyCode].stop(currentTime + time);
                     break;
                 case "strings":
-                    oscillators[keyCode] = oscillator;
+                    gainNodes[keyCode].gain.setValueAtTime(0.7 * currentGain, currentTime);
                     break;
                 default:
+                    oscillators[keyCode].stop(currentTime);
                     console.error(`Invalid sound mode: ${soundMode}`);
             } 
         }
