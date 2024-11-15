@@ -366,7 +366,7 @@
                     break;
                 case 'sine':
                     if (freq >= 440) {
-                        gainNode.gain.value = volume * (440/freq)**0.5;
+                        gainNode.gain.value = volume
                     } else {
                         gainNode.gain.value = volume * 440/freq;
                     }
@@ -378,7 +378,7 @@
                     gainNode.gain.value = volume;
                     break;
                 case 'triangle':
-                    gainNode.gain.value = volume * (440/freq)**0.5;
+                    gainNode.gain.value = volume * (440/freq)**0.3;
                     break;
             } 
 
