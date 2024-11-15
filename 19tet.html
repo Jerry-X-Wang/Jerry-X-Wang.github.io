@@ -188,15 +188,15 @@
             <label for="key">Key</label>
             <select id="key">
                 <option value=0>C</option>
-                <option value=1>C#</option>
+                <option value=1>C♯</option>
                 <option value=2>D♭</option>
                 <option value=3>D</option>
                 <option value=4>D♯</option>
                 <option value=5>E♭</option>
                 <option value=6>E</option>
-                <option value=7>E#(F♭)</option>
+                <option value=7>E♯(F♭)</option>
                 <option value=8>F</option>
-                <option value=9>F#</option>
+                <option value=9>F♯</option>
                 <option value=10>G♭</option>
                 <option value=11>G</option>
                 <option value=12>G♯</option>
@@ -205,7 +205,7 @@
                 <option value=15>A♯</option>
                 <option value=16>B♭</option>
                 <option value=17>B</option>
-                <option value=18>B#(C♭)</option>
+                <option value=18>B♯(C♭)</option>
             </select>
             <button id="keyDecrease" title="(ArrowLeft ←)">-</button>
             <button id="keyIncrease" title="(ArrowRight →)">+</button>
@@ -234,7 +234,7 @@
             </select>
         </div>
     </div>
-    <div class="display" id="frequency">
+    <div class="display" id="noteDisplay">
         Press some keys to play sound.
     </div>
     <div class="control">
@@ -247,18 +247,18 @@
         const toneNumber = 19; // 19-Tone equal temperament
 
         let reference = 440; // Reference frequency
-        document.getElementById('reference').value = reference;
+        document.getElementById("reference").value = reference;
         
         let octave = 4; // Octave number
-        document.getElementById('octave').value = octave;
+        document.getElementById("octave").value = octave;
 
         let key = 0; // key in music
 
         let waveType = "triangle"; // Wave type: sine, square, sawtooth, or triangle
-        document.getElementById('waveType').value = waveType;
+        document.getElementById("waveType").value = waveType;
 
         let soundMode = "piano"; // Sound mode: piano or strings
-        document.getElementById('soundMode').value = soundMode;
+        document.getElementById("soundMode").value = soundMode;
 
         let pedal = false; // Whether the pedal is pressed or not
         
@@ -267,7 +267,7 @@
         const gainNodes = {}; 
         const activekeyCodes = new Set();       
 
-        const keyCodes = {
+        const keyNumbers = {
             "q": -14,
             "a": -13,
             "z": -12,
@@ -326,27 +326,36 @@
             "=": 54,
         };
 
+        const notes = ["A", "A♯", "B♭", "B", "B♯(C♭)", "C", "C♯", "D♭", "D", "D♯", "E♭", "E", "E♯(F♭)", "F", "F♯", "G♭", "G", "G♯", "A♭"]
 
-        function frequency(keyCode) {
-            return reference * 2**((keyCode + key)/toneNumber + octave - 4);
+        function mod(a, mod){
+            return ((a % mod) + mod) % mod; // always returns a positive number
+        }
+
+        function frequency(keyNumber) {
+            return reference * 2**((keyNumber + key)/toneNumber + octave - 4);
         }
 
         function volumeCurve(rawVolume) {
             return (rawVolume / 2) ** 2;
         }
         
-        function updateFrequencyDisplay() {
-            const activeFrequencies = Array.from(activekeyCodes)
-                .map(keyCode => Math.round(frequency(keyCodes[keyCode])))
-                .filter(freq => freq !== undefined)
-                .sort((a, b) => a - b);
-            const display = activeFrequencies.map(freq => `${freq} Hz`).join('\n');
-            document.getElementById('frequency').textContent = display;
+        function updateNoteDisplay() {
+            let noteNumbers = [];
+            activekeyCodes.forEach(keyCode => {
+                noteNumbers.push(keyNumbers[keyCode] + key);
+            });
+            noteNumbers.sort((a, b) => a - b);
+            let display = "";
+            for (i in noteNumbers) {
+                display += notes[mod(noteNumbers[i], 19)] + (Math.floor((noteNumbers[i] + 14) / 19) + octave) + "\n";
+            }
+            document.getElementById("noteDisplay").textContent = display;
         }
 
         function updateActiveFrequencies() {
             activekeyCodes.forEach(keyCode => {
-                const activeFrequency = frequency(keyCodes[keyCode]);
+                const activeFrequency = frequency(keyNumbers[keyCode]);
                 if (oscillators[keyCode]) {
                     oscillators[keyCode].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
                 }
@@ -354,32 +363,36 @@
         }
 
         function playSound(keyCode) {
-            const freq = frequency(keyCodes[keyCode]);
+            const freq = frequency(keyNumbers[keyCode]);
             
             const gainNode = audioContext.createGain();
             gainNode.connect(audioContext.destination);
             gainNodes[keyCode] = gainNode;
-            const volume = volumeCurve(parseFloat(document.getElementById('volume').value))
+            const volume = volumeCurve(parseFloat(document.getElementById("volume").value))
             switch (waveType) { // set gain value in different cases
                 default:
                     gainNode.gain.value = volume; 
                     break;
-                case 'sine':
+                case "sine":
                     if (freq >= 440) {
                         gainNode.gain.value = volume
                     } else {
                         gainNode.gain.value = volume * 440/freq;
                     }
                     break;
-                case 'square':
+                case "square":
                     gainNode.gain.value = volume;
                     break;
-                case 'sawtooth':
+                case "sawtooth":
                     gainNode.gain.value = volume;
                     break;
-                case 'triangle':
-                    gainNode.gain.value = volume * (440/freq)**0.3;
-                    break;
+                case "triangle":
+                    if (freq >= 440) {
+                            gainNode.gain.value = volume
+                        } else {
+                            gainNode.gain.value = volume * 440/freq;
+                        }
+                        break;
             } 
 
             const oscillator = audioContext.createOscillator();
@@ -389,7 +402,7 @@
             oscillator.start();
 
             switch (soundMode) {
-                case 'piano':
+                case "piano":
                     const currentGain = gainNodes[keyCode].gain.value;
                     const halfLife = 0.5 * (440/freq)**0.3; // unit: second
                     const currentTime = audioContext.currentTime;
@@ -404,7 +417,7 @@
                     oscillators[keyCode] = oscillator;
                     oscillators[keyCode].stop(currentTime + time);
                     break;
-                case 'strings':
+                case "strings":
                     oscillators[keyCode] = oscillator;
                     break;
                 default:
@@ -435,17 +448,17 @@
                 activekeyCodes.delete(keyCode);
             }
 
-            updateFrequencyDisplay();
+            updateNoteDisplay();
         }
 
         function pressPedal() {
             pedal = true;
-            document.getElementById('pedal').style.backgroundColor = '#bbb';
+            document.getElementById("pedal").style.backgroundColor = "#bbb";
         }
 
         function releasePedal() {
             pedal = false;
-            document.getElementById('pedal').style.backgroundColor = '#eee';
+            document.getElementById("pedal").style.backgroundColor = "#eee";
             for (keyCode in oscillators) {
                 if (!activekeyCodes.has(keyCode)) {
                     stopSound(keyCode);
@@ -455,55 +468,55 @@
 
         function octaveDecrease() {
             octave--;
-            document.getElementById('octave').value = octave; 
+            document.getElementById("octave").value = octave; 
             updateActiveFrequencies(); 
-            updateFrequencyDisplay();
+            updateNoteDisplay();
         }
 
         function octaveIncrease() {
             octave++;
-            document.getElementById('octave').value = octave; 
+            document.getElementById("octave").value = octave; 
             updateActiveFrequencies(); 
-            updateFrequencyDisplay();
+            updateNoteDisplay();
         }
 
         function keyDecrease() {
             if (key == 0) {
                 octave--;
-                document.getElementById('octave').value = octave;
+                document.getElementById("octave").value = octave;
                 key = 18;
             } else {
                 key--;
             }
-            document.getElementById('key').value = key;
+            document.getElementById("key").value = key;
             updateActiveFrequencies(); 
-            updateFrequencyDisplay();
+            updateNoteDisplay();
         }
 
         function keyIncrease() {
             if (key == 18) {
                 octave++;
-                document.getElementById('octave').value = octave;
+                document.getElementById("octave").value = octave;
                 key = 0;
             } else {
                 key++;
             }
-            document.getElementById('key').value = key;
+            document.getElementById("key").value = key;
             updateActiveFrequencies(); 
-            updateFrequencyDisplay();
+            updateNoteDisplay();
         }
 
         
-        window.addEventListener('keydown', (event) => {
-            if (event.target.tagName.toLowerCase() === 'input') {
-                if (event.key === 'Enter') {
+        window.addEventListener("keydown", (event) => {
+            if (event.target.tagName.toLowerCase() === "input") {
+                if (event.key === "Enter") {
                     event.target.blur();
                     return; 
                 }
             }
 
             const keyCode = event.key;
-            const freq = frequency(keyCodes[keyCode]);
+            const freq = frequency(keyNumbers[keyCode]);
             
             if (freq) {
                 if (!activekeyCodes.has(keyCode)) {
@@ -516,33 +529,33 @@
                 } else {
                     oscillators[keyCode].frequency.setValueAtTime(freq, audioContext.currentTime);
                 }
-                updateFrequencyDisplay();
+                updateNoteDisplay();
             } else {
                 switch (keyCode) {
-                    case 'ArrowDown': 
+                    case "ArrowDown": 
                         octaveDecrease();
                         break;
-                    case 'ArrowUp': 
+                    case "ArrowUp": 
                         octaveIncrease();
                         break;
-                    case 'ArrowLeft':
+                    case "ArrowLeft":
                         keyDecrease();
                         break;
-                    case 'ArrowRight':
+                    case "ArrowRight":
                         keyIncrease();
                         break;
-                    case ' ':
+                    case " ":
                         pressPedal();
                         break;
                 }
             }
         });
 
-        window.addEventListener('keyup', (event) => {
+        window.addEventListener("keyup", (event) => {
             const keyCode = event.key;
 
             switch (keyCode) {
-                case ' ':
+                case " ":
                     releasePedal();
                     break;
             }
@@ -555,92 +568,92 @@
 
             if (activekeyCodes.has(keyCode)) {
                 activekeyCodes.delete(keyCode);
-                updateFrequencyDisplay();
+                updateNoteDisplay();
             }
         });
 
-        document.getElementById('volume').addEventListener('input', (event) => {
+        document.getElementById("volume").addEventListener("input", (event) => {
             const rawVolume = parseFloat(event.target.value);
             activekeyCodes.forEach(keyCode => {
                 if (oscillators[keyCode]) {
-                    if (soundMode === 'strings') {
+                    if (soundMode === "strings") {
                     gainNodes[keyCode].gain.value = volumeCurve(rawVolume); // set gain value
                     }
                 }
             });
         });
         
-        document.getElementById('reference').addEventListener('input', (event) => {
+        document.getElementById("reference").addEventListener("input", (event) => {
             reference = parseFloat(event.target.value);
             updateActiveFrequencies(); 
-            updateFrequencyDisplay();
+            updateNoteDisplay();
         });
-        document.getElementById('refIncrease').addEventListener('click', () => {
+        document.getElementById("refIncrease").addEventListener("click", () => {
             reference++;
-            document.getElementById('reference').value = reference;
+            document.getElementById("reference").value = reference;
             updateActiveFrequencies();
-            updateFrequencyDisplay();
+            updateNoteDisplay();
             document.activeElement.blur();
         });
-        document.getElementById('refDecrease').addEventListener('click', () => {
+        document.getElementById("refDecrease").addEventListener("click", () => {
             if (reference > 1) reference--;
-            document.getElementById('reference').value = reference;
+            document.getElementById("reference").value = reference;
             updateActiveFrequencies();
-            updateFrequencyDisplay();
+            updateNoteDisplay();
             document.activeElement.blur();
         });
 
-        document.getElementById('octave').addEventListener('input', (event) => {
+        document.getElementById("octave").addEventListener("input", (event) => {
             octave = parseInt(event.target.value);
             updateActiveFrequencies(); 
-            updateFrequencyDisplay();
+            updateNoteDisplay();
         });
-        document.getElementById('octaveDecrease').addEventListener('click', () => {
+        document.getElementById("octaveDecrease").addEventListener("click", () => {
             octaveDecrease();
             document.activeElement.blur();
         });
-        document.getElementById('octaveIncrease').addEventListener('click', () => {
+        document.getElementById("octaveIncrease").addEventListener("click", () => {
             octaveIncrease();
             document.activeElement.blur();
         });
         
-        document.getElementById('key').addEventListener('input', (event) => {
+        document.getElementById("key").addEventListener("input", (event) => {
             key = parseInt(event.target.value);
             updateActiveFrequencies(); 
-            updateFrequencyDisplay();
+            updateNoteDisplay();
         });
-        document.getElementById('keyDecrease').addEventListener('click', () => {
+        document.getElementById("keyDecrease").addEventListener("click", () => {
             keyDecrease();
             document.activeElement.blur();
         });
-        document.getElementById('keyIncrease').addEventListener('click', () => {
+        document.getElementById("keyIncrease").addEventListener("click", () => {
             keyIncrease();
             document.activeElement.blur();
         });
 
-        document.getElementById('waveType').addEventListener('focus', () => {
+        document.getElementById("waveType").addEventListener("focus", () => {
             activekeyCodes.forEach(keyCode => {
                 if (oscillators[keyCode]) {
                     stopSound(keyCode);
                 }
             });
         });
-        document.getElementById('waveType').addEventListener('change', (event) => {
+        document.getElementById("waveType").addEventListener("change", (event) => {
             waveType = event.target.value;
         });   
 
-        document.getElementById('soundMode').addEventListener('focus', () => {
+        document.getElementById("soundMode").addEventListener("focus", () => {
             activekeyCodes.forEach(keyCode => {
                 if (oscillators[keyCode]) {
                     stopSound(keyCode);
                 }
             });
         });
-        document.getElementById('soundMode').addEventListener('change', (event) => {
+        document.getElementById("soundMode").addEventListener("change", (event) => {
             soundMode = event.target.value;
         });  
         
-        window.addEventListener('blur', () => {
+        window.addEventListener("blur", () => {
             activekeyCodes.forEach(keyCode => {
                 if (oscillators[keyCode]) {
                     stopSound(keyCode);
@@ -648,7 +661,7 @@
             });
         });
 
-        window.addEventListener('contextmenu', (event) => {
+        window.addEventListener("contextmenu", (event) => {
             activekeyCodes.forEach(keyCode => {
                 if (oscillators[keyCode]) {
                     stopSound(keyCode);
@@ -656,8 +669,8 @@
             });
         });
 
-        const controls = document.querySelectorAll('.control input, .control select, .control button');
-        document.addEventListener('mousemove', (event) => {
+        const controls = document.querySelectorAll(".control input, .control select, .control button");
+        document.addEventListener("mousemove", (event) => {
             controls.forEach(control => {
                 const rect = control.getBoundingClientRect(); // get the bounding rect of the control
                 const controlCenterX = rect.left + rect.width / 2; // x center of the control
@@ -674,22 +687,22 @@
             });
         });
 
-        document.getElementById('pedal').addEventListener('mousedown', () => {
+        document.getElementById("pedal").addEventListener("mousedown", () => {
             pressPedal();
         });
-        document.getElementById('pedal').addEventListener('mouseup', () => {
+        document.getElementById("pedal").addEventListener("mouseup", () => {
             releasePedal();
         });
-        document.getElementById('pedal').addEventListener('mouseleave', () => {
+        document.getElementById("pedal").addEventListener("mouseleave", () => {
             releasePedal();
         }); 
-        document.getElementById('pedal').addEventListener('touchstart', () => {
+        document.getElementById("pedal").addEventListener("touchstart", () => {
             pressPedal();
         });
-        document.getElementById('pedal').addEventListener('touchend', () => {
+        document.getElementById("pedal").addEventListener("touchend", () => {
             releasePedal();
         });
-        document.getElementById('pedal').addEventListener('contextmenu', (event) => {
+        document.getElementById("pedal").addEventListener("contextmenu", (event) => {
             event.preventDefault();
         });
     </script>
