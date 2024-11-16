@@ -267,7 +267,8 @@
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillators = {};
         const gainNodes = {}; 
-        const activekeyCodes = new Set();       
+        const activeKeyCodes = new Set();
+        const timeoutStopSound = {};
 
         const keyNumbers = {
             "q": -14,
@@ -364,7 +365,7 @@
         }
 
         function updateActiveFrequencies() {
-            activekeyCodes.forEach(keyCode => {
+            activeKeyCodes.forEach(keyCode => {
                 const activeFrequency = frequency(keyNumbers[keyCode]);
                 if (oscillators[keyCode]) {
                     oscillators[keyCode].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
@@ -412,6 +413,8 @@
             oscillator.start();
             oscillators[keyCode] = oscillator;
 
+            updateNoteDisplay();
+
             const currentGain = gainNodes[keyCode].gain.value;
             const currentTime = audioContext.currentTime;
 
@@ -422,6 +425,19 @@
 
             switch (soundMode) {
                 case "piano":
+                    halfLife = 0.7 * (440/freq)**0.3;
+
+                    for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
+                        gain = gainCurve(time);
+                        gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
+                    }
+
+                    timeoutStopSound[keyCode] = setTimeout(() => {
+                        if (oscillators[keyCode]) {
+                            stopSound(keyCode);
+                        }
+                    }, time * 1000);
+                    break;
                 case "bells":
                     halfLife = 0.7 * (440/freq)**0.3;
 
@@ -429,7 +445,21 @@
                         gain = gainCurve(time);
                         gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
                     }
-                    oscillators[keyCode].stop(currentTime + time);
+
+                    timeoutStopSound[keyCode] = setTimeout(() => {
+                        if (oscillators[keyCode]) {
+                            stopSound(keyCode);
+                        }
+                    }, time * 1000);
+
+                    if (pedal) {
+                        clearTimeout(timeoutStopSound[keyCode]);
+                        timeoutStopSound[keyCode] = setTimeout(() => {
+                            if (oscillators[keyCode]) {
+                                stopSound(keyCode);
+                            }
+                        }, 100); // if pedal is pressed, stop the sound after 100ms, just like you are holding a bell
+                    }
                     break;
                 case "strings":
                     gainNodes[keyCode].gain.setValueAtTime(0.7 * currentGain, currentTime);
@@ -442,6 +472,7 @@
         }
 
         function stopSound(keyCode) {
+            clearTimeout(timeoutStopSound[keyCode]);
             gainNodes[keyCode].gain.cancelScheduledValues(audioContext.currentTime); // cancel the schedule before
 
             const currentGain = gainNodes[keyCode].gain.value;
@@ -459,11 +490,6 @@
             oscillators[keyCode].stop(currentTime + time);
             delete oscillators[keyCode];
             delete gainNodes[keyCode];
-
-            if (activekeyCodes.has(keyCode)) {
-                activekeyCodes.delete(keyCode);
-            }
-
             updateNoteDisplay();
         }
 
@@ -496,7 +522,7 @@
                 case "piano":
                 case "strings":
                     for (keyCode in oscillators) {
-                        if (!activekeyCodes.has(keyCode)) {
+                        if (!activeKeyCodes.has(keyCode)) {
                             stopSound(keyCode);
                         }
                     }
@@ -562,17 +588,14 @@
             const freq = frequency(keyNumbers[keyCode]);
             
             if (freq) {
-                if (!activekeyCodes.has(keyCode)) {
+                if (!activeKeyCodes.has(keyCode)) {
                     if (oscillators[keyCode]) {
                         stopSound(keyCode); // if the note is already playing, stop the sound first, then we can start the new sound
                     }
 
-                    activekeyCodes.add(keyCode);
-                    playSound(keyCode);   
-                } else {
-                    oscillators[keyCode].frequency.setValueAtTime(freq, audioContext.currentTime);
+                    activeKeyCodes.add(keyCode);
+                    playSound(keyCode);
                 }
-                updateNoteDisplay();
             } else {
                 switch (keyCode) {
                     case "ArrowDown": 
@@ -619,8 +642,8 @@
                     break;
             }
             
-            if (activekeyCodes.has(keyCode)) {
-                activekeyCodes.delete(keyCode);
+            if (activeKeyCodes.has(keyCode)) {
+                activeKeyCodes.delete(keyCode);
                 updateNoteDisplay();
             }
         });
