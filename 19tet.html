@@ -232,6 +232,7 @@
             <select id="soundMode">
                 <option value="piano">Piano</option>
                 <option value="strings">Strings</option>
+                <option value="bells">Bells</option>
             </select>
         </div>
     </div>
@@ -258,7 +259,7 @@
         let waveType = "triangle"; // Wave type: sine, square, sawtooth, or triangle
         document.getElementById("waveType").value = waveType;
 
-        let soundMode = "piano"; // Sound mode: piano or strings
+        let soundMode = "piano"; // Sound mode: piano, strings, or bells
         document.getElementById("soundMode").value = soundMode;
 
         let pedal = false; // Whether the pedal is pressed or not
@@ -329,8 +330,8 @@
 
         const notes = ["A", "A♯", "B♭", "B", "B♯(C♭)", "C", "C♯", "D♭", "D", "D♯", "E♭", "E", "E♯(F♭)", "F", "F♯", "G♭", "G", "G♯", "A♭"]
 
-        function mod(a, mod){
-            return ((a % mod) + mod) % mod; // always returns a positive number
+        function mod(a, b){
+            return ((a % b) + b) % b; // always returns a positive number
         }
 
         function frequency(keyNumber) {
@@ -343,9 +344,9 @@
         
         function updateNoteDisplay() {
             let noteNumbers = [];
-            activekeyCodes.forEach(keyCode => {
+            for (keyCode in oscillators) {
                 noteNumbers.push(keyNumbers[keyCode] + key);
-            });
+            }
             noteNumbers.sort((a, b) => a - b);
             let display = "";
             for (i in noteNumbers) {
@@ -379,9 +380,6 @@
             gainNodes[keyCode] = gainNode;
             const volume = volumeCurve(parseFloat(document.getElementById("volume").value))
             switch (waveType) { // set gain value in different cases
-                default:
-                    gainNode.gain.value = volume; 
-                    break;
                 case "sine":
                     if (freq >= 440) {
                         gainNode.gain.value = volume
@@ -397,11 +395,14 @@
                     break;
                 case "triangle":
                     if (freq >= 440) {
-                            gainNode.gain.value = volume
-                        } else {
-                            gainNode.gain.value = volume * 440/freq;
-                        }
-                        break;
+                        gainNode.gain.value = volume
+                    } else {
+                        gainNode.gain.value = volume * 440/freq;
+                    }
+                    break;
+                default:
+                    gainNode.gain.value = volume; 
+                    break;
             } 
 
             const oscillator = audioContext.createOscillator();
@@ -414,13 +415,16 @@
             const currentGain = gainNodes[keyCode].gain.value;
             const currentTime = audioContext.currentTime;
 
+            let halfLife; // unit: second
+            let gain = currentGain;
+            let time = 0;
+            const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
+
             switch (soundMode) {
                 case "piano":
-                    const halfLife = 0.7 * (440/freq)**0.3; // unit: second
-                    let gain = currentGain;
+                case "bells":
+                    halfLife = 0.7 * (440/freq)**0.3;
 
-                    const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
-                    let time = 0
                     for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
                         gain = gainCurve(time);
                         gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
@@ -433,6 +437,7 @@
                 default:
                     oscillators[keyCode].stop(currentTime);
                     console.error(`Invalid sound mode: ${soundMode}`);
+                    break;
             } 
         }
 
@@ -462,18 +467,45 @@
             updateNoteDisplay();
         }
 
+        function stopAllSounds() {
+            for (keyCode in oscillators) {
+                stopSound(keyCode);
+            }
+        }
+
         function pressPedal() {
             pedal = true;
             document.getElementById("pedal").style.backgroundColor = "#bbb";
+            switch (soundMode) {
+                case "piano":
+                case "strings":
+                    break;
+                case "bells":
+                    stopAllSounds();
+                    break;
+                default:
+                    console.error(`Invalid sound mode: ${soundMode}`);
+                    break;
+            }
         }
 
         function releasePedal() {
             pedal = false;
             document.getElementById("pedal").style.backgroundColor = "#eee";
-            for (keyCode in oscillators) {
-                if (!activekeyCodes.has(keyCode)) {
-                    stopSound(keyCode);
-                }
+            switch (soundMode) {
+                case "piano":
+                case "strings":
+                    for (keyCode in oscillators) {
+                        if (!activekeyCodes.has(keyCode)) {
+                            stopSound(keyCode);
+                        }
+                    }
+                    break;
+                case "bells":
+                    break;
+                default:
+                    console.error(`Invalid sound mode: ${soundMode}`);
+                    break;
             }
         }
 
@@ -532,7 +564,7 @@
             if (freq) {
                 if (!activekeyCodes.has(keyCode)) {
                     if (oscillators[keyCode]) {
-                        stopSound(keyCode); // if the key is extended by the pedal, stop the sound first, then we can start the new sound
+                        stopSound(keyCode); // if the note is already playing, stop the sound first, then we can start the new sound
                     }
 
                     activekeyCodes.add(keyCode);
@@ -571,12 +603,22 @@
                     break;
             }
 
-            if (!pedal) {
-                if (oscillators[keyCode]) {
-                    stopSound(keyCode);
-                }
+            switch (soundMode) {
+                case "piano":
+                case "strings":
+                    if (!pedal) {
+                        if (oscillators[keyCode]) {
+                            stopSound(keyCode);
+                        }
+                    }
+                    break;
+                case "bells":
+                    break;
+                default:
+                    console.error(`Invalid sound mode: ${soundMode}`);
+                    break;
             }
-
+            
             if (activekeyCodes.has(keyCode)) {
                 activekeyCodes.delete(keyCode);
                 updateNoteDisplay();
@@ -585,13 +627,11 @@
 
         document.getElementById("volume").addEventListener("input", (event) => {
             const rawVolume = parseFloat(event.target.value);
-            activekeyCodes.forEach(keyCode => {
-                if (oscillators[keyCode]) {
-                    if (soundMode === "strings") {
+            for (keyCode in oscillators) {
+                if (soundMode === "strings") {
                     gainNodes[keyCode].gain.value = volumeCurve(rawVolume); // set gain value
-                    }
                 }
-            });
+           }
         });
         
         document.getElementById("reference").addEventListener("input", (event) => {
@@ -642,42 +682,20 @@
             document.activeElement.blur();
         });
 
-        document.getElementById("waveType").addEventListener("focus", () => {
-            activekeyCodes.forEach(keyCode => {
-                if (oscillators[keyCode]) {
-                    stopSound(keyCode);
-                }
-            });
-        });
         document.getElementById("waveType").addEventListener("change", (event) => {
             waveType = event.target.value;
         });   
 
-        document.getElementById("soundMode").addEventListener("focus", () => {
-            activekeyCodes.forEach(keyCode => {
-                if (oscillators[keyCode]) {
-                    stopSound(keyCode);
-                }
-            });
-        });
         document.getElementById("soundMode").addEventListener("change", (event) => {
             soundMode = event.target.value;
         });  
         
         window.addEventListener("blur", () => {
-            activekeyCodes.forEach(keyCode => {
-                if (oscillators[keyCode]) {
-                    stopSound(keyCode);
-                }
-            });
+            stopAllSounds();
         });
 
         window.addEventListener("contextmenu", (event) => {
-            activekeyCodes.forEach(keyCode => {
-                if (oscillators[keyCode]) {
-                    stopSound(keyCode);
-                }
-            });
+            stopAllSounds();
         });
 
         const controls = document.querySelectorAll(".control input, .control select, .control button");
