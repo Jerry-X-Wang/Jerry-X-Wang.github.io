@@ -169,7 +169,7 @@
     <div class="title">
         19-Tone Equal Temperament Instrument
     </div>
-    <div class="container"> 
+    <div class="container">
 
         <div class="control">
             <label for="reference">Reference Frequency (Hz)</label>
@@ -355,7 +355,7 @@
                 } else {
                     freq = freq.toFixed();
                 }
-                display += notes[mod(noteNumbers[i], 19)] + (Math.floor((noteNumbers[i] + 14) / 19) + octave) + " " + freq + " Hz" + "\n";
+                display += notes[mod(noteNumbers[i], 19)] + (Math.floor((noteNumbers[i] + 14) / 19) + octave) + " " + freq + "\u2006Hz" + "\n";
                 //         note name                        octave                        ↓                           frequency
                 //                                                                        14 is because there is 14 semitones between C and A in 19-TET
             }
