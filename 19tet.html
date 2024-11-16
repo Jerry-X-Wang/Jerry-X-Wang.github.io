@@ -416,10 +416,10 @@
 
             switch (soundMode) {
                 case "piano":
-                    const halfLife = 0.5 * (440/freq)**0.3; // unit: second
+                    const halfLife = 0.7 * (440/freq)**0.3; // unit: second
                     let gain = currentGain;
 
-                    const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** (t**0.5); // exponential function with given halfLife
+                    const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
                     let time = 0
                     for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
                         gain = gainCurve(time);
