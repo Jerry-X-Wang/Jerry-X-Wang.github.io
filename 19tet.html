@@ -365,12 +365,12 @@
         }
 
         function updateActiveFrequencies() {
-            activeKeyCodes.forEach(keyCode => {
+            for (keyCode in oscillators) {
                 const activeFrequency = frequency(keyNumbers[keyCode]);
                 if (oscillators[keyCode]) {
                     oscillators[keyCode].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
                 }
-            });
+            }
         }
 
         function playSound(keyCode) {
@@ -421,11 +421,11 @@
             let halfLife; // unit: second
             let gain = currentGain;
             let time = 0;
-            const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
+            const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** (t**0.5); // similiar to a exponential function with given halfLife
 
             switch (soundMode) {
                 case "piano":
-                    halfLife = 0.7 * (440/freq)**0.3;
+                    halfLife = 0.5 * (440/freq)**0.3;
 
                     for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
                         gain = gainCurve(time);
@@ -439,7 +439,7 @@
                     }, time * 1000);
                     break;
                 case "bells":
-                    halfLife = 0.7 * (440/freq)**0.3;
+                    halfLife = 0.5 * (440/freq)**0.3;
 
                     for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
                         gain = gainCurve(time);
