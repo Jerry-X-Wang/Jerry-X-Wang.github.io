@@ -42,7 +42,7 @@
     
         .control input[type="number"], 
         .control input[type="range"] {
-            width: 60px; 
+            width: 62px; 
             height: 20px; 
             text-align: center; 
             border-radius: 0; 
@@ -142,7 +142,7 @@
         }
 
         #key {
-            width: 64px;
+            width: 66px;
             text-align: center;
         }
 
@@ -246,7 +246,7 @@
     </div>
     
     <script>
-        const toneNumber = 19; // 19-Tone equal temperament
+        // 19-Tone equal temperament
 
         let reference = 440; // Reference frequency
         document.getElementById("reference").value = reference;
@@ -336,7 +336,7 @@
         }
 
         function frequency(keyNumber) {
-            return reference * 2**((keyNumber + key)/toneNumber + octave - 4);
+            return reference * 2**((keyNumber + key)/19 + octave - 4);
         }
 
         function volumeCurve(rawVolume) {
