@@ -75,22 +75,31 @@ keys.forEach(key => {
     key.addEventListener("touchstart", function(event) {
         event.preventDefault(); // prevent the page from scrolling
         key.classList.add("active");
+        const noteCode = parseInt(key.innerText);
+        playNote(noteCode);
     });
 
     key.addEventListener("touchend", function() {
         key.classList.remove("active");
+        const noteCode = parseInt(key.innerText);
+        stopNote(noteCode);
     });
 
     key.addEventListener("mousedown", function() {
         key.classList.add("active");
+        const noteCode = parseInt(key.innerText);
+        playNote(noteCode);
     });
 
     key.addEventListener("mouseup", function() {
         key.classList.remove("active");
+        const noteCode = parseInt(key.innerText);
+        stopNote(noteCode);
     });
 
-    // 防止鼠标按住状态下仍然触发其他事件
     key.addEventListener("mouseleave", function() {
         key.classList.remove("active");
+        const noteCode = parseInt(key.innerText);
+        stopNote(noteCode);
     });
 });

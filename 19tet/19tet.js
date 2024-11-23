@@ -19,7 +19,7 @@ let pedal = false; // Whether the pedal is pressed or not
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const oscillators = {};
 const gainNodes = {}; 
-const activeKeyCodes = new Set();
+const activeNotes = new Set();
 const timeoutStopSound = {};
 
 const noteCodes = { // 0 -> A4
@@ -93,12 +93,13 @@ function volumeCurve(rawVolume) {
 
 function updateNoteDisplay() {
     let noteNumbers = [];
-    for (keyCode in oscillators) {
-        noteNumbers.push(noteCodes[keyCode] + key);
+    for (let noteCode in oscillators) {
+        noteCode = parseInt(noteCode);
+        noteNumbers.push(noteCode + key);
     }
     noteNumbers.sort((a, b) => a - b);
     let display = "";
-    for (i in noteNumbers) {
+    for (let i in noteNumbers) {
         let freq = frequency(noteNumbers[i]);
         if (freq < 100) {
             freq = freq.toPrecision(3);
@@ -113,20 +114,21 @@ function updateNoteDisplay() {
 }
 
 function updateActiveFrequencies() {
-    for (keyCode in oscillators) {
-        const activeFrequency = frequency(noteCodes[keyCode]);
-        if (oscillators[keyCode]) {
-            oscillators[keyCode].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
+    for (let noteCode in oscillators) {
+        noteCode = parseInt(noteCode);
+        const activeFrequency = frequency(noteCode);
+        if (oscillators[noteCode]) {
+            oscillators[noteCode].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
         }
     }
 }
 
-function playSound(keyCode) {
-    const freq = frequency(noteCodes[keyCode]);
+function playSound(noteCode) {
+    const freq = frequency(noteCode);
     
     const gainNode = audioContext.createGain();
     gainNode.connect(audioContext.destination);
-    gainNodes[keyCode] = gainNode;
+    gainNodes[noteCode] = gainNode;
     const volume = volumeCurve(parseFloat(document.getElementById("volume").value))
     switch (waveType) { // set gain value in different cases
         case "sine":
@@ -159,11 +161,11 @@ function playSound(keyCode) {
     oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
     oscillator.connect(gainNode); // connect oscillator to gain node
     oscillator.start();
-    oscillators[keyCode] = oscillator;
+    oscillators[noteCode] = oscillator;
 
     updateNoteDisplay();
 
-    const currentGain = gainNodes[keyCode].gain.value;
+    const currentGain = gainNodes[noteCode].gain.value;
     const currentTime = audioContext.currentTime;
 
     let halfLife; // unit: second
@@ -177,12 +179,12 @@ function playSound(keyCode) {
 
             for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
                 gain = gainCurve(time);
-                gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
+                gainNodes[noteCode].gain.setValueAtTime(gain, currentTime + time);
             }
 
-            timeoutStopSound[keyCode] = setTimeout(() => {
-                if (oscillators[keyCode]) {
-                    stopSound(keyCode);
+            timeoutStopSound[noteCode] = setTimeout(() => {
+                if (oscillators[noteCode]) {
+                    stopSound(noteCode);
                 }
             }, time * 1000);
             break;
@@ -191,39 +193,39 @@ function playSound(keyCode) {
 
             for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
                 gain = gainCurve(time);
-                gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
+                gainNodes[noteCode].gain.setValueAtTime(gain, currentTime + time);
             }
 
-            timeoutStopSound[keyCode] = setTimeout(() => {
-                if (oscillators[keyCode]) {
-                    stopSound(keyCode);
+            timeoutStopSound[noteCode] = setTimeout(() => {
+                if (oscillators[noteCode]) {
+                    stopSound(noteCode);
                 }
             }, time * 1000);
 
             if (pedal) {
-                clearTimeout(timeoutStopSound[keyCode]);
-                timeoutStopSound[keyCode] = setTimeout(() => {
-                    if (oscillators[keyCode]) {
-                        stopSound(keyCode);
+                clearTimeout(timeoutStopSound[noteCode]);
+                timeoutStopSound[noteCode] = setTimeout(() => {
+                    if (oscillators[noteCode]) {
+                        stopSound(noteCode);
                     }
                 }, 100); // if pedal is pressed, stop the sound after 100ms, just like you are holding a bell
             }
             break;
         case "strings":
-            gainNodes[keyCode].gain.setValueAtTime(0.7 * currentGain, currentTime);
+            gainNodes[noteCode].gain.setValueAtTime(0.7 * currentGain, currentTime);
             break;
         default:
-            oscillators[keyCode].stop(currentTime);
+            oscillators[noteCode].stop(currentTime);
             console.error(`Invalid sound mode: ${soundMode}`);
             break;
     } 
 }
 
-function stopSound(keyCode) {
-    clearTimeout(timeoutStopSound[keyCode]);
-    gainNodes[keyCode].gain.cancelScheduledValues(audioContext.currentTime); // cancel the schedule before
+function stopSound(noteCode) {
+    clearTimeout(timeoutStopSound[noteCode]);
+    gainNodes[noteCode].gain.cancelScheduledValues(audioContext.currentTime); // cancel the schedule before
 
-    const currentGain = gainNodes[keyCode].gain.value;
+    const currentGain = gainNodes[noteCode].gain.value;
     const halfLife = 0.05; // unit: second
     const currentTime = audioContext.currentTime;
     let gain = currentGain;
@@ -232,18 +234,50 @@ function stopSound(keyCode) {
     let time = 0;
     for (; gain >= 0.001; time += 0.001) { // set the gainNodes from now on, until it's too quiet
         gain = gainCurve(time);
-        gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
+        gainNodes[noteCode].gain.setValueAtTime(gain, currentTime + time);
     }
 
-    oscillators[keyCode].stop(currentTime + time);
-    delete oscillators[keyCode];
-    delete gainNodes[keyCode];
+    oscillators[noteCode].stop(currentTime + time);
+    delete oscillators[noteCode];
+    delete gainNodes[noteCode];
     updateNoteDisplay();
 }
 
 function stopAllSounds() {
-    for (keyCode in oscillators) {
-        stopSound(keyCode);
+    for (let noteCode in oscillators) {
+        noteCode = parseInt(noteCode);
+        stopSound(noteCode);
+    }
+}
+
+function playNote(noteCode) {
+    if (oscillators[noteCode]) {
+        stopSound(noteCode); // if the note is already playing, stop the sound first, then we can start the new sound
+    }
+    activeNotes.add(noteCode);
+    playSound(noteCode);
+}
+
+function stopNote(noteCode) {
+    switch (soundMode) {
+        case "piano":
+        case "strings":
+            if (!pedal) {
+                if (oscillators[noteCode]) {
+                    stopSound(noteCode);
+                }
+            }
+            break;
+        case "bells":
+            break;
+        default:
+            console.error(`Invalid sound mode: ${soundMode}`);
+            break;
+    }
+    
+    if (activeNotes.has(noteCode)) {
+        activeNotes.delete(noteCode);
+        updateNoteDisplay();
     }
 }
 
@@ -269,9 +303,10 @@ function releasePedal() {
     switch (soundMode) {
         case "piano":
         case "strings":
-            for (keyCode in oscillators) {
-                if (!activeKeyCodes.has(keyCode)) {
-                    stopSound(keyCode);
+            for (let noteCode in oscillators) {
+                noteCode = parseInt(noteCode);
+                if (!activeNotes.has(noteCode)) { // here needs to be fixed
+                    stopSound(noteCode);
                 }
             }
             break;
@@ -331,18 +366,14 @@ window.addEventListener("keydown", (event) => {
             return; 
         }
     }
-
+    
     const keyCode = event.key;
-    const freq = frequency(noteCodes[keyCode]);
+    const noteCode = noteCodes[keyCode]
+    const freq = frequency(noteCode);
     
     if (freq) {
-        if (!activeKeyCodes.has(keyCode)) {
-            if (oscillators[keyCode]) {
-                stopSound(keyCode); // if the note is already playing, stop the sound first, then we can start the new sound
-            }
-
-            activeKeyCodes.add(keyCode);
-            playSound(keyCode);
+        if (!activeNotes.has(noteCode)) {
+            playNote(noteCode);
         }
     } else {
         switch (keyCode) {
@@ -367,6 +398,7 @@ window.addEventListener("keydown", (event) => {
 
 window.addEventListener("keyup", (event) => {
     const keyCode = event.key;
+    const noteCode = noteCodes[keyCode];
 
     switch (keyCode) {
         case " ":
@@ -374,33 +406,15 @@ window.addEventListener("keyup", (event) => {
             break;
     }
 
-    switch (soundMode) {
-        case "piano":
-        case "strings":
-            if (!pedal) {
-                if (oscillators[keyCode]) {
-                    stopSound(keyCode);
-                }
-            }
-            break;
-        case "bells":
-            break;
-        default:
-            console.error(`Invalid sound mode: ${soundMode}`);
-            break;
-    }
-    
-    if (activeKeyCodes.has(keyCode)) {
-        activeKeyCodes.delete(keyCode);
-        updateNoteDisplay();
-    }
+    stopNote(noteCode);
 });
 
 document.getElementById("volume").addEventListener("input", (event) => {
     const rawVolume = parseFloat(event.target.value);
-    for (keyCode in oscillators) {
+    for (let noteCode in oscillators) {
+        noteCode = parseInt(noteCode);
         if (soundMode === "strings") {
-            gainNodes[keyCode].gain.value = volumeCurve(rawVolume); // set gain value
+            gainNodes[noteCode].gain.value = volumeCurve(rawVolume); // set gain value
         }
     }
 });
