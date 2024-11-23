@@ -15,12 +15,13 @@ body {
 
 .container {
   width: 400px; 
+  overflow: auto;
   margin: 0 auto; 
 }
 
 .control {
   display: flex;
-  justify-content: flex-start; /* Left align */
+  justify-content: center;
   align-items: center;
   margin-top: 8px;
   margin-bottom: 8px;
@@ -63,16 +64,16 @@ button:active {
 
 #volume {
   outline: none;
-  width: 120px;
+  width: 121px;
   height: 12px;
-  margin-left: 0px;
   margin-top: 5px;
   margin-bottom: 5px;
 }
 
 .display {
   font-size: 25px;
-  margin-top: 10px;
+  overflow: auto;
+  justify-content: center;
   white-space: pre-line;
   line-height: 1; /* in case of ♭. if we don't fix line-height, the ♭ will make the line higher */
 }
@@ -142,13 +143,12 @@ input[type="range"] {
   user-select: none;
   position: absolute;
   bottom: 5px;
-  width: 95%; 
+  width: 100%;
   height: 80px;
   background-color: #eee; 
   color: black; 
   font-size: 25px; 
   border: none; 
   cursor: pointer;
-  margin-left: 2.5%;
-  margin-bottom: 2px;
+  margin: 0px;
 }

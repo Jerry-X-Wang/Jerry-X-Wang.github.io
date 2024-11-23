@@ -21,78 +21,84 @@
 <a href="/" title="Home" style="position: absolute; top: 5px; left: 5px;">
 <img src="/home.png" alt="Home" style="width: 30px; height: 30px;">
 </a>
+
 <div class="title">
 19-TET Instrument
 </div>
-<div class="container">
 
-<div class="control">
-    <label for="reference">Reference Frequency (Hz)</label>
-    <input type="number" id="reference" min="1" pattern="[0-9]*">
-    <button id="refDecrease">-</button>
-    <button id="refIncrease">+</button>
-</div>
+<div style="display: flex;">
+    <div class="container" id="panel" style="flex: 1;">
 
-<div class="control">
-    <label for="octave">Octave</label>
-    <input type="number" id="octave" step="1" pattern="[0-9]*">
-    <button id="octaveDecrease" title="(ArrowDown ↓)">-</button>
-    <button id="octaveIncrease" title="(ArrowUp ↑)">+</button>
-</div>
+        <div class="control">
+            <label for="reference">Reference Frequency (Hz)</label>
+            <input type="number" id="reference" min="1" pattern="[0-9]*">
+            <button id="refDecrease">-</button>
+            <button id="refIncrease">+</button>
+        </div>
 
-<div class="control">
-    <label for="key">Key</label>
-    <select id="key">
-        <option value=0>C</option>
-        <option value=1>C♯</option>
-        <option value=2>D♭</option>
-        <option value=3>D</option>
-        <option value=4>D♯</option>
-        <option value=5>E♭</option>
-        <option value=6>E</option>
-        <option value=7>E♯(F♭)</option>
-        <option value=8>F</option>
-        <option value=9>F♯</option>
-        <option value=10>G♭</option>
-        <option value=11>G</option>
-        <option value=12>G♯</option>
-        <option value=13>A♭</option>
-        <option value=14>A</option>
-        <option value=15>A♯</option>
-        <option value=16>B♭</option>
-        <option value=17>B</option>
-        <option value=18>B♯(C♭)</option>
-    </select>
-    <button id="keyDecrease" title="(ArrowLeft ←)">-</button>
-    <button id="keyIncrease" title="(ArrowRight →)">+</button>
-</div>
+        <div class="control">
+            <label for="octave">Octave</label>
+            <input type="number" id="octave" step="1" pattern="[0-9]*">
+            <button id="octaveDecrease" title="(ArrowDown ↓)">-</button>
+            <button id="octaveIncrease" title="(ArrowUp ↑)">+</button>
+        </div>
 
-<div class="control">
-    <label for="volume">Volume</label>
-    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
-</div>
+        <div class="control">
+            <label for="key">Key</label>
+            <select id="key">
+                <option value=0>C</option>
+                <option value=1>C♯</option>
+                <option value=2>D♭</option>
+                <option value=3>D</option>
+                <option value=4>D♯</option>
+                <option value=5>E♭</option>
+                <option value=6>E</option>
+                <option value=7>E♯(F♭)</option>
+                <option value=8>F</option>
+                <option value=9>F♯</option>
+                <option value=10>G♭</option>
+                <option value=11>G</option>
+                <option value=12>G♯</option>
+                <option value=13>A♭</option>
+                <option value=14>A</option>
+                <option value=15>A♯</option>
+                <option value=16>B♭</option>
+                <option value=17>B</option>
+                <option value=18>B♯(C♭)</option>
+            </select>
+            <button id="keyDecrease" title="(ArrowLeft ←)">-</button>
+            <button id="keyIncrease" title="(ArrowRight →)">+</button>
+        </div>
 
-<div class="control">
-    <label for="waveType">Wave Type</label>
-    <select id="waveType">
-        <option value="sine">Sine</option>
-        <option value="square">Square</option>
-        <option value="sawtooth">Sawtooth</option>
-        <option value="triangle">Triangle</option>
-    </select>
-</div>
+        <div class="control">
+            <label for="volume">Volume</label>
+            <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
+        </div>
 
-<div class="control">
-    <label for="soundMode">Sound Mode</label>
-    <select id="soundMode">
-        <option value="piano">Piano</option>
-        <option value="strings">Strings</option>
-        <option value="bells">Bells</option>
-    </select>
-</div>
-</div>
-<div class="display" id="noteDisplay">
-    Press some keys to play sound.
+        <div class="control">
+            <label for="waveType">Wave Type</label>
+            <select id="waveType">
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="sawtooth">Sawtooth</option>
+                <option value="triangle">Triangle</option>
+            </select>
+        </div>
+
+        <div class="control">
+            <label for="soundMode">Sound Mode</label>
+            <select id="soundMode">
+                <option value="piano">Piano</option>
+                <option value="strings">Strings</option>
+                <option value="bells">Bells</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="display" id="noteDisplay" style="flex: 1;">
+        Press some keys to play sound.
+    </div>
+
 </div>
 
 <div class="piano-keyboard">

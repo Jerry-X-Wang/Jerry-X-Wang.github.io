@@ -35,6 +35,7 @@ for (let noteCode = startNote; noteCode <= endNote; noteCode++) {
     piano.appendChild(key);
     key.style.left = `${keyPosition(i, offset)}px`;
     key.style.border = `${borderWidth}px solid #bbb`;
+    key.noteCode = noteCode;
     key.innerText = noteCode;
 
     if (whiteKeys.includes(mod(i, 19))) { // white keys
@@ -62,6 +63,14 @@ for (let noteCode = startNote; noteCode <= endNote; noteCode++) {
     }
 }
 
+let windowHeight = window.innerHeight;
+const margin = 70;
+const pianoHeight = document.getElementsByClassName("piano-container")[0].clientHeight;
+const pedalHeight = document.getElementById("pedal").clientHeight;
+const titleHeight = document.getElementsByClassName("title")[0].clientHeight;
+document.getElementById("panel").style.height = `${windowHeight - pianoHeight - pedalHeight - titleHeight - margin}px`;
+document.getElementsByClassName("display")[0].style.height = `${windowHeight - pianoHeight - pedalHeight - titleHeight - margin}px`;
+
 // set the scroll bar to the center
 const pianoContainer = document.getElementsByClassName("piano-container")[0];
 const keysWidth = piano.scrollWidth; 
@@ -75,31 +84,41 @@ keys.forEach(key => {
     key.addEventListener("touchstart", function(event) {
         event.preventDefault(); // prevent the page from scrolling
         key.classList.add("active");
-        const noteCode = parseInt(key.innerText);
+        const noteCode = parseInt(key.noteCode);
         playNote(noteCode);
     });
 
     key.addEventListener("touchend", function() {
         key.classList.remove("active");
-        const noteCode = parseInt(key.innerText);
+        const noteCode = parseInt(key.noteCode);
         stopNote(noteCode);
     });
 
     key.addEventListener("mousedown", function() {
         key.classList.add("active");
-        const noteCode = parseInt(key.innerText);
+        const noteCode = parseInt(key.noteCode);
         playNote(noteCode);
     });
 
     key.addEventListener("mouseup", function() {
         key.classList.remove("active");
-        const noteCode = parseInt(key.innerText);
+        const noteCode = parseInt(key.noteCode);
         stopNote(noteCode);
     });
 
     key.addEventListener("mouseleave", function() {
         key.classList.remove("active");
-        const noteCode = parseInt(key.innerText);
+        const noteCode = parseInt(key.noteCode);
         stopNote(noteCode);
     });
+
+    key.addEventListener("contextmenu", function(event) {
+        event.preventDefault(); // prevent the default context menu from appearing
+    });
+});
+
+window.addEventListener("resize", function() {
+    windowHeight = window.innerHeight;
+    document.getElementById("panel").style.height = `${windowHeight - pianoHeight - pedalHeight - titleHeight - margin}px`;
+    document.getElementsByClassName("display")[0].style.height = `${windowHeight - pianoHeight - pedalHeight - titleHeight - margin}px`;
 });

@@ -177,7 +177,7 @@ function playSound(noteCode) {
         case "piano":
             halfLife = 0.5 * (440/freq)**0.3;
 
-            for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
+            for (; gain >= 0.0005; time += 0.01) { // set the gains from now on, until it's too quiet
                 gain = gainCurve(time);
                 gainNodes[noteCode].gain.setValueAtTime(gain, currentTime + time);
             }
@@ -191,7 +191,7 @@ function playSound(noteCode) {
         case "bells":
             halfLife = 0.5 * (440/freq)**0.3;
 
-            for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
+            for (; gain >= 0.0005; time += 0.01) { // set the gains from now on, until it's too quiet
                 gain = gainCurve(time);
                 gainNodes[noteCode].gain.setValueAtTime(gain, currentTime + time);
             }
