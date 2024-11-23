@@ -68,8 +68,9 @@ const margin = 70;
 const pianoHeight = document.getElementsByClassName("piano-container")[0].clientHeight;
 const pedalHeight = document.getElementById("pedal").clientHeight;
 const titleHeight = document.getElementsByClassName("title")[0].clientHeight;
-document.getElementById("panel").style.height = `${windowHeight - pianoHeight - pedalHeight - titleHeight - margin}px`;
-document.getElementsByClassName("display")[0].style.height = `${windowHeight - pianoHeight - pedalHeight - titleHeight - margin}px`;
+let restHeight = windowHeight - pianoHeight - pedalHeight - titleHeight - margin
+document.getElementById("panel").style.height = `${restHeight}px`;
+document.getElementsByClassName("display")[0].style.height = `${restHeight}px`;
 
 // set the scroll bar to the center
 const pianoContainer = document.getElementsByClassName("piano-container")[0];
@@ -79,6 +80,12 @@ const scrollPosition = (keysWidth - containerWidth) / 2;
 pianoContainer.scrollLeft = scrollPosition; 
 
 const keys = document.querySelectorAll(".white-key, .black-key, .grey-key");
+
+pianoContainer.addEventListener("wheel", function(event) {
+    pianoContainer.scrollBy({
+        left: event.deltaY,
+    });
+});
 
 keys.forEach(key => {
     key.addEventListener("touchstart", function(event) {
@@ -119,6 +126,7 @@ keys.forEach(key => {
 
 window.addEventListener("resize", function() {
     windowHeight = window.innerHeight;
-    document.getElementById("panel").style.height = `${windowHeight - pianoHeight - pedalHeight - titleHeight - margin}px`;
-    document.getElementsByClassName("display")[0].style.height = `${windowHeight - pianoHeight - pedalHeight - titleHeight - margin}px`;
+    restHeight = windowHeight - pianoHeight - pedalHeight - titleHeight - margin
+    document.getElementById("panel").style.height = `${restHeight}px`;
+    document.getElementsByClassName("display")[0].style.height = `${restHeight}px`;
 });
