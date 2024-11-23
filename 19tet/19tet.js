@@ -1,260 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<link rel="icon" href="19tet.png" type="image/x-icon">
-<title>19-Tone Equal Temperament</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-    body {
-        font-family: Arial;
-        text-align: center;
-        margin: 0; /* Remove default margin */
-        padding-top: 30px; 
-    }
-
-    .title {
-        font-size: 32px; 
-        margin-bottom: 20px; 
-        font-family: sans-serif; 
-        text-align: center; 
-        font-weight: bold;
-    }
-
-    .container {
-        width: 400px; 
-        margin: 0 auto; 
-    }
-
-    .control {
-        display: flex;
-        justify-content: flex-start; /* Left align */
-        align-items: center;
-        margin-top: 8px;
-        margin-bottom: 8px;
-    }
-
-    .control label {
-        margin-right: 10px; /* Space between label and input */
-        flex-basis: 200px; 
-        text-align: right; 
-    }
-
-    .control input[type="number"], 
-    .control input[type="range"] {
-        width: 62px; 
-        height: 20px; 
-        text-align: center; 
-        border-radius: 0; 
-        border: 2px solid #bbb; 
-        padding: 0;
-    }
-
-    button {
-        outline: none;
-        font-size: 22px;
-        font-family: Arial;
-        width: 24px;
-        height: 24px;
-        border: none;
-        background-color: #bbb;
-        color: white;
-        cursor: pointer;
-        margin-left: 5px;
-        border-radius: 0;
-        padding: 0;
-    }
-
-    button:active {
-        background-color: #ddd;
-    }
-
-    #volume {
-        outline: none;
-        width: 120px;
-        height: 12px;
-        margin-left: 0px;
-        margin-top: 5px;
-        margin-bottom: 5px;
-    }
-
-    .display {
-        font-size: 25px;
-        margin-top: 10px;
-        white-space: pre-line;
-        line-height: 1; /* in case of ♭. if we don't fix line-height, the ♭ will make the line higher */
-    }
-    
-    .control input[type="range"] {
-        -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
-        appearance: none; /* Remove default style */
-        width: 12px;
-        height: 22px; 
-        border-radius: 0; 
-    }
-
-    .control input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none; /* Remove default style */
-        appearance: none; /* Remove default style */
-        width: 12px;
-        height: 22px; 
-        background: #bbb; 
-        border-radius: 0; 
-        cursor: pointer; 
-    }
-
-    .control input[type="range"]::-moz-range-thumb {
-        width: 12px; 
-        height: 22px; 
-        background: #bbb; 
-        border-radius: 0;
-        cursor: pointer; 
-    }
-
-    .control input[type="range"]::-ms-thumb {
-        width: 12px;
-        height: 22px; 
-        background: #bbb; 
-        border-radius: 0;
-        cursor: pointer;
-    }
-
-    /* Hide number input's up and down arrows */
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button {
-        -webkit-appearance: none; /* Chrome and Safari */
-        margin: 0; /* Remove default margin */
-    }
-
-    /* Hide range input's default style */
-    input[type="range"] {
-        -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
-        appearance: none; /* Remove default style */
-    }
-
-    .control select {
-        color: black;
-        width: 124px; 
-        height: 24px;
-        border: 2px solid #bbb; 
-        border-radius: 0; 
-        padding: 0; 
-    }
-
-    #key {
-        width: 66px;
-        text-align: center;
-    }
-
-    #pedal {
-        user-select: none;
-        position: absolute;
-        bottom: 5px;
-        width: 95%; 
-        height: 80px;
-        background-color: #eee; 
-        color: black; 
-        font-size: 25px; 
-        border: none; 
-        cursor: pointer;
-        margin-left: 2.5%;
-        margin-bottom: 5px;
-    }
-</style>
-<script>
-    var _hmt = _hmt || [];
-    (function() {
-    var hm = document.createElement("script");
-    hm.src = "https://hm.baidu.com/hm.js?07a429e5188f6f9094684adbf5b59ff9";
-    var s = document.getElementsByTagName("script")[0]; 
-    s.parentNode.insertBefore(hm, s);
-    })();
-</script>
-</head>
-<body>
-<a href="/" title="Home" style="position: absolute; top: 5px; left: 5px;">
-<img src="home.png" alt="Home" style="width: 30px; height: 30px;">
-</a>
-<div class="title">
-19-Tone Equal Temperament Instrument
-</div>
-<div class="container">
-
-<div class="control">
-    <label for="reference">Reference Frequency (Hz)</label>
-    <input type="number" id="reference" min="1" pattern="[0-9]*">
-    <button id="refDecrease">-</button>
-    <button id="refIncrease">+</button>
-</div>
-
-<div class="control">
-    <label for="octave">Octave</label>
-    <input type="number" id="octave" step="1" pattern="[0-9]*">
-    <button id="octaveDecrease" title="(ArrowDown ↓)">-</button>
-    <button id="octaveIncrease" title="(ArrowUp ↑)">+</button>
-</div>
-
-<div class="control">
-    <label for="key">Key</label>
-    <select id="key">
-        <option value=0>C</option>
-        <option value=1>C♯</option>
-        <option value=2>D♭</option>
-        <option value=3>D</option>
-        <option value=4>D♯</option>
-        <option value=5>E♭</option>
-        <option value=6>E</option>
-        <option value=7>E♯(F♭)</option>
-        <option value=8>F</option>
-        <option value=9>F♯</option>
-        <option value=10>G♭</option>
-        <option value=11>G</option>
-        <option value=12>G♯</option>
-        <option value=13>A♭</option>
-        <option value=14>A</option>
-        <option value=15>A♯</option>
-        <option value=16>B♭</option>
-        <option value=17>B</option>
-        <option value=18>B♯(C♭)</option>
-    </select>
-    <button id="keyDecrease" title="(ArrowLeft ←)">-</button>
-    <button id="keyIncrease" title="(ArrowRight →)">+</button>
-</div>
-
-<div class="control">
-    <label for="volume">Volume</label>
-    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
-</div>
-
-<div class="control">
-    <label for="waveType">Wave Type</label>
-    <select id="waveType">
-        <option value="sine">Sine</option>
-        <option value="square">Square</option>
-        <option value="sawtooth">Sawtooth</option>
-        <option value="triangle">Triangle</option>
-    </select>
-</div>
-
-<div class="control">
-    <label for="soundMode">Sound Mode</label>
-    <select id="soundMode">
-        <option value="piano">Piano</option>
-        <option value="strings">Strings</option>
-        <option value="bells">Bells</option>
-    </select>
-</div>
-</div>
-<div class="display" id="noteDisplay">
-Press some keys to play sound.
-</div>
-<div class="control">
-<button id="pedal">
-    Pedal (Space)
-</button>
-</div>
-
-<script>
 // 19-Tone equal temperament
 
 let reference = 440; // Reference frequency
@@ -279,7 +22,7 @@ const gainNodes = {};
 const activeKeyCodes = new Set();
 const timeoutStopSound = {};
 
-const keyNumbers = {
+const noteCodes = { // 0 -> A4
     "q": -14,
     "a": -13,
     "z": -12,
@@ -340,12 +83,8 @@ const keyNumbers = {
 
 const notes = ["A", "A♯", "B♭", "B", "B♯(C♭)", "C", "C♯", "D♭", "D", "D♯", "E♭", "E", "E♯(F♭)", "F", "F♯", "G♭", "G", "G♯", "A♭"]
 
-function mod(a, b){
-    return ((a % b) + b) % b; // always returns a positive number
-}
-
-function frequency(keyNumber) {
-    return reference * 2**((keyNumber + key)/19 + octave - 4);
+function frequency(noteCode) {
+    return reference * 2**((noteCode + key)/19 + octave - 4);
 }
 
 function volumeCurve(rawVolume) {
@@ -355,7 +94,7 @@ function volumeCurve(rawVolume) {
 function updateNoteDisplay() {
     let noteNumbers = [];
     for (keyCode in oscillators) {
-        noteNumbers.push(keyNumbers[keyCode] + key);
+        noteNumbers.push(noteCodes[keyCode] + key);
     }
     noteNumbers.sort((a, b) => a - b);
     let display = "";
@@ -375,7 +114,7 @@ function updateNoteDisplay() {
 
 function updateActiveFrequencies() {
     for (keyCode in oscillators) {
-        const activeFrequency = frequency(keyNumbers[keyCode]);
+        const activeFrequency = frequency(noteCodes[keyCode]);
         if (oscillators[keyCode]) {
             oscillators[keyCode].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
         }
@@ -383,7 +122,7 @@ function updateActiveFrequencies() {
 }
 
 function playSound(keyCode) {
-    const freq = frequency(keyNumbers[keyCode]);
+    const freq = frequency(noteCodes[keyCode]);
     
     const gainNode = audioContext.createGain();
     gainNode.connect(audioContext.destination);
@@ -594,7 +333,7 @@ window.addEventListener("keydown", (event) => {
     }
 
     const keyCode = event.key;
-    const freq = frequency(keyNumbers[keyCode]);
+    const freq = frequency(noteCodes[keyCode]);
     
     if (freq) {
         if (!activeKeyCodes.has(keyCode)) {
@@ -758,6 +497,7 @@ document.getElementById("pedal").addEventListener("mouseleave", () => {
     releasePedal();
 }); 
 document.getElementById("pedal").addEventListener("touchstart", () => {
+    event.preventDefault(); // prevent the page from scrolling
     pressPedal();
 });
 document.getElementById("pedal").addEventListener("touchend", () => {
@@ -766,6 +506,3 @@ document.getElementById("pedal").addEventListener("touchend", () => {
 document.getElementById("pedal").addEventListener("contextmenu", (event) => {
     event.preventDefault();
 });
-</script>
-</body>
-</html>
