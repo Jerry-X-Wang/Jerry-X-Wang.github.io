@@ -1,762 +1,771 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="19tet.png" type="image/x-icon">
-    <title>19-Tone Equal Temperament</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial;
-            text-align: center;
-            margin: 0; /* Remove default margin */
-            padding-top: 30px; 
-        }
+<link rel="icon" href="19tet.png" type="image/x-icon">
+<title>19-Tone Equal Temperament</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        font-family: Arial;
+        text-align: center;
+        margin: 0; /* Remove default margin */
+        padding-top: 30px; 
+    }
 
-        .title {
-            font-size: 32px; 
-            margin-bottom: 20px; 
-            font-family: sans-serif; 
-            text-align: center; 
-            font-weight: bold;
-        }
+    .title {
+        font-size: 32px; 
+        margin-bottom: 20px; 
+        font-family: sans-serif; 
+        text-align: center; 
+        font-weight: bold;
+    }
+
+    .container {
+        width: 400px; 
+        margin: 0 auto; 
+    }
+
+    .control {
+        display: flex;
+        justify-content: flex-start; /* Left align */
+        align-items: center;
+        margin-top: 8px;
+        margin-bottom: 8px;
+    }
+
+    .control label {
+        margin-right: 10px; /* Space between label and input */
+        flex-basis: 200px; 
+        text-align: right; 
+    }
+
+    .control input[type="number"], 
+    .control input[type="range"] {
+        width: 62px; 
+        height: 20px; 
+        text-align: center; 
+        border-radius: 0; 
+        border: 2px solid #bbb; 
+        padding: 0;
+    }
+
+    button {
+        outline: none;
+        font-size: 22px;
+        font-family: Arial;
+        width: 24px;
+        height: 24px;
+        border: none;
+        background-color: #bbb;
+        color: white;
+        cursor: pointer;
+        margin-left: 5px;
+        border-radius: 0;
+        padding: 0;
+    }
+
+    button:active {
+        background-color: #ddd;
+    }
+
+    #volume {
+        outline: none;
+        width: 120px;
+        height: 12px;
+        margin-left: 0px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    .display {
+        font-size: 25px;
+        margin-top: 10px;
+        white-space: pre-line;
+        line-height: 1; /* in case of ♭. if we don't fix line-height, the ♭ will make the line higher */
+    }
     
-        .container {
-            width: 400px; 
-            margin: 0 auto; 
-        }
-    
-        .control {
-            display: flex;
-            justify-content: flex-start; /* Left align */
-            align-items: center;
-            margin-top: 8px;
-            margin-bottom: 8px;
-        }
-    
-        .control label {
-            margin-right: 10px; /* Space between label and input */
-            flex-basis: 200px; 
-            text-align: right; 
-        }
-    
-        .control input[type="number"], 
-        .control input[type="range"] {
-            width: 62px; 
-            height: 20px; 
-            text-align: center; 
-            border-radius: 0; 
-            border: 2px solid #bbb; 
-            padding: 0;
-        }
-    
-        button {
-            outline: none;
-            font-size: 22px;
-            font-family: Arial;
-            width: 24px;
-            height: 24px;
-            border: none;
-            background-color: #bbb;
-            color: white;
-            cursor: pointer;
-            margin-left: 5px;
-            border-radius: 0;
-            padding: 0;
-        }
+    .control input[type="range"] {
+        -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
+        appearance: none; /* Remove default style */
+        width: 12px;
+        height: 22px; 
+        border-radius: 0; 
+    }
 
-        button:active {
-            background-color: #ddd;
-        }
-    
-        #volume {
-            outline: none;
-            width: 120px;
-            height: 12px;
-            margin-left: 0px;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-    
-        .display {
-            font-size: 25px;
-            margin-top: 10px;
-            white-space: pre-line;
-            line-height: 1; /* in case of ♭. if we don't fix line-height, the ♭ will make the line higher */
-        }
-        
-        .control input[type="range"] {
-            -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
-            appearance: none; /* Remove default style */
-            width: 12px;
-            height: 22px; 
-            border-radius: 0; 
-        }
+    .control input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none; /* Remove default style */
+        appearance: none; /* Remove default style */
+        width: 12px;
+        height: 22px; 
+        background: #bbb; 
+        border-radius: 0; 
+        cursor: pointer; 
+    }
 
-        .control input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; /* Remove default style */
-            appearance: none; /* Remove default style */
-            width: 12px;
-            height: 22px; 
-            background: #bbb; 
-            border-radius: 0; 
-            cursor: pointer; 
-        }
+    .control input[type="range"]::-moz-range-thumb {
+        width: 12px; 
+        height: 22px; 
+        background: #bbb; 
+        border-radius: 0;
+        cursor: pointer; 
+    }
 
-        .control input[type="range"]::-moz-range-thumb {
-            width: 12px; 
-            height: 22px; 
-            background: #bbb; 
-            border-radius: 0;
-            cursor: pointer; 
-        }
+    .control input[type="range"]::-ms-thumb {
+        width: 12px;
+        height: 22px; 
+        background: #bbb; 
+        border-radius: 0;
+        cursor: pointer;
+    }
 
-        .control input[type="range"]::-ms-thumb {
-            width: 12px;
-            height: 22px; 
-            background: #bbb; 
-            border-radius: 0;
-            cursor: pointer;
-        }
+    /* Hide number input's up and down arrows */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none; /* Chrome and Safari */
+        margin: 0; /* Remove default margin */
+    }
 
-        /* Hide number input's up and down arrows */
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none; /* Chrome and Safari */
-            margin: 0; /* Remove default margin */
-        }
+    /* Hide range input's default style */
+    input[type="range"] {
+        -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
+        appearance: none; /* Remove default style */
+    }
 
-        /* Hide range input's default style */
-        input[type="range"] {
-            -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
-            appearance: none; /* Remove default style */
-        }
+    .control select {
+        color: black;
+        width: 124px; 
+        height: 24px;
+        border: 2px solid #bbb; 
+        border-radius: 0; 
+        padding: 0; 
+    }
 
-        .control select {
-            color: black;
-            width: 124px; 
-            height: 24px;
-            border: 2px solid #bbb; 
-            border-radius: 0; 
-            padding: 0; 
-        }
+    #key {
+        width: 66px;
+        text-align: center;
+    }
 
-        #key {
-            width: 66px;
-            text-align: center;
-        }
-
-        #pedal {
-            user-select: none;
-            position: absolute;
-            bottom: 5px;
-            width: 95%; 
-            height: 80px;
-            background-color: #eee; 
-            color: black; 
-            font-size: 25px; 
-            border: none; 
-            cursor: pointer;
-            margin-left: 2.5%;
-            margin-bottom: 5px;
-        }
-    </style>
+    #pedal {
+        user-select: none;
+        position: absolute;
+        bottom: 5px;
+        width: 95%; 
+        height: 80px;
+        background-color: #eee; 
+        color: black; 
+        font-size: 25px; 
+        border: none; 
+        cursor: pointer;
+        margin-left: 2.5%;
+        margin-bottom: 5px;
+    }
+</style>
+<script>
+    var _hmt = _hmt || [];
+    (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?07a429e5188f6f9094684adbf5b59ff9";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+    })();
+</script>
 </head>
 <body>
-    <a href="/" title="Home" style="position: absolute; top: 5px; left: 5px;">
-        <img src="home.png" alt="Home" style="width: 30px; height: 30px;">
-    </a>
-    <div class="title">
-        19-Tone Equal Temperament Instrument
-    </div>
-    <div class="container">
+<a href="/" title="Home" style="position: absolute; top: 5px; left: 5px;">
+<img src="home.png" alt="Home" style="width: 30px; height: 30px;">
+</a>
+<div class="title">
+19-Tone Equal Temperament Instrument
+</div>
+<div class="container">
 
-        <div class="control">
-            <label for="reference">Reference Frequency (Hz)</label>
-            <input type="number" id="reference" min="1" pattern="[0-9]*">
-            <button id="refDecrease">-</button>
-            <button id="refIncrease">+</button>
-        </div>
+<div class="control">
+    <label for="reference">Reference Frequency (Hz)</label>
+    <input type="number" id="reference" min="1" pattern="[0-9]*">
+    <button id="refDecrease">-</button>
+    <button id="refIncrease">+</button>
+</div>
 
-        <div class="control">
-            <label for="octave">Octave</label>
-            <input type="number" id="octave" step="1" pattern="[0-9]*">
-            <button id="octaveDecrease" title="(ArrowDown ↓)">-</button>
-            <button id="octaveIncrease" title="(ArrowUp ↑)">+</button>
-        </div>
+<div class="control">
+    <label for="octave">Octave</label>
+    <input type="number" id="octave" step="1" pattern="[0-9]*">
+    <button id="octaveDecrease" title="(ArrowDown ↓)">-</button>
+    <button id="octaveIncrease" title="(ArrowUp ↑)">+</button>
+</div>
 
-        <div class="control">
-            <label for="key">Key</label>
-            <select id="key">
-                <option value=0>C</option>
-                <option value=1>C♯</option>
-                <option value=2>D♭</option>
-                <option value=3>D</option>
-                <option value=4>D♯</option>
-                <option value=5>E♭</option>
-                <option value=6>E</option>
-                <option value=7>E♯(F♭)</option>
-                <option value=8>F</option>
-                <option value=9>F♯</option>
-                <option value=10>G♭</option>
-                <option value=11>G</option>
-                <option value=12>G♯</option>
-                <option value=13>A♭</option>
-                <option value=14>A</option>
-                <option value=15>A♯</option>
-                <option value=16>B♭</option>
-                <option value=17>B</option>
-                <option value=18>B♯(C♭)</option>
-            </select>
-            <button id="keyDecrease" title="(ArrowLeft ←)">-</button>
-            <button id="keyIncrease" title="(ArrowRight →)">+</button>
-        </div>
+<div class="control">
+    <label for="key">Key</label>
+    <select id="key">
+        <option value=0>C</option>
+        <option value=1>C♯</option>
+        <option value=2>D♭</option>
+        <option value=3>D</option>
+        <option value=4>D♯</option>
+        <option value=5>E♭</option>
+        <option value=6>E</option>
+        <option value=7>E♯(F♭)</option>
+        <option value=8>F</option>
+        <option value=9>F♯</option>
+        <option value=10>G♭</option>
+        <option value=11>G</option>
+        <option value=12>G♯</option>
+        <option value=13>A♭</option>
+        <option value=14>A</option>
+        <option value=15>A♯</option>
+        <option value=16>B♭</option>
+        <option value=17>B</option>
+        <option value=18>B♯(C♭)</option>
+    </select>
+    <button id="keyDecrease" title="(ArrowLeft ←)">-</button>
+    <button id="keyIncrease" title="(ArrowRight →)">+</button>
+</div>
 
-        <div class="control">
-            <label for="volume">Volume</label>
-            <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
-        </div>
+<div class="control">
+    <label for="volume">Volume</label>
+    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
+</div>
 
-        <div class="control">
-            <label for="waveType">Wave Type</label>
-            <select id="waveType">
-                <option value="sine">Sine</option>
-                <option value="square">Square</option>
-                <option value="sawtooth">Sawtooth</option>
-                <option value="triangle">Triangle</option>
-            </select>
-        </div>
+<div class="control">
+    <label for="waveType">Wave Type</label>
+    <select id="waveType">
+        <option value="sine">Sine</option>
+        <option value="square">Square</option>
+        <option value="sawtooth">Sawtooth</option>
+        <option value="triangle">Triangle</option>
+    </select>
+</div>
 
-        <div class="control">
-            <label for="soundMode">Sound Mode</label>
-            <select id="soundMode">
-                <option value="piano">Piano</option>
-                <option value="strings">Strings</option>
-                <option value="bells">Bells</option>
-            </select>
-        </div>
-    </div>
-    <div class="display" id="noteDisplay">
-        Press some keys to play sound.
-    </div>
-    <div class="control">
-        <button id="pedal">
-           Pedal (Space)
-        </button>
-    </div>
+<div class="control">
+    <label for="soundMode">Sound Mode</label>
+    <select id="soundMode">
+        <option value="piano">Piano</option>
+        <option value="strings">Strings</option>
+        <option value="bells">Bells</option>
+    </select>
+</div>
+</div>
+<div class="display" id="noteDisplay">
+Press some keys to play sound.
+</div>
+<div class="control">
+<button id="pedal">
+    Pedal (Space)
+</button>
+</div>
+
+<script>
+// 19-Tone equal temperament
+
+let reference = 440; // Reference frequency
+document.getElementById("reference").value = reference;
+
+let octave = 4; // Octave number
+document.getElementById("octave").value = octave;
+
+let key = 0; // key in music
+
+let waveType = "triangle"; // Wave type: sine, square, sawtooth, or triangle
+document.getElementById("waveType").value = waveType;
+
+let soundMode = "piano"; // Sound mode: piano, strings, or bells
+document.getElementById("soundMode").value = soundMode;
+
+let pedal = false; // Whether the pedal is pressed or not
+
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const oscillators = {};
+const gainNodes = {}; 
+const activeKeyCodes = new Set();
+const timeoutStopSound = {};
+
+const keyNumbers = {
+    "q": -14,
+    "a": -13,
+    "z": -12,
+
+    "w": -11,
+    "s": -10,
+    "x": -9,
+
+    "e": -8,
+    "d": -7,
+
+    "r": -6,
+    "f": -5,
+    "v": -4,
+
+    "t": -3,
+    "g": -2,
+    "b": -1,
+
+    "y": 0,
+    "h": 1,
+    "n": 2,
+
+    "u": 3,
+    "j": 4,
     
-    <script>
-        // 19-Tone equal temperament
+    "i": 5,
+    "k": 6,
+    ",": 7,
 
-        let reference = 440; // Reference frequency
-        document.getElementById("reference").value = reference;
-        
-        let octave = 4; // Octave number
-        document.getElementById("octave").value = octave;
+    "o": 8,
+    "l": 9,
+    ".": 10,
 
-        let key = 0; // key in music
+    "p": 11,
+    ";": 12,
 
-        let waveType = "triangle"; // Wave type: sine, square, sawtooth, or triangle
-        document.getElementById("waveType").value = waveType;
+    "[": 13,
+    "'": 14,
+    "/": 15,
 
-        let soundMode = "piano"; // Sound mode: piano, strings, or bells
-        document.getElementById("soundMode").value = soundMode;
+    "]": 16,
+    "\\": 19,
+    "`": 22,
+    "1": 24,
+    "2": 27,
+    "3": 30,
+    "4": 32,
+    "5": 35,
+    "6": 38,
+    "7": 41,
+    "8": 43,
+    "9": 46,
+    "0": 49,
+    "-": 51,
+    "=": 54,
+};
 
-        let pedal = false; // Whether the pedal is pressed or not
-        
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillators = {};
-        const gainNodes = {}; 
-        const activeKeyCodes = new Set();
-        const timeoutStopSound = {};
+const notes = ["A", "A♯", "B♭", "B", "B♯(C♭)", "C", "C♯", "D♭", "D", "D♯", "E♭", "E", "E♯(F♭)", "F", "F♯", "G♭", "G", "G♯", "A♭"]
 
-        const keyNumbers = {
-            "q": -14,
-            "a": -13,
-            "z": -12,
+function mod(a, b){
+    return ((a % b) + b) % b; // always returns a positive number
+}
 
-            "w": -11,
-            "s": -10,
-            "x": -9,
+function frequency(keyNumber) {
+    return reference * 2**((keyNumber + key)/19 + octave - 4);
+}
 
-            "e": -8,
-            "d": -7,
+function volumeCurve(rawVolume) {
+    return (rawVolume / 2) ** 2;
+}
 
-            "r": -6,
-            "f": -5,
-            "v": -4,
-
-            "t": -3,
-            "g": -2,
-            "b": -1,
-
-            "y": 0,
-            "h": 1,
-            "n": 2,
-
-            "u": 3,
-            "j": 4,
-            
-            "i": 5,
-            "k": 6,
-            ",": 7,
-
-            "o": 8,
-            "l": 9,
-            ".": 10,
-
-            "p": 11,
-            ";": 12,
-
-            "[": 13,
-            "'": 14,
-            "/": 15,
-
-            "]": 16,
-            "\\": 19,
-            "`": 22,
-            "1": 24,
-            "2": 27,
-            "3": 30,
-            "4": 32,
-            "5": 35,
-            "6": 38,
-            "7": 41,
-            "8": 43,
-            "9": 46,
-            "0": 49,
-            "-": 51,
-            "=": 54,
-        };
-
-        const notes = ["A", "A♯", "B♭", "B", "B♯(C♭)", "C", "C♯", "D♭", "D", "D♯", "E♭", "E", "E♯(F♭)", "F", "F♯", "G♭", "G", "G♯", "A♭"]
-
-        function mod(a, b){
-            return ((a % b) + b) % b; // always returns a positive number
+function updateNoteDisplay() {
+    let noteNumbers = [];
+    for (keyCode in oscillators) {
+        noteNumbers.push(keyNumbers[keyCode] + key);
+    }
+    noteNumbers.sort((a, b) => a - b);
+    let display = "";
+    for (i in noteNumbers) {
+        let freq = frequency(noteNumbers[i]);
+        if (freq < 100) {
+            freq = freq.toPrecision(3);
+        } else {
+            freq = freq.toFixed();
         }
+        display += notes[mod(noteNumbers[i], 19)] + (Math.floor((noteNumbers[i] + 14) / 19) + octave) + " " + freq + "\u2006Hz" + "\n";
+        //         note name                        octave                        ↓                           frequency
+        //                                                                        14 is because there is 14 semitones between C and A in 19-TET
+    }
+    document.getElementById("noteDisplay").textContent = display;
+}
 
-        function frequency(keyNumber) {
-            return reference * 2**((keyNumber + key)/19 + octave - 4);
+function updateActiveFrequencies() {
+    for (keyCode in oscillators) {
+        const activeFrequency = frequency(keyNumbers[keyCode]);
+        if (oscillators[keyCode]) {
+            oscillators[keyCode].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
         }
+    }
+}
 
-        function volumeCurve(rawVolume) {
-            return (rawVolume / 2) ** 2;
-        }
-        
-        function updateNoteDisplay() {
-            let noteNumbers = [];
-            for (keyCode in oscillators) {
-                noteNumbers.push(keyNumbers[keyCode] + key);
+function playSound(keyCode) {
+    const freq = frequency(keyNumbers[keyCode]);
+    
+    const gainNode = audioContext.createGain();
+    gainNode.connect(audioContext.destination);
+    gainNodes[keyCode] = gainNode;
+    const volume = volumeCurve(parseFloat(document.getElementById("volume").value))
+    switch (waveType) { // set gain value in different cases
+        case "sine":
+            if (freq >= 440) {
+                gainNode.gain.value = volume
+            } else {
+                gainNode.gain.value = volume * 440/freq;
             }
-            noteNumbers.sort((a, b) => a - b);
-            let display = "";
-            for (i in noteNumbers) {
-                let freq = frequency(noteNumbers[i]);
-                if (freq < 100) {
-                    freq = freq.toPrecision(3);
-                } else {
-                    freq = freq.toFixed();
-                }
-                display += notes[mod(noteNumbers[i], 19)] + (Math.floor((noteNumbers[i] + 14) / 19) + octave) + " " + freq + "\u2006Hz" + "\n";
-                //         note name                        octave                        ↓                           frequency
-                //                                                                        14 is because there is 14 semitones between C and A in 19-TET
+            break;
+        case "square":
+            gainNode.gain.value = volume;
+            break;
+        case "sawtooth":
+            gainNode.gain.value = volume;
+            break;
+        case "triangle":
+            if (freq >= 440) {
+                gainNode.gain.value = volume
+            } else {
+                gainNode.gain.value = volume * 440/freq;
             }
-            document.getElementById("noteDisplay").textContent = display;
-        }
+            break;
+        default:
+            gainNode.gain.value = volume; 
+            break;
+    } 
 
-        function updateActiveFrequencies() {
-            for (keyCode in oscillators) {
-                const activeFrequency = frequency(keyNumbers[keyCode]);
-                if (oscillators[keyCode]) {
-                    oscillators[keyCode].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
-                }
-            }
-        }
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = waveType; // wave type
+    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+    oscillator.connect(gainNode); // connect oscillator to gain node
+    oscillator.start();
+    oscillators[keyCode] = oscillator;
 
-        function playSound(keyCode) {
-            const freq = frequency(keyNumbers[keyCode]);
-            
-            const gainNode = audioContext.createGain();
-            gainNode.connect(audioContext.destination);
-            gainNodes[keyCode] = gainNode;
-            const volume = volumeCurve(parseFloat(document.getElementById("volume").value))
-            switch (waveType) { // set gain value in different cases
-                case "sine":
-                    if (freq >= 440) {
-                        gainNode.gain.value = volume
-                    } else {
-                        gainNode.gain.value = volume * 440/freq;
-                    }
-                    break;
-                case "square":
-                    gainNode.gain.value = volume;
-                    break;
-                case "sawtooth":
-                    gainNode.gain.value = volume;
-                    break;
-                case "triangle":
-                    if (freq >= 440) {
-                        gainNode.gain.value = volume
-                    } else {
-                        gainNode.gain.value = volume * 440/freq;
-                    }
-                    break;
-                default:
-                    gainNode.gain.value = volume; 
-                    break;
-            } 
+    updateNoteDisplay();
 
-            const oscillator = audioContext.createOscillator();
-            oscillator.type = waveType; // wave type
-            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-            oscillator.connect(gainNode); // connect oscillator to gain node
-            oscillator.start();
-            oscillators[keyCode] = oscillator;
+    const currentGain = gainNodes[keyCode].gain.value;
+    const currentTime = audioContext.currentTime;
 
-            updateNoteDisplay();
+    let halfLife; // unit: second
+    let gain = currentGain;
+    let time = 0;
+    const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** (t**0.5); // similiar to a exponential function with given halfLife
 
-            const currentGain = gainNodes[keyCode].gain.value;
-            const currentTime = audioContext.currentTime;
+    switch (soundMode) {
+        case "piano":
+            halfLife = 0.5 * (440/freq)**0.3;
 
-            let halfLife; // unit: second
-            let gain = currentGain;
-            let time = 0;
-            const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** (t**0.5); // similiar to a exponential function with given halfLife
-
-            switch (soundMode) {
-                case "piano":
-                    halfLife = 0.5 * (440/freq)**0.3;
-
-                    for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
-                        gain = gainCurve(time);
-                        gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
-                    }
-
-                    timeoutStopSound[keyCode] = setTimeout(() => {
-                        if (oscillators[keyCode]) {
-                            stopSound(keyCode);
-                        }
-                    }, time * 1000);
-                    break;
-                case "bells":
-                    halfLife = 0.5 * (440/freq)**0.3;
-
-                    for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
-                        gain = gainCurve(time);
-                        gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
-                    }
-
-                    timeoutStopSound[keyCode] = setTimeout(() => {
-                        if (oscillators[keyCode]) {
-                            stopSound(keyCode);
-                        }
-                    }, time * 1000);
-
-                    if (pedal) {
-                        clearTimeout(timeoutStopSound[keyCode]);
-                        timeoutStopSound[keyCode] = setTimeout(() => {
-                            if (oscillators[keyCode]) {
-                                stopSound(keyCode);
-                            }
-                        }, 100); // if pedal is pressed, stop the sound after 100ms, just like you are holding a bell
-                    }
-                    break;
-                case "strings":
-                    gainNodes[keyCode].gain.setValueAtTime(0.7 * currentGain, currentTime);
-                    break;
-                default:
-                    oscillators[keyCode].stop(currentTime);
-                    console.error(`Invalid sound mode: ${soundMode}`);
-                    break;
-            } 
-        }
-
-        function stopSound(keyCode) {
-            clearTimeout(timeoutStopSound[keyCode]);
-            gainNodes[keyCode].gain.cancelScheduledValues(audioContext.currentTime); // cancel the schedule before
-
-            const currentGain = gainNodes[keyCode].gain.value;
-            const halfLife = 0.05; // unit: second
-            const currentTime = audioContext.currentTime;
-            let gain = currentGain;
-
-            const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
-            let time = 0;
-            for (; gain >= 0.001; time += 0.001) { // set the gainNodes from now on, until it's too quiet
+            for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
                 gain = gainCurve(time);
                 gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
             }
 
-            oscillators[keyCode].stop(currentTime + time);
-            delete oscillators[keyCode];
-            delete gainNodes[keyCode];
-            updateNoteDisplay();
-        }
-
-        function stopAllSounds() {
-            for (keyCode in oscillators) {
-                stopSound(keyCode);
-            }
-        }
-
-        function pressPedal() {
-            pedal = true;
-            document.getElementById("pedal").style.backgroundColor = "#bbb";
-            switch (soundMode) {
-                case "piano":
-                case "strings":
-                    break;
-                case "bells":
-                    stopAllSounds();
-                    break;
-                default:
-                    console.error(`Invalid sound mode: ${soundMode}`);
-                    break;
-            }
-        }
-
-        function releasePedal() {
-            pedal = false;
-            document.getElementById("pedal").style.backgroundColor = "#eee";
-            switch (soundMode) {
-                case "piano":
-                case "strings":
-                    for (keyCode in oscillators) {
-                        if (!activeKeyCodes.has(keyCode)) {
-                            stopSound(keyCode);
-                        }
-                    }
-                    break;
-                case "bells":
-                    break;
-                default:
-                    console.error(`Invalid sound mode: ${soundMode}`);
-                    break;
-            }
-        }
-
-        function octaveDecrease() {
-            octave--;
-            document.getElementById("octave").value = octave; 
-            updateActiveFrequencies(); 
-            updateNoteDisplay();
-        }
-
-        function octaveIncrease() {
-            octave++;
-            document.getElementById("octave").value = octave; 
-            updateActiveFrequencies(); 
-            updateNoteDisplay();
-        }
-
-        function keyDecrease() {
-            if (key == 0) {
-                octave--;
-                document.getElementById("octave").value = octave;
-                key = 18;
-            } else {
-                key--;
-            }
-            document.getElementById("key").value = key;
-            updateActiveFrequencies(); 
-            updateNoteDisplay();
-        }
-
-        function keyIncrease() {
-            if (key == 18) {
-                octave++;
-                document.getElementById("octave").value = octave;
-                key = 0;
-            } else {
-                key++;
-            }
-            document.getElementById("key").value = key;
-            updateActiveFrequencies(); 
-            updateNoteDisplay();
-        }
-
-        
-        window.addEventListener("keydown", (event) => {
-            if (event.target.tagName.toLowerCase() === "input") {
-                if (event.key === "Enter") {
-                    event.target.blur();
-                    return; 
+            timeoutStopSound[keyCode] = setTimeout(() => {
+                if (oscillators[keyCode]) {
+                    stopSound(keyCode);
                 }
+            }, time * 1000);
+            break;
+        case "bells":
+            halfLife = 0.5 * (440/freq)**0.3;
+
+            for (; gain >= 0.0001; time += 0.01) { // set the gains from now on, until it's too quiet
+                gain = gainCurve(time);
+                gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
             }
 
-            const keyCode = event.key;
-            const freq = frequency(keyNumbers[keyCode]);
-            
-            if (freq) {
-                if (!activeKeyCodes.has(keyCode)) {
+            timeoutStopSound[keyCode] = setTimeout(() => {
+                if (oscillators[keyCode]) {
+                    stopSound(keyCode);
+                }
+            }, time * 1000);
+
+            if (pedal) {
+                clearTimeout(timeoutStopSound[keyCode]);
+                timeoutStopSound[keyCode] = setTimeout(() => {
                     if (oscillators[keyCode]) {
-                        stopSound(keyCode); // if the note is already playing, stop the sound first, then we can start the new sound
+                        stopSound(keyCode);
                     }
-
-                    activeKeyCodes.add(keyCode);
-                    playSound(keyCode);
-                }
-            } else {
-                switch (keyCode) {
-                    case "ArrowDown": 
-                        octaveDecrease();
-                        break;
-                    case "ArrowUp": 
-                        octaveIncrease();
-                        break;
-                    case "ArrowLeft":
-                        keyDecrease();
-                        break;
-                    case "ArrowRight":
-                        keyIncrease();
-                        break;
-                    case " ":
-                        pressPedal();
-                        break;
-                }
+                }, 100); // if pedal is pressed, stop the sound after 100ms, just like you are holding a bell
             }
-        });
+            break;
+        case "strings":
+            gainNodes[keyCode].gain.setValueAtTime(0.7 * currentGain, currentTime);
+            break;
+        default:
+            oscillators[keyCode].stop(currentTime);
+            console.error(`Invalid sound mode: ${soundMode}`);
+            break;
+    } 
+}
 
-        window.addEventListener("keyup", (event) => {
-            const keyCode = event.key;
+function stopSound(keyCode) {
+    clearTimeout(timeoutStopSound[keyCode]);
+    gainNodes[keyCode].gain.cancelScheduledValues(audioContext.currentTime); // cancel the schedule before
 
-            switch (keyCode) {
-                case " ":
-                    releasePedal();
-                    break;
-            }
+    const currentGain = gainNodes[keyCode].gain.value;
+    const halfLife = 0.05; // unit: second
+    const currentTime = audioContext.currentTime;
+    let gain = currentGain;
 
-            switch (soundMode) {
-                case "piano":
-                case "strings":
-                    if (!pedal) {
-                        if (oscillators[keyCode]) {
-                            stopSound(keyCode);
-                        }
-                    }
-                    break;
-                case "bells":
-                    break;
-                default:
-                    console.error(`Invalid sound mode: ${soundMode}`);
-                    break;
-            }
-            
-            if (activeKeyCodes.has(keyCode)) {
-                activeKeyCodes.delete(keyCode);
-                updateNoteDisplay();
-            }
-        });
+    const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
+    let time = 0;
+    for (; gain >= 0.001; time += 0.001) { // set the gainNodes from now on, until it's too quiet
+        gain = gainCurve(time);
+        gainNodes[keyCode].gain.setValueAtTime(gain, currentTime + time);
+    }
 
-        document.getElementById("volume").addEventListener("input", (event) => {
-            const rawVolume = parseFloat(event.target.value);
+    oscillators[keyCode].stop(currentTime + time);
+    delete oscillators[keyCode];
+    delete gainNodes[keyCode];
+    updateNoteDisplay();
+}
+
+function stopAllSounds() {
+    for (keyCode in oscillators) {
+        stopSound(keyCode);
+    }
+}
+
+function pressPedal() {
+    pedal = true;
+    document.getElementById("pedal").style.backgroundColor = "#bbb";
+    switch (soundMode) {
+        case "piano":
+        case "strings":
+            break;
+        case "bells":
+            stopAllSounds();
+            break;
+        default:
+            console.error(`Invalid sound mode: ${soundMode}`);
+            break;
+    }
+}
+
+function releasePedal() {
+    pedal = false;
+    document.getElementById("pedal").style.backgroundColor = "#eee";
+    switch (soundMode) {
+        case "piano":
+        case "strings":
             for (keyCode in oscillators) {
-                if (soundMode === "strings") {
-                    gainNodes[keyCode].gain.value = volumeCurve(rawVolume); // set gain value
+                if (!activeKeyCodes.has(keyCode)) {
+                    stopSound(keyCode);
                 }
-           }
-        });
-        
-        document.getElementById("reference").addEventListener("input", (event) => {
-            reference = parseFloat(event.target.value);
-            updateActiveFrequencies(); 
-            updateNoteDisplay();
-        });
-        document.getElementById("refIncrease").addEventListener("click", () => {
-            reference++;
-            document.getElementById("reference").value = reference;
-            updateActiveFrequencies();
-            updateNoteDisplay();
-            document.activeElement.blur();
-        });
-        document.getElementById("refDecrease").addEventListener("click", () => {
-            if (reference > 1) reference--;
-            document.getElementById("reference").value = reference;
-            updateActiveFrequencies();
-            updateNoteDisplay();
-            document.activeElement.blur();
-        });
+            }
+            break;
+        case "bells":
+            break;
+        default:
+            console.error(`Invalid sound mode: ${soundMode}`);
+            break;
+    }
+}
 
-        document.getElementById("octave").addEventListener("input", (event) => {
-            octave = parseInt(event.target.value);
-            updateActiveFrequencies(); 
-            updateNoteDisplay();
-        });
-        document.getElementById("octaveDecrease").addEventListener("click", () => {
-            octaveDecrease();
-            document.activeElement.blur();
-        });
-        document.getElementById("octaveIncrease").addEventListener("click", () => {
-            octaveIncrease();
-            document.activeElement.blur();
-        });
-        
-        document.getElementById("key").addEventListener("input", (event) => {
-            key = parseInt(event.target.value);
-            updateActiveFrequencies(); 
-            updateNoteDisplay();
-        });
-        document.getElementById("keyDecrease").addEventListener("click", () => {
-            keyDecrease();
-            document.activeElement.blur();
-        });
-        document.getElementById("keyIncrease").addEventListener("click", () => {
-            keyIncrease();
-            document.activeElement.blur();
-        });
+function octaveDecrease() {
+    octave--;
+    document.getElementById("octave").value = octave; 
+    updateActiveFrequencies(); 
+    updateNoteDisplay();
+}
 
-        document.getElementById("waveType").addEventListener("change", (event) => {
-            waveType = event.target.value;
-        });   
+function octaveIncrease() {
+    octave++;
+    document.getElementById("octave").value = octave; 
+    updateActiveFrequencies(); 
+    updateNoteDisplay();
+}
 
-        document.getElementById("soundMode").addEventListener("change", (event) => {
-            soundMode = event.target.value;
-        });  
-        
-        window.addEventListener("blur", () => {
-            stopAllSounds();
-        });
+function keyDecrease() {
+    if (key == 0) {
+        octave--;
+        document.getElementById("octave").value = octave;
+        key = 18;
+    } else {
+        key--;
+    }
+    document.getElementById("key").value = key;
+    updateActiveFrequencies(); 
+    updateNoteDisplay();
+}
 
-        window.addEventListener("contextmenu", (event) => {
-            stopAllSounds();
-        });
+function keyIncrease() {
+    if (key == 18) {
+        octave++;
+        document.getElementById("octave").value = octave;
+        key = 0;
+    } else {
+        key++;
+    }
+    document.getElementById("key").value = key;
+    updateActiveFrequencies(); 
+    updateNoteDisplay();
+}
 
-        const controls = document.querySelectorAll(".control input, .control select, .control button");
-        document.addEventListener("mousemove", (event) => {
-            controls.forEach(control => {
-                const rect = control.getBoundingClientRect(); // get the bounding rect of the control
-                const controlCenterX = rect.left + rect.width / 2; // x center of the control
-                const controlCenterY = rect.top + rect.height / 2; // y center of the control
-                const xDistanceThreshold = rect.width / 2 + 10; 
-                const yDistanceThreshold = rect.height / 2 + 10;
 
-                const xDistance = Math.abs(event.clientX - controlCenterX)
-                const yDistance = Math.abs(event.clientY - controlCenterY)
+window.addEventListener("keydown", (event) => {
+    if (event.target.tagName.toLowerCase() === "input") {
+        if (event.key === "Enter") {
+            event.target.blur();
+            return; 
+        }
+    }
 
-                if (xDistance > xDistanceThreshold || yDistance > yDistanceThreshold) {
-                    control.blur(); // blur the focus if mouse cursor is too far from the control
+    const keyCode = event.key;
+    const freq = frequency(keyNumbers[keyCode]);
+    
+    if (freq) {
+        if (!activeKeyCodes.has(keyCode)) {
+            if (oscillators[keyCode]) {
+                stopSound(keyCode); // if the note is already playing, stop the sound first, then we can start the new sound
+            }
+
+            activeKeyCodes.add(keyCode);
+            playSound(keyCode);
+        }
+    } else {
+        switch (keyCode) {
+            case "ArrowDown": 
+                octaveDecrease();
+                break;
+            case "ArrowUp": 
+                octaveIncrease();
+                break;
+            case "ArrowLeft":
+                keyDecrease();
+                break;
+            case "ArrowRight":
+                keyIncrease();
+                break;
+            case " ":
+                pressPedal();
+                break;
+        }
+    }
+});
+
+window.addEventListener("keyup", (event) => {
+    const keyCode = event.key;
+
+    switch (keyCode) {
+        case " ":
+            releasePedal();
+            break;
+    }
+
+    switch (soundMode) {
+        case "piano":
+        case "strings":
+            if (!pedal) {
+                if (oscillators[keyCode]) {
+                    stopSound(keyCode);
                 }
-            });
-        });
+            }
+            break;
+        case "bells":
+            break;
+        default:
+            console.error(`Invalid sound mode: ${soundMode}`);
+            break;
+    }
+    
+    if (activeKeyCodes.has(keyCode)) {
+        activeKeyCodes.delete(keyCode);
+        updateNoteDisplay();
+    }
+});
 
-        document.getElementById("pedal").addEventListener("mousedown", () => {
-            pressPedal();
-        });
-        document.getElementById("pedal").addEventListener("mouseup", () => {
-            releasePedal();
-        });
-        document.getElementById("pedal").addEventListener("mouseleave", () => {
-            releasePedal();
-        }); 
-        document.getElementById("pedal").addEventListener("touchstart", () => {
-            pressPedal();
-        });
-        document.getElementById("pedal").addEventListener("touchend", () => {
-            releasePedal();
-        });
-        document.getElementById("pedal").addEventListener("contextmenu", (event) => {
-            event.preventDefault();
-        });
-    </script>
+document.getElementById("volume").addEventListener("input", (event) => {
+    const rawVolume = parseFloat(event.target.value);
+    for (keyCode in oscillators) {
+        if (soundMode === "strings") {
+            gainNodes[keyCode].gain.value = volumeCurve(rawVolume); // set gain value
+        }
+    }
+});
+
+document.getElementById("reference").addEventListener("input", (event) => {
+    reference = parseFloat(event.target.value);
+    updateActiveFrequencies(); 
+    updateNoteDisplay();
+});
+document.getElementById("refIncrease").addEventListener("click", () => {
+    reference++;
+    document.getElementById("reference").value = reference;
+    updateActiveFrequencies();
+    updateNoteDisplay();
+    document.activeElement.blur();
+});
+document.getElementById("refDecrease").addEventListener("click", () => {
+    if (reference > 1) reference--;
+    document.getElementById("reference").value = reference;
+    updateActiveFrequencies();
+    updateNoteDisplay();
+    document.activeElement.blur();
+});
+
+document.getElementById("octave").addEventListener("input", (event) => {
+    octave = parseInt(event.target.value);
+    updateActiveFrequencies(); 
+    updateNoteDisplay();
+});
+document.getElementById("octaveDecrease").addEventListener("click", () => {
+    octaveDecrease();
+    document.activeElement.blur();
+});
+document.getElementById("octaveIncrease").addEventListener("click", () => {
+    octaveIncrease();
+    document.activeElement.blur();
+});
+
+document.getElementById("key").addEventListener("input", (event) => {
+    key = parseInt(event.target.value);
+    updateActiveFrequencies(); 
+    updateNoteDisplay();
+});
+document.getElementById("keyDecrease").addEventListener("click", () => {
+    keyDecrease();
+    document.activeElement.blur();
+});
+document.getElementById("keyIncrease").addEventListener("click", () => {
+    keyIncrease();
+    document.activeElement.blur();
+});
+
+document.getElementById("waveType").addEventListener("change", (event) => {
+    waveType = event.target.value;
+});   
+
+document.getElementById("soundMode").addEventListener("change", (event) => {
+    soundMode = event.target.value;
+});  
+
+window.addEventListener("blur", () => {
+    stopAllSounds();
+});
+
+window.addEventListener("contextmenu", (event) => {
+    stopAllSounds();
+});
+
+const controls = document.querySelectorAll(".control input, .control select, .control button");
+document.addEventListener("mousemove", (event) => {
+    controls.forEach(control => {
+        const rect = control.getBoundingClientRect(); // get the bounding rect of the control
+        const controlCenterX = rect.left + rect.width / 2; // x center of the control
+        const controlCenterY = rect.top + rect.height / 2; // y center of the control
+        const xDistanceThreshold = rect.width / 2 + 10; 
+        const yDistanceThreshold = rect.height / 2 + 10;
+
+        const xDistance = Math.abs(event.clientX - controlCenterX)
+        const yDistance = Math.abs(event.clientY - controlCenterY)
+
+        if (xDistance > xDistanceThreshold || yDistance > yDistanceThreshold) {
+            control.blur(); // blur the focus if mouse cursor is too far from the control
+        }
+    });
+});
+
+document.getElementById("pedal").addEventListener("mousedown", () => {
+    pressPedal();
+});
+document.getElementById("pedal").addEventListener("mouseup", () => {
+    releasePedal();
+});
+document.getElementById("pedal").addEventListener("mouseleave", () => {
+    releasePedal();
+}); 
+document.getElementById("pedal").addEventListener("touchstart", () => {
+    pressPedal();
+});
+document.getElementById("pedal").addEventListener("touchend", () => {
+    releasePedal();
+});
+document.getElementById("pedal").addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+});
+</script>
 </body>
 </html>
