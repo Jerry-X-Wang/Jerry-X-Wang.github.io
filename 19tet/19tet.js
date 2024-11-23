@@ -171,14 +171,16 @@ function playSound(noteCode) {
     let halfLife; // unit: second
     let gain = currentGain;
     let time = 0;
-    const gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** (t**0.5); // similiar to a exponential function with given halfLife
+    // gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** (t**0.5); // similiar to a exponential function with given halfLife
+    // here we use timeCurve instead of gainCurve in order to improve performance
+    const timeCurve = gain => (halfLife * Math.log2(currentGain / gain)) ** 2; // inverse function of gainCurve
 
     switch (soundMode) {
         case "piano":
             halfLife = 0.5 * (440/freq)**0.3;
 
-            for (; gain >= 0.0005; time += 0.01) { // set the gains from now on, until it's too quiet
-                gain = gainCurve(time);
+            for (; gain > 0.0001; gain -= 0.0001) { // set the gains from now on, until it's too quiet
+                time = timeCurve(gain);
                 gainNodes[noteCode].gain.setValueAtTime(gain, currentTime + time);
             }
 
@@ -191,8 +193,8 @@ function playSound(noteCode) {
         case "bells":
             halfLife = 0.5 * (440/freq)**0.3;
 
-            for (; gain >= 0.0005; time += 0.01) { // set the gains from now on, until it's too quiet
-                gain = gainCurve(time);
+            for (; gain > 0.0001; gain -= 0.0001) { // set the gains from now on, until it's too quiet
+                time = timeCurve(gain);
                 gainNodes[noteCode].gain.setValueAtTime(gain, currentTime + time);
             }
 
@@ -510,7 +512,7 @@ document.getElementById("pedal").addEventListener("mouseup", () => {
 document.getElementById("pedal").addEventListener("mouseleave", () => {
     releasePedal();
 }); 
-document.getElementById("pedal").addEventListener("touchstart", () => {
+document.getElementById("pedal").addEventListener("touchstart", (event) => {
     event.preventDefault(); // prevent the page from scrolling
     pressPedal();
 });
