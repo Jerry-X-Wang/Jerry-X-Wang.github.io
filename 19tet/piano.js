@@ -13,6 +13,14 @@ function keyPosition(noteCode, offset) {
   }
 }
 
+function removeAllActiveKeys() {
+    keys.forEach(key => {
+        if (key.classList.contains("active")) {
+            key.classList.remove("active");
+        }
+    });
+}
+
 const piano = document.getElementById("piano");
 
 // for startNote and endNote, 0 -> A4
@@ -90,33 +98,42 @@ pianoContainer.addEventListener("wheel", function(event) {
 keys.forEach(key => {
     key.addEventListener("touchstart", function(event) {
         event.preventDefault(); // prevent the page from scrolling
-        key.classList.add("active");
         const noteCode = parseInt(key.noteCode);
         playNote(noteCode);
+        console.log(`Touch start on key ${noteCode}`);
     });
 
     key.addEventListener("touchend", function() {
-        key.classList.remove("active");
+        const noteCode = parseInt(key.noteCode);
+        stopNote(noteCode);
+        console.log(`Touch end on key ${noteCode}`);
+    });
+
+    key.addEventListener("touchleave", function() {
         const noteCode = parseInt(key.noteCode);
         stopNote(noteCode);
     });
 
     key.addEventListener("mousedown", function() {
-        key.classList.add("active");
         const noteCode = parseInt(key.noteCode);
         playNote(noteCode);
     });
 
     key.addEventListener("mouseup", function() {
-        key.classList.remove("active");
         const noteCode = parseInt(key.noteCode);
         stopNote(noteCode);
     });
 
     key.addEventListener("mouseleave", function() {
-        key.classList.remove("active");
         const noteCode = parseInt(key.noteCode);
         stopNote(noteCode);
+    });
+
+    key.addEventListener("mousemove", function(event) {
+        if (event.buttons == 1 && !key.classList.contains("active")) { // left mouse button is down
+            const noteCode = parseInt(key.noteCode);
+            playNote(noteCode);
+        }
     });
 
     key.addEventListener("contextmenu", function(event) {
@@ -129,4 +146,12 @@ window.addEventListener("resize", function() {
     restHeight = windowHeight - pianoHeight - pedalHeight - titleHeight - margin
     document.getElementById("panel").style.height = `${restHeight}px`;
     document.getElementsByClassName("display")[0].style.height = `${restHeight}px`;
+});
+
+window.addEventListener("blur", () => {
+    removeAllActiveKeys();
+});
+
+window.addEventListener("contextmenu", () => {
+    removeAllActiveKeys();
 });
