@@ -135,7 +135,7 @@ function playSound(noteCode) {
             if (freq >= 440) {
                 gainNode.gain.value = volume
             } else {
-                gainNode.gain.value = volume * 440/freq;
+                gainNode.gain.value = volume * (440/freq)**0.5;
             }
             break;
         case "square":
@@ -148,7 +148,7 @@ function playSound(noteCode) {
             if (freq >= 440) {
                 gainNode.gain.value = volume
             } else {
-                gainNode.gain.value = volume * 440/freq;
+                gainNode.gain.value = volume * (440/freq)**0.5;
             }
             break;
         default:
@@ -171,13 +171,13 @@ function playSound(noteCode) {
     let halfLife; // unit: second
     let gain = currentGain;
     let time = 0;
-    // gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** (t**0.5); // similiar to a exponential function with given halfLife
+    // gainCurve = t => currentGain * (0.5 ** (1 / halfLife)) ** t; // exponential function with given halfLife
     // here we use timeCurve instead of gainCurve in order to improve performance
-    const timeCurve = gain => (halfLife * Math.log2(currentGain / gain)) ** 2; // inverse function of gainCurve
+    const timeCurve = gain => (halfLife * Math.log2(currentGain / gain)); // inverse function of gainCurve
 
     switch (soundMode) {
         case "piano":
-            halfLife = 0.5 * (440/freq)**0.3;
+            halfLife = 0.5 * (440/freq)**0.5;
 
             for (; gain > 0.0001; gain -= 0.0001) { // set the gains from now on, until it's too quiet
                 time = timeCurve(gain);
@@ -191,7 +191,7 @@ function playSound(noteCode) {
             }, time * 1000);
             break;
         case "bells":
-            halfLife = 0.5 * (440/freq)**0.3;
+            halfLife = 0.5 * (440/freq)**0.5;
 
             for (; gain > 0.0001; gain -= 0.0001) { // set the gains from now on, until it's too quiet
                 time = timeCurve(gain);
@@ -253,6 +253,11 @@ function stopAllSounds() {
 }
 
 function playNote(noteCode) {
+    keys.forEach(key => {
+        if (key.noteCode == noteCode && !key.classList.contains("active")) {
+            key.classList.add("active");
+        }
+    });
     if (oscillators[noteCode]) {
         stopSound(noteCode); // if the note is already playing, stop the sound first, then we can start the new sound
     }
@@ -261,6 +266,11 @@ function playNote(noteCode) {
 }
 
 function stopNote(noteCode) {
+    keys.forEach(key => {
+        if (key.noteCode == noteCode && key.classList.contains("active")) {
+            key.classList.remove("active");
+        }
+    });
     switch (soundMode) {
         case "piano":
         case "strings":
@@ -307,7 +317,7 @@ function releasePedal() {
         case "strings":
             for (let noteCode in oscillators) {
                 noteCode = parseInt(noteCode);
-                if (!activeNotes.has(noteCode)) { // here needs to be fixed
+                if (!activeNotes.has(noteCode)) {
                     stopSound(noteCode);
                 }
             }
@@ -370,7 +380,7 @@ window.addEventListener("keydown", (event) => {
     }
     
     const keyCode = event.key;
-    const noteCode = noteCodes[keyCode]
+    const noteCode = noteCodes[keyCode];
     const freq = frequency(noteCode);
     
     if (freq) {
@@ -481,7 +491,7 @@ window.addEventListener("blur", () => {
     stopAllSounds();
 });
 
-window.addEventListener("contextmenu", (event) => {
+window.addEventListener("contextmenu", () => {
     stopAllSounds();
 });
 
