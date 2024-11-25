@@ -16,7 +16,6 @@ body {
 .container {
   width: 400px; 
   overflow: auto;
-  margin: 0 auto; 
 }
 
 .control {
@@ -63,11 +62,9 @@ button:active {
 }
 
 #volume {
-  outline: none;
-  width: 121px;
+  width: 120px;
   height: 12px;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin: 5px 0px;
 }
 
 .display {
