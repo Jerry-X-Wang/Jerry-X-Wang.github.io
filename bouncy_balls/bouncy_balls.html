@@ -13,6 +13,16 @@
             box-sizing: border-box;
         }
 
+        #info {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            color: grey;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            padding: 5px;
+        }
+
         canvas {
             display: block;
             background-color: #fff;
@@ -21,6 +31,7 @@
 </head>
 <body>
     <canvas id="canvas" width="800" height="600"></canvas>
+    <div id="info"></div>
     <script src="/utilities.js"></script>
     <script src="bouncy_balls.js"></script>
 </body>

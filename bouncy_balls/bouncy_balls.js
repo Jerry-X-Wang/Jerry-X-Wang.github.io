@@ -20,24 +20,28 @@ class Ball {
 
     move() {
         // check whether the ball is out of the canvas
+        let overBound = 0;
         if ((this.pos.x > canvas.width - this.r)) {
-            const overBound = this.pos.x - (canvas.width - this.r);
+            overBound = this.pos.x - (canvas.width - this.r);
             this.F.x = this.F.x - k * overBound;
         } else if (this.pos.x < this.r) {
-            const overBound = this.pos.x - this.r;
+            overBound = this.pos.x - this.r;
             this.F.x = this.F.x - k * overBound;
         }
         if ((this.pos.y > canvas.height - this.r)) {
-            const overBound = this.pos.y - (canvas.height - this.r);
+            overBound = this.pos.y - (canvas.height - this.r);
             this.F.y = this.F.y - k * overBound;
         } else if (this.pos.y < this.r) {
-            const overBound = this.pos.y - this.r;
+            overBound = this.pos.y - this.r;
             this.F.y = this.F.y - k * overBound;
         }
+
+        Ep_elastic += 1/2 * k * overBound ** 2; // E = 1/2 * k * x^2
 
         // apply gravity
         if (gravityOn) {
             this.F = this.F.plus(g.multi(this.m)); // F += m * g
+            Ep_gravity += this.m * g.norm() * (new Vector(canvas.width/2, canvas.height/2).minus(this.pos).dot(g)/g.norm()); // E = m * g * h
         }
 
         if (airOn) {
@@ -60,15 +64,24 @@ class Ball {
                 if (overlap > 0) {
                     const scalarF = -k * overlap; // scalar F = -k * overlap
                     this.F = this.F.plus(unitD.multi(scalarF)); // F += k * overlap * unitD
+
+                    Ep_elastic += 1/2 * k * overlap ** 2; // E = 1/2 * k * x^2
                 }
 
             }
         }
 
+        Ek += 0.5 * this.m * this.v.norm() ** 2; // E = 1/2 * m * v^2
+
         // move the ball
-        this.a = this.F.multi(1/this.m); // a = F / m
-        this.pos = this.pos.plus(this.v.multi(tickTime)).plus(this.a.multi(0.5).multi(tickTime ** 2)); // pos += v * dt + 1/2 * a * dt^2
-        this.v = this.v.plus(this.a.multi(tickTime)); // v += a * dt
+        if (!frozen || tickingOnce) {
+            this.a = this.F.multi(1/this.m); // a = F / m
+            this.pos = this.pos.plus(this.v.multi(tickTime)).plus(this.a.multi(0.5).multi(tickTime ** 2)); // pos += v * dt + 1/2 * a * dt^2
+            this.v = this.v.plus(this.a.multi(tickTime)); // v += a * dt
+            tickingOnce = false;
+        }
+
+        E = Ek + Ep_gravity + Ep_elastic;
 
         // reset force
         this.F = new Vector(0, 0);
@@ -81,6 +94,20 @@ function animate() {
     requestAnimationFrame(animate);
     context.clearRect(0, 0, canvas.width, canvas.height);
 
+    if (showInfo) {
+        document.getElementById("info").innerHTML = `
+            airOn: ${airOn} <br>
+            gravityOn: ${gravityOn} <br>
+            frozen: ${frozen} <br>
+            Ek: ${Ek.toFixed(0)} <br>
+            Ep_gravity: ${Ep_gravity.toFixed(0)} <br>
+            Ep_elastic: ${Ep_elastic.toFixed(0)} <br>
+            E: ${E.toFixed(0)} 
+        `;
+    } else {
+        document.getElementById("info").innerHTML = "";
+    }
+
     balls.forEach(ball => {
         ball.draw();
     });
@@ -88,10 +115,22 @@ function animate() {
 
 function tick() {
     return setInterval(() => {
+        Ek = 0;
+        Ep_gravity = 0;
+        Ep_elastic = 0;
+        E = 0;
         balls.forEach(ball => {
             ball.move();
         });
     }, tickTime * 1000);
+}
+
+function tickOnce() {
+    if (frozen) {
+        tickingOnce = true;
+    } else {
+        console.log("Already ticking");
+    }
 }
 
 function randomBall() { // generate a random ball
@@ -118,13 +157,21 @@ const context = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let showInfo = false;
+
 let tps = 120; // ticks per second; the web calculate once every tick
 let tickTime = 1 / tps; // time for each tick
 let frozen = false;
+let tickingOnce = false;
 
 let balls = [];
 
-const k = 2000; // spring constant
+const k = 1000; // spring constant
+
+let Ek = 0; // kinetic energy of the system
+let Ep_gravity = 0; // gravity potential energy of the system
+let Ep_elastic = 0; // elastic potential energy of the system
+let E = 0; // total energy of the system
 
 let gravityOn = true;
 let g = new Vector(0, 300); // acceleration of gravity
@@ -155,21 +202,29 @@ canvas.addEventListener("touchstart", function(event) {
 });
 
 window.addEventListener("keydown", function(event) {
-    if (event.key == "g") {
-        gravityOn = !gravityOn;
-    } else if (event.key == "a") {
-        airOn = !airOn;
-    } else if (event.key == "c") {
-        balls = [];
-    } else if (event.key == "f") {
-        frozen = !frozen;
-        if (frozen) {
-            clearInterval(ticking);
-        } else {
-            ticking = tick();
-        }
+    switch (event.key) {
+        case "g":
+            gravityOn = !gravityOn;
+            break;
+        case "a":
+            airOn = !airOn;
+            break;
+        case "c":
+            balls = [];
+            break;
+        case "f":
+            frozen = !frozen;
+            break;
+        case "t":
+            tickOnce();
+            break;
+        case "h":
+            showInfo = !showInfo;
+            break;
+        default:
+            break;
     }
 });
 
-let ticking = tick();
+tick();
 animate();
