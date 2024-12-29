@@ -35,10 +35,6 @@ class Ball {
             this.F.y = this.F.y - k * overBound;
         }
 
-        if ((this.pos.y >= canvas.height - this.r && this.v.y > 0) || (this.pos.y <= this.r && this.v.y < 0)) {
-            this.v.y *= -1;
-        }
-
         // apply gravity
         if (gravityOn) {
             this.F = this.F.plus(g.multi(this.m)); // F += m * g
@@ -128,7 +124,7 @@ let frozen = false;
 
 let balls = [];
 
-const k = 1000; // spring constant
+const k = 2000; // spring constant
 
 let gravityOn = true;
 let g = new Vector(0, 300); // acceleration of gravity
