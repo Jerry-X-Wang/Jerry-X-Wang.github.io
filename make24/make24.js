@@ -178,11 +178,19 @@ function naturalizeFormula(formula) {
     return translateFormula(formula).slice(1, -1); // remove parentheses in the beginning and end
 }
 
-function confirmInputs() {
-    const inputs = document.getElementById('numbers').children;
+function randomNumbers() {
+    const inputNumbers = document.getElementById('numbers').children;
+    for (i = 0; i < inputNumbers.length; i++) {
+        inputNumbers[i].value = Math.floor(Math.random() * 13) + 1;
+    }
+    document.getElementById("random").blur();
+}
+
+function confirmNumbers() {
+    const inputNumbers = document.getElementById('numbers').children;
     const numbers = [];
-    for (i = 0; i < inputs.length; i++) {
-        numbers.push(parseFloat(inputs[i].value));
+    for (i = 0; i < inputNumbers.length; i++) {
+        numbers.push(parseFloat(inputNumbers[i].value));
     }
     const n = parseFloat(document.getElementById('result').value);
     console.log(`Finding formulas with ${numbers} making ${n}`);
@@ -206,7 +214,7 @@ function confirmInputs() {
 window.addEventListener('keydown', function(event) {
     switch (event.key) {
         case "Enter":
-            confirmInputs();
+            confirmNumbers();
             break;
     }
 });
