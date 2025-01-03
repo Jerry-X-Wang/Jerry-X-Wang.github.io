@@ -1,0 +1,51 @@
+body {
+    font-family: Arial, sans-serif;
+    padding-top: 30px; 
+}
+
+.title {
+    font-size: 32px; 
+    margin-bottom: 20px; 
+    font-family: sans-serif; 
+    text-align: center; 
+    font-weight: bold;
+}
+
+.container {
+    display: flex;
+    align-items: center; 
+}
+
+.text {
+    font-size: 20px;
+    margin: 5px;
+    line-height: 1.5;
+}
+
+.input {
+    box-sizing: border-box;
+    width: 50px;
+    height: 40px;
+    margin: 5px;
+    border-radius: 0;
+    border: 2px solid #bbb; 
+    font-size: 20px;
+    text-indent: 2px;
+}
+
+.button {
+    height: 40px;
+    margin: 5px;
+    border-radius: 0;
+    border: 2px solid #bbb; 
+    font-size: 20px;
+}
+
+.button:active {
+    background-color: #ddd;
+}
+
+#output {
+    margin-top: 20px;
+    font-family: Lucida Console;
+}

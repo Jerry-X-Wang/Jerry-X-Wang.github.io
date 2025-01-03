@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Make 24</title>
+	<link rel="stylesheet" href="make24.css">
+</head>
+<body>
+    <a href="/" title="Home" style="position: absolute; top: 5px; left: 5px;">
+    <img src="/home.png" alt="Home" style="width: 30px; height: 30px;">
+    </a>
+    <div class="title">
+        Make 24
+    </div>
+
+    <div class="container" style="justify-content: center;">
+        <div class="text">Can</div>
+        <div id="numbers"></div>
+        <div class="text">make</div>
+        <div>
+            <input type="number" class="input" id="result" value=24 style="width: 60px">
+        </div>
+        <div class="text">?</div>
+    </div>
+
+    <div class="container" style="justify-content: center;">
+        <button class="button" onclick="confirmInputs()">Calculate</button>
+    </div>
+    <div class="container" style="justify-content: center;">
+        <div class="text" id="output" style="text-align: center;"></div>
+    </div>
+
+    <script src="make24.js"></script>
+</html>
