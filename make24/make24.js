@@ -34,6 +34,10 @@ function operate(x, y, operation) {
     }
 }
 
+function uniqueArray(array) { // remove duplicates in array
+    return Array.from(new Set(array.map(JSON.stringify)), JSON.parse);
+}
+
 function permutationsOfArray(array, n = array.length) {
     const result = [];
 
@@ -51,7 +55,7 @@ function permutationsOfArray(array, n = array.length) {
         }
     }
 
-    return[... new Set(result)]; // remove duplicates
+    return uniqueArray(result);
 }
 
 function powerOfArray(array, index) {
@@ -131,7 +135,7 @@ function withNumbersMakeN(numbers, n) {
             });
         });
     });
-
+    
     return formulas;
 }
 
