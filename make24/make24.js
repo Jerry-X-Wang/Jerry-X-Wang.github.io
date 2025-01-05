@@ -184,6 +184,7 @@ function randomNumbers() {
         inputNumbers[i].value = Math.floor(Math.random() * 13) + 1;
     }
     document.getElementById("random").blur();
+    document.getElementById("output").innerHTML = "";
 }
 
 function confirmNumbers() {
