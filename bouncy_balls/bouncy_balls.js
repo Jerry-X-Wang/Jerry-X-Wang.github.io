@@ -192,7 +192,7 @@ canvas.height = window.innerHeight;
 
 let infoOn = false;
 
-let tpsSet = 200; // ticks per second; the web calculate once every tick
+let tpsSet = 120; // ticks per second; the web calculate once every tick
 let tps = 0; // ticks per second actually
 let tickTime = 1 / tpsSet; // time for each tick
 let mspt = 0; // milliseconds per tick
