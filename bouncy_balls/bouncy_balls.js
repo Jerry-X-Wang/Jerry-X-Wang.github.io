@@ -20,23 +20,12 @@ class Ball {
 
     move() {
         // check whether the ball is out of the canvas
-        let overBound = 0;
-        if ((this.pos.x > canvas.width - this.r)) {
-            overBound = this.pos.x - (canvas.width - this.r);
-            this.F.x = this.F.x - k * overBound;
-        } else if (this.pos.x < this.r) {
-            overBound = this.pos.x - this.r;
-            this.F.x = this.F.x - k * overBound;
+        if ((this.pos.x > canvas.width - this.r && this.v.x > 0) || (this.pos.x < this.r && this.v.x < 0)) {
+            this.v.x = -this.v.x * e;
         }
-        if ((this.pos.y > canvas.height - this.r)) {
-            overBound = this.pos.y - (canvas.height - this.r);
-            this.F.y = this.F.y - k * overBound;
-        } else if (this.pos.y < this.r) {
-            overBound = this.pos.y - this.r;
-            this.F.y = this.F.y - k * overBound;
-        }
-
-        Ep_elastic += 1/2 * k * overBound ** 2; // E = 1/2 * k * x^2
+        if ((this.pos.y > canvas.height - this.r && this.v.y > 0) || (this.pos.y < this.r && this.v.y < 0)) {
+            this.v.y = -this.v.y * e;
+        } 
 
         // apply gravity
         if (gravityOn) {
@@ -62,12 +51,27 @@ class Ball {
 
                 // if the ball collides with another ball, see the balls as springs, and apply force by hookes law
                 if (overlap > 0) {
-                    const scalarF = -k * overlap; // scalar F = -k * overlap
-                    this.F = this.F.plus(unitD.multi(scalarF)); // F += k * overlap * unitD
+                    // horizontal component of the velocity in the direction of unitD
+                    const v1h = unitD.multi(this.v.dot(unitD));
+                    const v2h = unitD.multi(that.v.dot(unitD));
+                    if (v2h.minus(v1h).dot(unitD) < 0) {
+                        // vertical component
+                        const v1v = this.v.minus(v1h);
+                        const v2v = that.v.minus(v2h);
+                        
+                        const m1 = this.m;
+                        const m2 = that.m;
 
-                    Ep_elastic += 1/2 * k * overlap ** 2; // E = 1/2 * k * x^2
+                        const v1h_final = v1h.multi(m1).plus(v2h.multi(m2)).plus(v2h.minus(v1h).multi(e*m2)).multi(1/(m1+m2));
+                        const v2h_final = v1h.multi(m1).plus(v2h.multi(m2)).plus(v1h.minus(v2h).multi(e*m1)).multi(1/(m1+m2));
+
+                        const v1_final = v1h_final.plus(v1v);
+                        const v2_final = v2h_final.plus(v2v);
+
+                        this.v = v1_final;
+                        that.v = v2_final;
+                    }
                 }
-
             }
         }
 
@@ -78,10 +82,7 @@ class Ball {
             this.a = this.F.multi(1/this.m); // a = F / m
             this.pos = this.pos.plus(this.v.multi(tickTime)).plus(this.a.multi(0.5).multi(tickTime ** 2)); // pos += v * dt + 1/2 * a * dt^2
             this.v = this.v.plus(this.a.multi(tickTime)); // v += a * dt
-            tickingOnce = false;
         }
-
-        E = Ek + Ep_gravity + Ep_elastic;
 
         // reset force
         this.F = new Vector(0, 0);
@@ -89,21 +90,29 @@ class Ball {
 
 }
 
+function showInfo() {
+    document.getElementById("info").innerHTML = `
+        fps: ${fps} <br>
+        tps: ${tps} <br>
+        mspt: ${mspt.toFixed(1)} <br>
+        ballCount: ${ballCount} <br>
+        airOn: ${airOn} <br>
+        gravityOn: ${gravityOn} <br>
+        frozen: ${frozen} <br>
+        e: ${e.toFixed(2)} <br>
+        Ek: ${Ek.toFixed(0)} <br>
+        Ep_gravity: ${Ep_gravity.toFixed(0)} <br>
+        E: ${E.toFixed(0)} 
+    `;
+}
+
 
 function animate() {
     requestAnimationFrame(animate);
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (showInfo) {
-        document.getElementById("info").innerHTML = `
-            airOn: ${airOn} <br>
-            gravityOn: ${gravityOn} <br>
-            frozen: ${frozen} <br>
-            Ek: ${Ek.toFixed(0)} <br>
-            Ep_gravity: ${Ep_gravity.toFixed(0)} <br>
-            Ep_elastic: ${Ep_elastic.toFixed(0)} <br>
-            E: ${E.toFixed(0)} 
-        `;
+    if (infoOn) {
+        showInfo();
     } else {
         document.getElementById("info").innerHTML = "";
     }
@@ -111,25 +120,49 @@ function animate() {
     balls.forEach(ball => {
         ball.draw();
     });
+    countFps();
+}
+
+function countTps() {
+    tps += 1;
+    setTimeout(() => {
+        tps -= 1;
+    }, 1000);
+}
+
+function countFps() {
+    fps += 1;
+    setTimeout(() => {
+        fps -= 1;
+    }, 1000);
 }
 
 function tick() {
     return setInterval(() => {
+        const startTime = performance.now();
+
         Ek = 0;
         Ep_gravity = 0;
-        Ep_elastic = 0;
-        E = 0;
         balls.forEach(ball => {
             ball.move();
         });
+        E = Ek + Ep_gravity;
+
+        ballCount = balls.length;
+
+        if (!frozen || tickingOnce) {
+            countTps();
+            tickingOnce = false;
+        }
+
+        const endTime = performance.now();
+        mspt = endTime - startTime;
     }, tickTime * 1000);
 }
 
 function tickOnce() {
     if (frozen) {
         tickingOnce = true;
-    } else {
-        console.log("Already ticking");
     }
 }
 
@@ -157,27 +190,30 @@ const context = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let showInfo = false;
+let infoOn = false;
 
-let tps = 120; // ticks per second; the web calculate once every tick
-let tickTime = 1 / tps; // time for each tick
+let tpsSet = 200; // ticks per second; the web calculate once every tick
+let tps = 0; // ticks per second actually
+let tickTime = 1 / tpsSet; // time for each tick
+let mspt = 0; // milliseconds per tick
+let fps = 0; // frames per second actually
 let frozen = false;
 let tickingOnce = false;
 
 let balls = [];
+let ballCount = 0;
 
-const k = 1000; // spring constant
+let e = 1; // restitution coefficient
 
 let Ek = 0; // kinetic energy of the system
 let Ep_gravity = 0; // gravity potential energy of the system
-let Ep_elastic = 0; // elastic potential energy of the system
 let E = 0; // total energy of the system
 
 let gravityOn = true;
 let g = new Vector(0, 300); // acceleration of gravity
 
-let airOn = true;
-let airResistanceConstant = 0.00001; // c as in scalar F = c * d * v^2, (d is diameter of a ball)
+let airOn = false;
+let airResistanceConstant = 0.000001; // c as in scalar F = c * d * v^2, (d is diameter of a ball)
 
 // initialize balls
 for (let i = 0; i < 5; i++) {
@@ -195,10 +231,34 @@ canvas.addEventListener("mousedown", function(event) {
     randomBallAt(pos);
 });
 
+canvas.addEventListener("contextmenu", function(event) {
+    event.preventDefault();
+});
+
+canvas.addEventListener("wheel", function(event) {
+    if (event.deltaY < 0) {
+        e += 0.05;
+        if (e > 1) {
+            e = 1;
+        }
+    } else if (event.deltaY > 0) {
+        e -= 0.05;
+        if (e < 0) {
+            e = 0;
+        }
+    }
+});
+
 canvas.addEventListener("touchstart", function(event) {
     event.preventDefault();
-    const pos = new Vector(event.touches[event.touches.length-1].clientX, event.touches[event.touches.length-1].clientY);
-    randomBallAt(pos);
+    const touchX = event.touches[event.touches.length-1].clientX;
+    const touchY = event.touches[event.touches.length-1].clientY;
+    const pos = new Vector(touchX, touchY);
+    if (touchX <= 50 && touchY <= 50) {
+        infoOn = !infoOn;
+    } else {
+        randomBallAt(pos);
+    }
 });
 
 window.addEventListener("keydown", function(event) {
@@ -219,7 +279,7 @@ window.addEventListener("keydown", function(event) {
             tickOnce();
             break;
         case "h":
-            showInfo = !showInfo;
+            infoOn = !infoOn;
             break;
         default:
             break;
