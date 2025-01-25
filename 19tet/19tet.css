@@ -68,6 +68,7 @@ button:active {
 }
 
 .display {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 25px;
     overflow: auto;
     justify-content: center;
