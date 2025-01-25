@@ -20,12 +20,40 @@ class Ball {
 
     move() {
         // check whether the ball is out of the canvas
-        if ((this.pos.x > canvas.width - this.r && this.v.x > 0) || (this.pos.x < this.r && this.v.x < 0)) {
-            this.v.x = -this.v.x * e;
+        let overBound = 0;
+        if (this.pos.x > canvas.width - this.r) {
+            if (this.v.x > 10) {
+                this.v.x = -this.v.x * e;
+            } else if (elasticityOn) { // if the ball is out of the canvas but is not going outwards, apply a force to it
+                overBound = this.pos.x - (canvas.width - this.r);
+                this.F.x = this.F.x - k * overBound;
+            }
         }
-        if ((this.pos.y > canvas.height - this.r && this.v.y > 0) || (this.pos.y < this.r && this.v.y < 0)) {
-            this.v.y = -this.v.y * e;
+        if (this.pos.x < this.r) {
+            if (this.v.x < -10){
+                this.v.x = -this.v.x * e;
+            } else if (elasticityOn) { // same as above
+                overBound = this.pos.x - this.r;
+                this.F.x = this.F.x - k * overBound;
+            }
+        }
+        if (this.pos.y > canvas.height - this.r) {
+            if (this.v.y > 10) {
+                this.v.y = -this.v.y * e;
+            } else if (elasticityOn) { // same as above
+                overBound = this.pos.y - (canvas.height - this.r);
+                this.F.y = this.F.y - k * overBound;
+            }
         } 
+        if (this.pos.y < this.r) {
+            if (this.v.y < -10) {
+                this.v.y = -this.v.y * e;
+            } else if (elasticityOn) { // same as above
+                overBound = this.pos.y - this.r;
+                this.F.y = this.F.y - k * overBound;
+            }
+        }
+        Ep_elasticity += 1/2 * k * overBound ** 2; // E = 1/2 * k * x^2
 
         // apply gravity
         if (gravityOn) {
@@ -49,7 +77,6 @@ class Ball {
                 const unitD = vectorD.unit();
                 const overlap = this.r + that.r - dist;
 
-                // if the ball collides with another ball, see the balls as springs, and apply force by hookes law
                 if (overlap > 0) {
                     // horizontal component of the velocity in the direction of unitD
                     const v1h = unitD.multi(this.v.dot(unitD));
@@ -70,6 +97,11 @@ class Ball {
 
                         this.v = v1_final;
                         that.v = v2_final;
+                    } else if (elasticityOn) { // if the ball is not moving in the direction of the other ball, see it as a spring and apply force to it
+                        const scalarF = -k * overlap; // scalar F = -k * overlap
+                        this.F = this.F.plus(unitD.multi(scalarF)); // F += k * overlap * unitD
+
+                        Ep_elasticity += 1/2 * k * overlap ** 2; // E = 1/2 * k * x^2
                     }
                 }
             }
@@ -98,10 +130,12 @@ function showInfo() {
         ballCount: ${ballCount} <br>
         airOn: ${airOn} <br>
         gravityOn: ${gravityOn} <br>
+        elasticityOn: ${elasticityOn} <br>
         frozen: ${frozen} <br>
         e: ${e.toFixed(2)} <br>
         Ek: ${Ek.toFixed(0)} <br>
         Ep_gravity: ${Ep_gravity.toFixed(0)} <br>
+        Ep_elasticity: ${Ep_elasticity.toFixed(0)} <br>
         E: ${E.toFixed(0)} 
     `;
 }
@@ -143,6 +177,7 @@ function tick() {
 
         Ek = 0;
         Ep_gravity = 0;
+        Ep_elasticity = 0;
         balls.forEach(ball => {
             ball.move();
         });
@@ -192,10 +227,12 @@ canvas.height = window.innerHeight;
 
 let infoOn = false;
 
-let tpsSet = 120; // ticks per second; the web calculate once every tick
+let tpsSet = 125; // ticks per second; the web calculate once every tick
+let tickTime = floorToPrec(1/tpsSet, 3); // time for each tick (s); due to the limit of setInterval, the tickTime must be a integer with unit ms
+tpsSet = 1 / tickTime; // due to the limit of setInterval, the tpsSet would change as well
+console.log(`tpsSet actually: ${tpsSet}`)
 let tps = 0; // ticks per second actually
-let tickTime = 1 / tpsSet; // time for each tick
-let mspt = 0; // milliseconds per tick
+let mspt = 0; // milliseconds per tick (ms)
 let fps = 0; // frames per second actually
 let frozen = false;
 let tickingOnce = false;
@@ -203,16 +240,19 @@ let tickingOnce = false;
 let balls = [];
 let ballCount = 0;
 
-let e = 1; // restitution coefficient
+let e = 0.95; // restitution coefficient
+let k = 1000; // spring constant
+let elasticityOn = true;
 
 let Ek = 0; // kinetic energy of the system
 let Ep_gravity = 0; // gravity potential energy of the system
+let Ep_elasticity = 0; // elasticity potential energy of the system
 let E = 0; // total energy of the system
 
 let gravityOn = true;
 let g = new Vector(0, 300); // acceleration of gravity
 
-let airOn = false;
+let airOn = true;
 let airResistanceConstant = 0.000001; // c as in scalar F = c * d * v^2, (d is diameter of a ball)
 
 // initialize balls
@@ -225,11 +265,6 @@ window.onresize = function() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 };
-
-canvas.addEventListener("mousedown", function(event) {
-    const pos = new Vector(event.clientX, event.clientY);
-    randomBallAt(pos);
-});
 
 canvas.addEventListener("contextmenu", function(event) {
     event.preventDefault();
@@ -249,15 +284,27 @@ canvas.addEventListener("wheel", function(event) {
     }
 });
 
+canvas.addEventListener("mousedown", function(event) {
+    const pos = new Vector(event.clientX, event.clientY);
+    randomBallAt(pos);
+});
+
 canvas.addEventListener("touchstart", function(event) {
     event.preventDefault();
     const touchX = event.touches[event.touches.length-1].clientX;
     const touchY = event.touches[event.touches.length-1].clientY;
     const pos = new Vector(touchX, touchY);
-    if (touchX <= 50 && touchY <= 50) {
-        infoOn = !infoOn;
-    } else {
+    if (!(touchX <= 40 && touchY <= 40)) {
         randomBallAt(pos);
+    }
+});
+
+window.addEventListener("touchstart", function(event) {
+    event.preventDefault();
+    const touchX = event.touches[event.touches.length-1].clientX;
+    const touchY = event.touches[event.touches.length-1].clientY;
+    if (touchX <= 40 && touchY <= 40) {
+        infoOn = !infoOn;
     }
 });
 
@@ -272,6 +319,12 @@ window.addEventListener("keydown", function(event) {
         case "c":
             balls = [];
             break;
+        case "d":
+        case "Delete":
+            if (balls.length > 0) {
+                balls.pop();
+            }
+            break;
         case "f":
             frozen = !frozen;
             break;
@@ -280,6 +333,9 @@ window.addEventListener("keydown", function(event) {
             break;
         case "h":
             infoOn = !infoOn;
+            break;
+        case "e":
+            elasticityOn = !elasticityOn;
             break;
         default:
             break;

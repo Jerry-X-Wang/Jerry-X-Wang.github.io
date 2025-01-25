@@ -43,3 +43,12 @@ class Vector { // 2d vector
 function mod(a, b){
     return ((a % b) + b) % b; // always returns a positive number
 }
+
+function floorToPrec(number, prec) {
+    return Math.floor(number*10**prec) / 10**prec
+}
+
+function ceilToPrec(number, prec) {
+    return Math.ceil(number*10**prec) / 10**prec
+}
+
