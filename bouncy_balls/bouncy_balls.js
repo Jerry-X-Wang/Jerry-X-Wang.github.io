@@ -22,7 +22,7 @@ class Ball {
         // check whether the ball is out of the canvas
         let overBound = 0;
         if (this.pos.x > canvas.width - this.r) {
-            if (this.v.x > 10) {
+            if (this.v.x > g.project(new Vector(1, 0)).norm()*tickTime*2) {
                 this.v.x = -this.v.x * e;
             } else if (elasticityOn) { // if the ball is out of the canvas but is not going outwards, apply a force to it
                 overBound = this.pos.x - (canvas.width - this.r);
@@ -30,7 +30,7 @@ class Ball {
             }
         }
         if (this.pos.x < this.r) {
-            if (this.v.x < -10){
+            if (this.v.x < -g.project(new Vector(-1, 0)).norm()*tickTime*2) {
                 this.v.x = -this.v.x * e;
             } else if (elasticityOn) { // same as above
                 overBound = this.pos.x - this.r;
@@ -38,7 +38,7 @@ class Ball {
             }
         }
         if (this.pos.y > canvas.height - this.r) {
-            if (this.v.y > 10) {
+            if (this.v.y > g.project(new Vector(0, 1)).norm()*tickTime*2) {
                 this.v.y = -this.v.y * e;
             } else if (elasticityOn) { // same as above
                 overBound = this.pos.y - (canvas.height - this.r);
@@ -46,20 +46,18 @@ class Ball {
             }
         } 
         if (this.pos.y < this.r) {
-            if (this.v.y < -10) {
+            if (this.v.y < -g.project(new Vector(0, -1)).norm()*tickTime*2) {
                 this.v.y = -this.v.y * e;
             } else if (elasticityOn) { // same as above
                 overBound = this.pos.y - this.r;
                 this.F.y = this.F.y - k * overBound;
             }
         }
-        Ep_elasticity += 1/2 * k * overBound ** 2; // E = 1/2 * k * x^2
+        Ep_elasticity += 0.5 * k * overBound ** 2; // E = 1/2 * k * x^2
 
         // apply gravity
-        if (gravityOn) {
-            this.F = this.F.plus(g.multi(this.m)); // F += m * g
-            Ep_gravity += this.m * g.norm() * (new Vector(canvas.width/2, canvas.height/2).minus(this.pos).dot(g)/g.norm()); // E = m * g * h
-        }
+        this.F = this.F.plus(g.multi(this.m)); // F += m * g
+        Ep_gravity += this.m * g.norm() * (new Vector(canvas.width/2, canvas.height/2).minus(this.pos).dot(g)/g.norm()); // E = m * g * h
 
         if (airOn) {
             const d = this.r * 2; // diameter
@@ -78,13 +76,15 @@ class Ball {
                 const overlap = this.r + that.r - dist;
 
                 if (overlap > 0) {
+                    const v1 = this.v;
+                    const v2 = that.v;
                     // horizontal component of the velocity in the direction of unitD
-                    const v1h = unitD.multi(this.v.dot(unitD));
-                    const v2h = unitD.multi(that.v.dot(unitD));
+                    const v1h = v1.project(unitD);
+                    const v2h = v2.project(unitD);
                     if (v2h.minus(v1h).dot(unitD) < 0) {
                         // vertical component
-                        const v1v = this.v.minus(v1h);
-                        const v2v = that.v.minus(v2h);
+                        const v1v = v1.minus(v1h);
+                        const v2v = v2.minus(v2h);
                         
                         const m1 = this.m;
                         const m2 = that.m;
@@ -127,19 +127,19 @@ function showInfo() {
         fps: ${fps} <br>
         tps: ${tps} <br>
         mspt: ${mspt.toFixed(1)} <br>
+        frozen: ${frozen} <br>
         ballCount: ${ballCount} <br>
         airOn: ${airOn} <br>
         gravityOn: ${gravityOn} <br>
-        elasticityOn: ${elasticityOn} <br>
-        frozen: ${frozen} <br>
+        g: ${g.toString(3)} <br>
         e: ${e.toFixed(2)} <br>
-        Ek: ${Ek.toFixed(0)} <br>
-        Ep_gravity: ${Ep_gravity.toFixed(0)} <br>
-        Ep_elasticity: ${Ep_elasticity.toFixed(0)} <br>
-        E: ${E.toFixed(0)} 
+        elasticityOn: ${elasticityOn} <br>
+        Ek: ${Ek.toPrecision(6)} <br>
+        Ep_gravity: ${Ep_gravity.toPrecision(6)} <br>
+        Ep_elasticity: ${Ep_elasticity.toPrecision(6)} <br>
+        E: ${E.toPrecision(6)} 
     `;
 }
-
 
 function animate() {
     requestAnimationFrame(animate);
@@ -250,7 +250,8 @@ let Ep_elasticity = 0; // elasticity potential energy of the system
 let E = 0; // total energy of the system
 
 let gravityOn = true;
-let g = new Vector(0, 300); // acceleration of gravity
+let gSet = new Vector(0, 300); // acceleration of gravity
+let g = gSet;
 
 let airOn = true;
 let airResistanceConstant = 0.000001; // c as in scalar F = c * d * v^2, (d is diameter of a ball)
@@ -270,23 +271,22 @@ canvas.addEventListener("contextmenu", function(event) {
     event.preventDefault();
 });
 
-canvas.addEventListener("wheel", function(event) {
-    if (event.deltaY < 0) {
-        e += 0.05;
-        if (e > 1) {
-            e = 1;
-        }
-    } else if (event.deltaY > 0) {
-        e -= 0.05;
-        if (e < 0) {
-            e = 0;
-        }
-    }
-});
-
 canvas.addEventListener("mousedown", function(event) {
     const pos = new Vector(event.clientX, event.clientY);
-    randomBallAt(pos);
+    if (event.button == 0 || event.button == 2) {
+        if (pos.x <= 30 && pos.y <= 30) {
+            infoOn = !infoOn;
+        } else {
+            randomBallAt(pos);
+        }
+    } else if (event.button == 1) {
+        for (let i = balls.length - 1; i >= 0; i--) {
+            if (balls[i].pos.minus(pos).norm() <= balls[i].r) {
+                balls.splice(i, 1);
+                break;
+            }
+        }
+    }
 });
 
 canvas.addEventListener("touchstart", function(event) {
@@ -305,6 +305,11 @@ window.addEventListener("keydown", function(event) {
     switch (event.key) {
         case "g":
             gravityOn = !gravityOn;
+            if (gravityOn) {
+                g = gSet;
+            } else {
+                g = new Vector(0, 0);
+            }
             break;
         case "a":
             airOn = !airOn;
@@ -329,6 +334,18 @@ window.addEventListener("keydown", function(event) {
             break;
         case "e":
             elasticityOn = !elasticityOn;
+            break;
+        case "ArrowUp":
+            e += 0.05;
+            if (e > 1) {
+                e = 1;
+            }
+            break;
+        case "ArrowDown":
+            e -= 0.05;
+            if (e < 0) {
+                e = 0;
+            }
             break;
         default:
             break;
