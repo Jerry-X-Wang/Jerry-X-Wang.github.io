@@ -14,6 +14,7 @@
         }
 
         #info {
+            pointer-events: none;
             position: absolute;
             top: 0px;
             left: 0px;
@@ -25,13 +26,17 @@
         }
 
         canvas {
+            margin: 0px;
             display: block;
             background-color: #fff;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas" width="800" height="600"></canvas>
+    <a href="/" title="Home" style="position: absolute; top: 5px; right: 35px;">
+        <img src="/home.png" alt="Home" style="position: absolute; width: 30px; height: 30px;">
+    </a>
+    <canvas id="canvas"></canvas>
     <div id="info"></div>
     <script src="/utilities.js"></script>
     <script src="bouncy_balls.js"></script>
