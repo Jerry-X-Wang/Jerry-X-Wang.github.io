@@ -294,7 +294,7 @@ canvas.addEventListener("touchstart", function(event) {
     const touchX = event.touches[event.touches.length-1].clientX;
     const touchY = event.touches[event.touches.length-1].clientY;
     const pos = new Vector(touchX, touchY);
-    if (touchX <= 40 && touchY <= 40) {
+    if (touchX <= 30 && touchY <= 30) {
         infoOn = !infoOn;
     } else {
         randomBallAt(pos);
