@@ -5,6 +5,14 @@ class Vector { // 2d vector
         this.y = y;
     }
 
+    toString(prec=0) {
+        if (prec == 0) {
+            return `(${this.x}, ${this.y})`;
+        } else {
+            return `(${this.x.toPrecision(prec)}, ${this.y.toPrecision(prec)})`;
+        }
+    }
+
     plus(vector) {
         return new Vector(this.x + vector.x, this.y + vector.y);
     }
@@ -35,6 +43,11 @@ class Vector { // 2d vector
         } else {
             return new Vector(this.x / this.norm(), this.y / this.norm());
         }
+    }
+
+    project(vector) { // vector projection on another vector
+        const unit = vector.unit();
+        return unit.multi(this.dot(unit));
     }
 
 }
