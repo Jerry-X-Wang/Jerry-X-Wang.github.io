@@ -41,7 +41,7 @@ class Vector { // 2d vector
         if (this.norm() === 0) {
             return new Vector(0, 0);
         } else {
-            return new Vector(this.x / this.norm(), this.y / this.norm());
+            return this.multi(1/this.norm());
         }
     }
 
