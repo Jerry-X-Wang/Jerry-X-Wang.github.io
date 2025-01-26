@@ -53,6 +53,10 @@ class Vector { // 2d vector
 }
 
 
+function log(base, x) {
+    return Math.log(x) / Math.log(base);
+}
+
 function mod(a, b){
     return ((a % b) + b) % b; // always returns a positive number
 }
@@ -64,4 +68,3 @@ function floorToPrec(number, prec) {
 function ceilToPrec(number, prec) {
     return Math.ceil(number*10**prec) / 10**prec
 }
-
