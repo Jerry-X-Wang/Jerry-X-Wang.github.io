@@ -57,6 +57,18 @@ function calculateBPM(beatCount) {
 }
 
 
+function handlePress(event) {
+    if (event.pointerType == "mouse") {
+        event.preventDefault();
+    }
+    tap()
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    let button = document.querySelector("button");
+    button.addEventListener("pointerdown", handlePress);
+});
+
 window.addEventListener("keydown", (event) => {
     switch (event.key) {
         case "Escape":
