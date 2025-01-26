@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPM Tester</title>
+    <link rel="stylesheet" href="bpm_test.css">
+</head>
+<body>
+    <a href="/" title="Home" style="position: absolute; top: 5px; left: 5px;">
+        <img src="/home.png" alt="Home" style="width: 30px; height: 30px;">
+    </a>
+        
+    <div class="title">
+        BPM Test
+    </div>
+    <div class="text" id="bpm"></div>
+    <div>
+        <button id="tap" onmousedown="tap()">Tap here <br> or <br> Press any key</button>
+    </div>
+    <div>
+        <button id="reset" onclick="reset()">Reset (Esc)</button>
+    </div>
+
+    <script src="/utilities.js"></script>
+    <script src="bpm_test.js"></script>
+</body>
+</html>
