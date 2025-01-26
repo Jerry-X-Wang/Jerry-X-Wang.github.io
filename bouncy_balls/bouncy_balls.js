@@ -57,7 +57,7 @@ class Ball {
 
         // apply gravity
         this.F = this.F.plus(g.multi(this.m)); // F += m * g
-        Ep_gravity += this.m * g.norm() * (new Vector(canvas.width/2, canvas.height/2).minus(this.pos).dot(g)/g.norm()); // E = m * g * h
+        Ep_gravity += this.m * g.dot(new Vector(canvas.width/2, canvas.height/2).minus(this.pos)); // E = m * g * h
 
         if (airOn) {
             const d = this.r * 2; // diameter
@@ -130,10 +130,10 @@ function showInfo() {
         frozen: ${frozen} <br>
         ballCount: ${ballCount} <br>
         airOn: ${airOn} <br>
+        elasticityOn: ${elasticityOn} <br>
         gravityOn: ${gravityOn} <br>
         g: ${g.toString(3)} <br>
         e: ${e.toFixed(2)} <br>
-        elasticityOn: ${elasticityOn} <br>
         Ek: ${Ek.toPrecision(6)} <br>
         Ep_gravity: ${Ep_gravity.toPrecision(6)} <br>
         Ep_elasticity: ${Ep_elasticity.toPrecision(6)} <br>
@@ -181,7 +181,7 @@ function tick() {
         balls.forEach(ball => {
             ball.move();
         });
-        E = Ek + Ep_gravity;
+        E = Ek + Ep_gravity + Ep_elasticity;
 
         ballCount = balls.length;
 
