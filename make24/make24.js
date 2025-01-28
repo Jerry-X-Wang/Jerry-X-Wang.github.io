@@ -132,6 +132,7 @@ function randomNumbers() {
     }
     document.getElementById("random").blur();
     document.getElementById("output").innerHTML = "";
+    document.getElementById("toggleHidden").style.display = "none";
 }
 
 function confirmNumbers() {
@@ -170,6 +171,12 @@ function confirmNumbers() {
             });
         }
         document.getElementById("output").innerHTML = output;
+        hidden = false;
+        document.getElementById("toggleHidden").innerHTML = "Hide";
+        document.getElementById("toggleHidden").style.display = "block";
+        document.getElementById("output").style.display = "block";
+        document.getElementById("output").style.color = "#000";
+
         setTimeout(() => { // if do not use setTimeout, the calculating will not work
             calculating = false;
         }, 100);
@@ -178,10 +185,23 @@ function confirmNumbers() {
     }
 }
 
+function toggleHidden() {
+    if (hidden) {
+        hidden = false;
+        document.getElementById("output").style.display = "block";
+        document.getElementById("toggleHidden").innerHTML = "Hide";
+    } else {
+        hidden = true;
+        document.getElementById("output").style.display = "none";
+        document.getElementById("toggleHidden").innerHTML = "Show";
+    }
+}
+
 
 let numberCount = 4;
 const operators = ["+", "-", "*", "/"];
 let calculating = false; // to prevent calculation when it is already in progress
+let hidden = false; // whether the output is hidden
 
 
 window.onload = function() {
@@ -197,4 +217,8 @@ window.addEventListener("keydown", function(event) {
             confirmNumbers();
             break;
     }
+});
+
+document.getElementById("numbers").addEventListener("input", function() {
+    document.getElementById("output").style.color = "#888";
 });
