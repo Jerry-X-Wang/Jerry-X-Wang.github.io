@@ -1,185 +1,132 @@
-let numberCount = 4;
-
-window.onload = function() {
-    for (let i = 0; i < numberCount; i++) {
-        createInput();
-        document.getElementById('numbers').lastChild.value = i + 1;
+class Operation {
+    constructor(index1, index2, operator) {
+        this.index1 = index1;
+        this.index2 = index2;
+        this.operator = operator; // +, -, *, or /
     }
-};
+
+    naturalOperator() {
+        switch (this.operator) {
+            case "+":
+                return "+";
+            case "-":
+                return "-";
+            case "*":
+                return "×";
+            case "/":
+                return "/";
+            default:
+            console.error("Invalid operator");
+        }
+    }
+}
+
+class Formula {
+    constructor(numbers, operations) {
+        this.numbers = numbers; // [num1, num2, ... , numN]; e.g. [1, 2, 3, 4]
+        this.operations = operations; // [operation1, operation2, ... , operationN]; e.g. [Operation(0, 1, "+"), Operation(2, 1, "*"), Operation(1, 0, "-")]
+        if (numbers.length - operations.length != 1) {
+            console.error("Invalid formula: Count of operations should be 1 less than count of numbers")
+        }
+    }
+
+    value() {
+        if (this.numbers.length == 2) {
+            return calculate(
+                this.numbers[this.operations[0].index1], 
+                this.numbers[this.operations[0].index2], 
+                this.operations[0].operator
+            );
+        } else {
+            const value = calculate(
+                this.numbers[this.operations[0].index1], 
+                this.numbers[this.operations[0].index2], 
+                this.operations[0].operator
+            );
+            const restNumbers = this.numbers.slice();
+            restNumbers[this.operations[0].index1] = value;
+            restNumbers.splice(this.operations[0].index2, 1);
+            const restOperations = this.operations.slice(1);
+            return new Formula(restNumbers, restOperations).value();
+        }
+    }
+
+    natural() {
+        if (this.numbers.length == 2) {
+            return `(${this.numbers[this.operations[0].index1]}\u2006` + 
+                `${this.operations[0].naturalOperator()}\u2006` + 
+                `${this.numbers[this.operations[0].index2]})`;
+        } else {
+            const natuaralized = `(${this.numbers[this.operations[0].index1]}\u2006` + 
+                `${this.operations[0].naturalOperator()}\u2006` + 
+                `${this.numbers[this.operations[0].index2]})`;
+            const restNumbers = this.numbers.slice();
+            restNumbers[this.operations[0].index1] = natuaralized;
+            restNumbers.splice(this.operations[0].index2, 1);
+            const restOperations = this.operations.slice(1);
+            return new Formula(restNumbers, restOperations).natural();
+        }
+    }
+}
+
+
+function calculate(x, y, operator) {
+    switch (operator) {
+        case "+":
+            return x + y;
+        case "-":
+            return x - y;
+        case "*":
+            return x * y;
+        case "/":
+            return x / y;
+        default:
+            console.error("Invalid operator");
+    }
+}
 
 // generate an input
 function createInput() {
-    const inputDiv = document.getElementById('numbers');
-    const input = document.createElement('input');
-    input.className = 'input';
-    input.type = 'number';
+    const inputDiv = document.getElementById("numbers");
+    const input = document.createElement("input");
+    input.className = "input";
+    input.type = "number";
     inputDiv.appendChild(input);
 }
 
-const operationCounts = 4;
-
-function operate(x, y, operation) {
-    switch (operation) {
-        case 0: // add
-            return x + y;
-        case 1: // subtract
-            return x - y;
-        case 2: // multiply
-            return x * y;
-        case 3: // divide
-            return x / y;
-        default:
-            console.error("Invalid operation");
-            return NaN;
-    }
-}
-
-function uniqueArray(array) { // remove duplicates in array
-    return Array.from(new Set(array.map(JSON.stringify)), JSON.parse);
-}
-
-function permutationsOfArray(array, n = array.length) {
-    const result = [];
-
-    if (n == 0) {
-        return [[]];
-    }
-
-    for (let i = 0; i < array.length; i++) {
-        const current = array[i];
-        const rest = array.slice(0, i).concat(array.slice(i + 1));
-        const restPermutations = permutationsOfArray(rest, n - 1);
-
-        for (let j = 0; j < restPermutations.length; j++) {
-            result.push([current].concat(restPermutations[j]));
-        }
-    }
-
-    return uniqueArray(result);
-}
-
-function powerOfArray(array, index) {
-    if (index == 0) {
-        return [[]];
-    }
-
-    if (index == 1) {
-        return array.map(x => [x]);
-    }
-
-    const result = [];
-    for (let i = 0; i < array.length; i++) {
-        const current = array[i];
-        const restPowers = powerOfArray(array, index - 1);
-
-        for (let j = 0; j < restPowers.length; j++) {
-            result.push([current].concat(restPowers[j]));
-        }
-    }
-
-    return result;
-}
-
-function calculate(formula) { // formula = [numbers, operations, orders]
-    const numbers = formula[0];
-    const operations = formula[1];
-    const orders = formula[2];
-    if (numbers.length - 1 == operations.length && operations.length - 1 == orders.length) {
-        if (numbers.length == 2) {
-            return operate(numbers[0], numbers[1], operations[0]);
-        }
-
-        const formula = [numbers.slice(1), operations.slice(1), orders.slice(1)];
-        if (orders[0] == 0) {
-            return operate(
-                calculate(formula), 
-                numbers[0], 
-                operations[0]
-            );
-        } else if (orders[0] == 1) {
-            return operate(
-                numbers[0], 
-                calculate(formula), 
-                operations[0]
-            );
-        } else {
-            console.error("Invalid order");
-        }
-    } else {
-        console.error("Invalid formula");
-    }
-}
-
-function withNumbersMakeN(numbers, n) {
+function withNumbersMakeN(numbers, n) { // returns a Formula object
+    // enumerate all the formulas and find whether its value is n
     const numberCount = numbers.length;
-    let numbersTried = permutationsOfArray(numbers);
-
-    let operations = [];
-    for (i = 0; i < operationCounts; i++) {
-        operations.push(i);
-    }
-    let operationsTried = powerOfArray(operations, numberCount - 1);
-
-    let ordersTried = powerOfArray([0, 1], numberCount - 2); // 0 for argument x, 1 for argument y, in operate(x, y, operation)
+    let operatorsTried = powerOfArray(operators, numberCount - 1);
 
     const formulas = [];
 
-    numbersTried.forEach(numbers => {
-        operationsTried.forEach(operations => {
-            ordersTried.forEach(orders => {
-                const formula = [numbers, operations, orders];
-                result = calculate(formula);
-                if (result == n) {
-                    formulas.push(formula);
-                }
+    let formulaCount = 0;
+
+    operatorsTried.forEach(operators => { // try all possible operators
+        const orders = [];
+        for (let i = 0; i < numberCount - 1; i++) {
+            orders.push(productOfArrays(permutationsOfArray(range(numberCount - i), 2), [operators[i]]));
+        }
+        const operationses = productOfArrays(...orders); // operationses is the plural of operations
+        operationses.forEach(operations => { 
+            operations.forEach((operation, i) => { // try all possible operations
+                operations[i] = new Operation(operation[0][0], operation[0][1], operation[1]); // format the operations to fit the constructor of Formula
             });
+            const formula = new Formula(numbers, operations);
+            formulaCount++;
+            if (formula.value() == n) {
+                formulas.push(formula);
+            }
         });
     });
     
-    return formulas;
-}
-
-function translateOperation(operation) {
-    switch (operation) {
-        case 0: // add
-            return "+";
-        case 1: // subtract
-            return "-";
-        case 2: // multiply
-            return "×";
-        case 3: // divide
-            return "/";
-        default:
-            console.error("Invalid operation");
-    }
-}
-
-function translateFormula(formula) {
-    if (formula[0].length == 2) {
-        return `(${formula[0][0]}`+ "\u2006" +
-            `${translateOperation(formula[1][0])}`+ "\u2006" +
-            `${formula[0][1]})`;
-    }
-
-    if (formula[2][0] == 0) {
-        return `(${translateFormula([formula[0].slice(1), formula[1].slice(1), formula[2].slice(1)])}` + "\u2006" +
-            `${translateOperation(formula[1][0])}` + "\u2006" +
-            `${formula[0][0]})`;
-    } else if (formula[2][0] == 1) {
-        return `(${formula[0][0]}` + "\u2006" +
-            `${translateOperation(formula[1][0])}` + "\u2006" +
-            `${translateFormula([formula[0].slice(1), formula[1].slice(1), formula[2].slice(1)])})`;
-    } else {
-        console.error("Invalid order");
-    }
-}
-
-function naturalizeFormula(formula) {
-    return translateFormula(formula).slice(1, -1); // remove parentheses in the beginning and end
+    console.log(`Tried ${formulaCount} formula(s)`);
+    return uniqueArray(formulas);
 }
 
 function randomNumbers() {
-    const inputNumbers = document.getElementById('numbers').children;
+    const inputNumbers = document.getElementById("numbers").children;
     for (i = 0; i < inputNumbers.length; i++) {
         inputNumbers[i].value = Math.floor(Math.random() * 13) + 1;
     }
@@ -188,31 +135,63 @@ function randomNumbers() {
 }
 
 function confirmNumbers() {
-    const inputNumbers = document.getElementById('numbers').children;
-    const numbers = [];
-    for (i = 0; i < inputNumbers.length; i++) {
-        numbers.push(parseFloat(inputNumbers[i].value));
-    }
-    const n = parseFloat(document.getElementById('result').value);
-    console.log(`Finding formulas with ${numbers} making ${n}`);
-    const formulas = withNumbersMakeN(numbers, n);
-    console.log(`Finished with ${formulas.length} formula(s) found`);
-    const naturalFormulas = formulas.map(naturalizeFormula);
-
-    let output
-    if (formulas == "") {
-        output = `${numbers} cannot make ${n}`;
-    } else {
-        output = `${formulas.length} formula(s) found <br>`
-        naturalFormulas.forEach(formula => {
-            output += formula + `\u2006=\u2006${n}<br>`;
+    if (!calculating) {
+        calculating = true;
+        const inputNumbers = document.getElementById("numbers").children;
+        const numbers = [];
+        for (i = 0; i < inputNumbers.length; i++) {
+            numbers.push(parseFloat(inputNumbers[i].value));
+        }
+        const n = parseFloat(document.getElementById("result").value);
+        console.log(`Finding formulas with ${numbers} making ${n}`);
+        let formulas = withNumbersMakeN(numbers, n);
+        
+        // naturalize the formulas
+        const naturalFormulas = [];
+        formulas.forEach((formula, i) => {
+            const naturalFormula = formula.natural().slice(1, -1); // slice(1, -1) to remove the outer parentheses
+            if (!naturalFormulas.includes(naturalFormula)) {
+                naturalFormulas.push(naturalFormula);
+            } else {
+                formulas[i] = undefined; // remove duplicates
+            }
         });
+        formulas = formulas.filter(item => item !== undefined); // remove duplicates
+
+        console.log(`Done with ${formulas.length} formula(s) found`);
+
+        let output;
+        if (formulas == "") {
+            output = `${numbers} cannot make ${n}`;
+        } else {
+            output = `${formulas.length} formula(s) found <br>`
+            naturalFormulas.forEach(formula => {
+                output += formula + `\u2006=\u2006${n}<br>`;
+            });
+        }
+        document.getElementById("output").innerHTML = output;
+        setTimeout(() => { // if do not use setTimeout, the calculating will not work
+            calculating = false;
+        }, 100);
+    } else {
+        console.log("Already calculating");
     }
-    document.getElementById('output').innerHTML = output;
 }
 
 
-window.addEventListener('keydown', function(event) {
+let numberCount = 4;
+const operators = ["+", "-", "*", "/"];
+let calculating = false; // to prevent calculation when it is already in progress
+
+
+window.onload = function() {
+    for (let i = 0; i < numberCount; i++) {
+        createInput();
+        document.getElementById("numbers").lastChild.value = i + 1;
+    }
+};
+
+window.addEventListener("keydown", function(event) {
     switch (event.key) {
         case "Enter":
             confirmNumbers();

@@ -68,3 +68,77 @@ function floorToPrec(number, prec) {
 function ceilToPrec(number, prec) {
     return Math.ceil(number*10**prec) / 10**prec
 }
+
+
+function uniqueArray(array) { // remove duplicates in array
+    let seen = new Set();
+    return array.filter(item => {
+        let str = JSON.stringify(item);
+        if (seen.has(str)) {
+            return false;
+        } else {
+            seen.add(str);
+            return true;
+        }
+    });
+}
+
+function permutationsOfArray(array, n = array.length) {
+    const result = [];
+
+    if (n == 0) {
+        return [[]];
+    } else {
+        for (let i = 0; i < array.length; i++) {
+            const current = array[i];
+            const rest = array.slice(0, i).concat(array.slice(i + 1));
+            const restPermutations = permutationsOfArray(rest, n - 1);
+    
+            for (let j = 0; j < restPermutations.length; j++) {
+                result.push([current].concat(restPermutations[j]));
+            }
+        }
+    
+        return uniqueArray(result);
+    }
+}
+
+function productOfArrays(...arrays) { // cartesian product of arrays
+    return uniqueArray(arrays.reduce((acc, curr) => 
+        acc.flatMap(x => 
+            curr.map(y => 
+                [...x, y]
+            )
+        ), [[]]));
+}
+
+function powerOfArray(array, index) {
+    if (index <= 0) {
+        return [[]];
+    }
+
+    // generate index repeated arrays
+    const repeatedArrays = Array.from({length: index}, () => array);
+
+    return productOfArrays(...repeatedArrays);
+}
+
+function range(start, stop, step) {
+    if (typeof stop === "undefined") {
+        stop = start;
+        start = 0;
+    }
+    if (typeof step === "undefined") {
+        step = 1;
+    }
+
+    if ((step > 0 && start >= stop) || (step < 0 && start <= stop)) {
+        return [];
+    }
+
+    var result = [];
+    for (var i = start; step > 0 ? i < stop : i > stop; i += step) {
+        result.push(i);
+    }
+    return result;
+}
