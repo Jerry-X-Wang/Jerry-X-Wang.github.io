@@ -2,7 +2,6 @@ let timestamps = [];
 
 function init() {
     document.getElementById("tap").style.height = window.innerHeight/3 + "px";
-    reset();
 }
 
 function tap() {
@@ -25,6 +24,7 @@ function reset() {
     document.getElementById("bpm").innerHTML = `
         BPM Current:     0 <br>
         BPM in 4 Beats:  0 <br>
+        BPM in 12 Beats: 0 <br>
         BPM in 16 Beats: 0 <br>
         BPM Overall:     0 <br>
     `;
@@ -43,6 +43,7 @@ function updateBPM() {
     document.getElementById("bpm").innerHTML = `
         BPM Current:     ${calculateBPM(1).toFixed(0)} <br>
         BPM in 4 Beats:  ${calculateBPM(4).toFixed(0)} <br>
+        BPM in 12 Beats: ${calculateBPM(12).toFixed(0)} <br>
         BPM in 16 Beats: ${calculateBPM(16).toFixed(0)} <br>
         BPM Overall:     ${calculateBPM(timestamps.length - 1).toFixed(Math.max(0, Math.floor(Math.log10(timestamps.length)) - 1))} <br>
     `;
@@ -58,15 +59,14 @@ function calculateBPM(beatCount) {
 
 
 function handlePress(event) {
-    if (event.pointerType == "mouse") {
-        event.preventDefault();
-    }
+    event.preventDefault();
     tap()
 }
 
 document.addEventListener("DOMContentLoaded", function() {
     let button = document.querySelector("button");
     button.addEventListener("pointerdown", handlePress);
+    
 });
 
 window.addEventListener("keydown", (event) => {
@@ -124,4 +124,5 @@ window.addEventListener("blur", () => {
 
 window.addEventListener("resize", init);
 
+reset();
 init();
