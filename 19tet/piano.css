@@ -21,8 +21,10 @@
     position: absolute;
     transform: scaleY(-1); /* let the scroll bar appear on the top */
     top: 244px;
-    font-size: 16px;
+    font-size: 8px;
+    text-align: center;
     color: #888;
+    line-height: 1;
 }
 
 .white-key {

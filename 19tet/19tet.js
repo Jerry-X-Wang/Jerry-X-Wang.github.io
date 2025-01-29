@@ -6,7 +6,7 @@ document.getElementById("reference").value = reference;
 let octave = 4; // Octave number
 document.getElementById("octave").value = octave;
 
-let key = 0; // key in music
+let keyInMusic = 0; // key in music
 
 let waveType = "triangle"; // Wave type: sine, square, sawtooth, or triangle
 document.getElementById("waveType").value = waveType;
@@ -84,7 +84,7 @@ const noteCodes = { // 0 -> A4
 const notes = ["A", "A♯", "B♭", "B", "B♯(C♭)", "C", "C♯", "D♭", "D", "D♯", "E♭", "E", "E♯(F♭)", "F", "F♯", "G♭", "G", "G♯", "A♭"]
 
 function frequency(noteCode) {
-    return reference * 2**((noteCode + key)/19 + octave - 4);
+    return reference * 2**((noteCode + keyInMusic)/19 + octave - 4);
 }
 
 function volumeCurve(rawVolume) {
@@ -95,7 +95,7 @@ function updateNoteDisplay() {
     let noteNumbers = [];
     for (let noteCode in oscillators) {
         noteCode = parseInt(noteCode);
-        noteNumbers.push(noteCode + key);
+        noteNumbers.push(noteCode);
     }
     noteNumbers.sort((a, b) => a - b);
     let display = "";
@@ -106,11 +106,15 @@ function updateNoteDisplay() {
         } else {
             freq = freq.toFixed();
         }
-        display += notes[mod(noteNumbers[i], 19)] + (Math.floor((noteNumbers[i] + 14) / 19) + octave) + " " + freq + "\u2006Hz" + "\n";
-        //         note name                        octave                        ↓                           frequency
-        //                                                                        14 is because there is 14 semitones between C and A in 19-TET
+        display += nameOfNote(noteNumbers[i]) + " " + freq + "\u2006Hz" + "\n";
     }
     document.getElementById("noteDisplay").textContent = display;
+}
+
+function nameOfNote(noteCode) {
+    return notes[mod(noteCode + keyInMusic, 19)] + (Math.floor((noteCode + keyInMusic + 14) / 19) + octave);
+    //     note name                                octave                              ↓
+    //                                                                                  14 is because there is 14 semitones between C and A in 19-TET
 }
 
 function updateActiveFrequencies() {
@@ -335,6 +339,7 @@ function octaveDecrease() {
     document.getElementById("octave").value = octave; 
     updateActiveFrequencies(); 
     updateNoteDisplay();
+    refreshKeyNames();
 }
 
 function octaveIncrease() {
@@ -342,32 +347,35 @@ function octaveIncrease() {
     document.getElementById("octave").value = octave; 
     updateActiveFrequencies(); 
     updateNoteDisplay();
+    refreshKeyNames();
 }
 
 function keyDecrease() {
-    if (key == 0) {
+    if (keyInMusic == 0) {
         octave--;
         document.getElementById("octave").value = octave;
-        key = 18;
+        keyInMusic = 18;
     } else {
-        key--;
+        keyInMusic--;
     }
-    document.getElementById("key").value = key;
+    document.getElementById("key").value = keyInMusic;
     updateActiveFrequencies(); 
     updateNoteDisplay();
+    refreshKeyNames();
 }
 
 function keyIncrease() {
-    if (key == 18) {
+    if (keyInMusic == 18) {
         octave++;
         document.getElementById("octave").value = octave;
-        key = 0;
+        keyInMusic = 0;
     } else {
-        key++;
+        keyInMusic++;
     }
-    document.getElementById("key").value = key;
+    document.getElementById("key").value = keyInMusic;
     updateActiveFrequencies(); 
     updateNoteDisplay();
+    refreshKeyNames();
 }
 
 
@@ -455,6 +463,7 @@ document.getElementById("octave").addEventListener("input", (event) => {
     octave = parseInt(event.target.value);
     updateActiveFrequencies(); 
     updateNoteDisplay();
+    refreshKeyNames();
 });
 document.getElementById("octaveDecrease").addEventListener("click", () => {
     octaveDecrease();
@@ -466,9 +475,10 @@ document.getElementById("octaveIncrease").addEventListener("click", () => {
 });
 
 document.getElementById("key").addEventListener("input", (event) => {
-    key = parseInt(event.target.value);
+    keyInMusic = parseInt(event.target.value);
     updateActiveFrequencies(); 
     updateNoteDisplay();
+    refreshKeyNames();
 });
 document.getElementById("keyDecrease").addEventListener("click", () => {
     keyDecrease();

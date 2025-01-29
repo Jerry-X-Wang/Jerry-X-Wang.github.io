@@ -21,6 +21,12 @@ function removeAllActiveKeys() {
     });
 }
 
+function refreshKeyNames() {
+    keys.forEach(key => {
+        key.innerText = nameOfNote(key.noteCode);
+    });
+}
+
 const piano = document.getElementById("piano");
 
 // for startNote and endNote, 0 -> A4
@@ -44,7 +50,7 @@ for (let noteCode = startNote; noteCode <= endNote; noteCode++) {
     key.style.left = `${keyPosition(i, offset)}px`;
     key.style.border = `${borderWidth}px solid #bbb`;
     key.noteCode = noteCode;
-    key.innerText = noteCode;
+    key.innerText = nameOfNote(noteCode + keyInMusic);
 
     if (whiteKeys.includes(mod(i, 19))) { // white keys
 
@@ -93,6 +99,10 @@ pianoContainer.addEventListener("wheel", function(event) {
     pianoContainer.scrollBy({
         left: event.deltaY,
     });
+});
+
+document.getElementById("key").addEventListener("input", function() {
+    refreshKeyNames();
 });
 
 keys.forEach(key => {
