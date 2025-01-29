@@ -89,7 +89,7 @@ function calculate(x, y, operator) {
 function createInput() {
     const inputDiv = document.getElementById("numbers");
     const input = document.createElement("input");
-    input.className = "input";
+    input.className = "input question-input";
     input.type = "number";
     inputDiv.appendChild(input);
 }
@@ -123,16 +123,6 @@ function withNumbersMakeN(numbers, n) { // returns a Formula object
     
     console.log(`Tried ${formulaCount} formula(s)`);
     return uniqueArray(formulas);
-}
-
-function randomNumbers() {
-    const inputNumbers = document.getElementById("numbers").children;
-    for (i = 0; i < inputNumbers.length; i++) {
-        inputNumbers[i].value = Math.floor(Math.random() * 13) + 1;
-    }
-    document.getElementById("random").blur();
-    document.getElementById("output").innerHTML = "";
-    document.getElementById("toggleHidden").style.display = "none";
 }
 
 function confirmNumbers() {
@@ -185,6 +175,16 @@ function confirmNumbers() {
     }
 }
 
+function randomNumbers() {
+    const inputNumbers = document.getElementById("numbers").children;
+    for (i = 0; i < inputNumbers.length; i++) {
+        inputNumbers[i].value = randomInt(...randomRange);
+    }
+    document.getElementById("random").blur();
+    document.getElementById("output").innerHTML = "";
+    document.getElementById("toggleHidden").style.display = "none";
+}
+
 function toggleHidden() {
     if (hidden) {
         hidden = false;
@@ -198,11 +198,42 @@ function toggleHidden() {
 }
 
 
-let numberCount = 4;
+let numberCount = document.getElementById("numberCount").value;
+let randomRange = [
+    document.getElementById("randomStart").value,
+    document.getElementById("randomEnd").value
+]
 const operators = ["+", "-", "*", "/"];
 let calculating = false; // to prevent calculation when it is already in progress
 let hidden = false; // whether the output is hidden
 
+
+document.getElementById("numberCount").addEventListener("input", (event) => {
+    numberCount = parseInt(event.target.value);
+    document.getElementById("numbers").innerHTML = "";
+    for (let i = 0; i < numberCount; i++) {
+        createInput();
+        document.getElementById("numbers").lastChild.value = i + 1;
+    }
+});
+
+document.getElementById("randomStart").addEventListener("input", (event) => {
+    const randomStart = parseInt(event.target.value);
+    if (randomStart <= randomRange[1]) {
+        randomRange[0] = randomStart;
+    } else {
+        event.target.value = randomRange[0];
+    }
+});
+
+document.getElementById("randomEnd").addEventListener("input", (event) => {
+    const randomEnd = parseInt(event.target.value);
+    if (randomEnd >= randomRange[0]) {
+        randomRange[1] = randomEnd;
+    } else {
+        event.target.value = randomRange[1];
+    }
+});
 
 window.onload = function() {
     for (let i = 0; i < numberCount; i++) {
@@ -220,5 +251,5 @@ window.addEventListener("keydown", function(event) {
 });
 
 document.getElementById("numbers").addEventListener("input", function() {
-    document.getElementById("output").style.color = "#888";
+    document.getElementById("output").style.color = "#aaa";
 });

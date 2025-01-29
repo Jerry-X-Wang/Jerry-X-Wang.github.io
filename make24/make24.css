@@ -1,11 +1,12 @@
 body {
     font-family: Arial, sans-serif;
     padding-top: 30px; 
+    margin: 0px;
 }
 
 .title {
     font-size: 32px; 
-    margin-bottom: 20px; 
+    margin-bottom: 10px; 
     font-family: sans-serif; 
     text-align: center; 
     font-weight: bold;
@@ -17,34 +18,43 @@ body {
 }
 
 .text {
-    font-size: 20px;
+    font-size: 16px;
     margin: 5px;
-    line-height: 1.5;
+    line-height: 1.15;
 }
 
 .input {
     box-sizing: border-box;
     width: 50px;
-    height: 40px;
+    height: 30px;
     margin: 5px;
     border-radius: 0;
     border: 2px solid #bbb; 
-    font-size: 20px;
+    font-size: 16px;
     text-indent: 2px;
 }
 
+.question {
+    font-size: 20px;
+}
+
+.question-input {
+    font-size: 20px;
+    height: 35px;
+}
+
 .button {
-    height: 40px;
+    height: 30px;
     margin: 5px;
     border-radius: 0;
     border: 2px solid #bbb; 
-    font-size: 20px;
+    font-size: 16px;
     color: #000;
 }
 
 #toggleHidden {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .button:active {
@@ -53,4 +63,5 @@ body {
 
 #output {
     font-family: Lucida Console;
+    line-height: 1.5;
 }
