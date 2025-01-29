@@ -142,3 +142,13 @@ function range(start, stop, step) {
     }
     return result;
 }
+
+function randomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    if (min <= max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    } else {
+        console.error("Invalid range for randomInt: min must be less than or equal to max.");
+    }
+}
