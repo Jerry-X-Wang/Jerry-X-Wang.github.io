@@ -220,12 +220,22 @@ function randomBallAt(pos){
     balls.push(new Ball(m, r, colour, pos));
 }
 
+function toggleHelp() {
+    helpOn = !helpOn;
+    if (helpOn) {
+        document.getElementById("help").style.display = "block";
+    } else {
+        document.getElementById("help").style.display = "none";
+    }
+}
+
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let infoOn = false;
+let helpOn = false;
 
 let tpsSet = 125; // ticks per second; the web calculate once every tick
 let tickTime = floorToPrec(1/tpsSet, 3); // time for each tick (s); due to the limit of setInterval, the tickTime must be a integer with unit ms
@@ -304,6 +314,7 @@ canvas.addEventListener("touchstart", function(event) {
 window.addEventListener("keydown", function(event) {
     switch (event.key) {
         case "g":
+        case "G":
             gravityOn = !gravityOn;
             if (gravityOn) {
                 g = gSet;
@@ -312,27 +323,34 @@ window.addEventListener("keydown", function(event) {
             }
             break;
         case "a":
+        case "A":
             airOn = !airOn;
             break;
         case "c":
+        case "C":
             balls = [];
             break;
         case "d":
+        case "D":
         case "Delete":
             if (balls.length > 0) {
                 balls.pop();
             }
             break;
         case "f":
+        case "F":
             frozen = !frozen;
             break;
         case "t":
+        case "T":
             tickOnce();
             break;
-        case "h":
+        case "i":
+        case "I":
             infoOn = !infoOn;
             break;
         case "e":
+        case "E":
             elasticityOn = !elasticityOn;
             break;
         case "ArrowUp":
@@ -346,6 +364,10 @@ window.addEventListener("keydown", function(event) {
             if (e < 0) {
                 e = 0;
             }
+            break;
+        case "h":
+        case "H":
+            toggleHelp();
             break;
         default:
             break;

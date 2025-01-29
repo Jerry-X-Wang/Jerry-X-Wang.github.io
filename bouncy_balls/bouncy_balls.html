@@ -20,8 +20,6 @@
             left: 0px;
             color: grey;
             font-family: consolas;
-            font-size: 16px;
-            padding: 5px;
             line-height: 1;
         }
 
@@ -32,16 +30,42 @@
         }
 
         .text {
+            font-size: 16px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 5px;
+        }
+
+        #help {
+            display: none;
+            position: absolute;
+            top: 35px;
+            right: 5px;
         }
     </style>
 </head>
 <body>
     <a href="/" title="Home" style="position: absolute; top: 5px; right: 5px;">
-        <img src="/home.png" alt="Home" style="width: 30px; height: 30px;">
+        <img src="/home.png" alt="Home" style="width: 30px; height: 30px; user-select: none;">
     </a>
+    <div style="position: absolute; top: 5px; right: 40px;">
+        <img src="/question.png" alt="Question" style="width: 30px; height: 30px; user-select: none;" onclick="toggleHelp()">
+    </div>
+    <div class="text" id="help" style="display: none;">
+        Left/right click or tap to add a random ball. <br>
+        Middle click to remove a ball. <br>
+        Press "D" or "Delete" to remove the last ball. <br>
+        Press "C" to clear all balls. <br>
+        Press "I" or click the left-top to toggle info. <br>
+        Press "F" to toggle frozen. <br>
+        Press "T" when frozen to tick once. <br>
+        Press "A" to toggle air resistance. <br>
+        Press "E" to toggle elasticity. <br>
+        Press "G" to toggle gravity. <br>
+        Press "↑" or "↓" to adjust e (restitution coefficient). <br>
+        Press "H" to toggle help. <br>
+    </div>
     <canvas id="canvas"></canvas>
-    <div id="info"></div>
+    <div class="text" id="info"></div>
     <script src="/utilities.js"></script>
     <script src="bouncy_balls.js"></script>
 </body>
