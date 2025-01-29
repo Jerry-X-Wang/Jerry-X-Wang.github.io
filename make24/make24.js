@@ -208,8 +208,13 @@ let calculating = false; // to prevent calculation when it is already in progres
 let hidden = false; // whether the output is hidden
 
 
+document.getElementById("numbers").addEventListener("input", function() {
+    document.getElementById("output").style.color = "#aaa";
+});
+
 document.getElementById("numberCount").addEventListener("input", (event) => {
     numberCount = parseInt(event.target.value);
+    document.getElementById("output").style.color = "#aaa";
     document.getElementById("numbers").innerHTML = "";
     for (let i = 0; i < numberCount; i++) {
         createInput();
@@ -248,8 +253,4 @@ window.addEventListener("keydown", function(event) {
             confirmNumbers();
             break;
     }
-});
-
-document.getElementById("numbers").addEventListener("input", function() {
-    document.getElementById("output").style.color = "#aaa";
 });
