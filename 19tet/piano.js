@@ -21,9 +21,19 @@ function removeAllActiveKeys() {
     });
 }
 
+function keyName(noteCode) {
+    let keyName = nameOfNote(noteCode);
+    if (keyName.includes("(")) { // change name like E♯(F♭)4 into E♯4 \n F♭4
+        const octave = keyName.slice(-1);
+        keyName = keyName.slice(0, keyName.indexOf("(")) + octave + "\n" +
+            keyName.slice(keyName.indexOf("(") + 1, keyName.indexOf(")")) + octave;
+    }
+    return keyName;
+}
+
 function refreshKeyNames() {
     keys.forEach(key => {
-        key.innerText = nameOfNote(key.noteCode);
+        key.innerText = keyName(key.noteCode);
     });
 }
 
@@ -50,7 +60,7 @@ for (let noteCode = startNote; noteCode <= endNote; noteCode++) {
     key.style.left = `${keyPosition(i, offset)}px`;
     key.style.border = `${borderWidth}px solid #bbb`;
     key.noteCode = noteCode;
-    key.innerText = nameOfNote(noteCode + keyInMusic);
+    key.innerText = keyName(noteCode);
 
     if (whiteKeys.includes(mod(i, 19))) { // white keys
 
