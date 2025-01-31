@@ -128,6 +128,7 @@ function withNumbersMakeN(numbers, n) { // returns a Formula object
 function confirmNumbers() {
     if (!calculating) {
         calculating = true;
+        const startTime = new Date().getTime();
         const inputNumbers = document.getElementById("numbers").children;
         const numbers = [];
         for (i = 0; i < inputNumbers.length; i++) {
@@ -166,6 +167,9 @@ function confirmNumbers() {
         document.getElementById("toggleHidden").style.display = "block";
         document.getElementById("output").style.display = "block";
         document.getElementById("output").style.color = "#000";
+
+        const endTime = new Date().getTime();
+        console.log(`Time elapsed: ${(endTime - startTime) / 1000} s`);
 
         setTimeout(() => { // if do not use setTimeout, the calculating will not work
             calculating = false;
