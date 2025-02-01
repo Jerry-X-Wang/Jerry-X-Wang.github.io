@@ -122,6 +122,45 @@ class Ball {
 
 }
 
+
+const canvas = document.getElementById("canvas");
+const context = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let infoOn = false;
+let helpOn = false;
+
+let tpsSet = 125; // ticks per second; the web calculate once every tick
+let tickTime = floorToPrec(1/tpsSet, 3); // time for each tick (s); due to the limit of setInterval, the tickTime must be a integer with unit ms
+tpsSet = 1 / tickTime; // due to the limit of setInterval, the tpsSet would change as well
+console.log(`tpsSet actually: ${tpsSet}`)
+let tps = 0; // ticks per second actually
+let mspt = 0; // milliseconds per tick (ms)
+let fps = 0; // frames per second actually
+let frozen = false;
+let tickingOnce = false;
+
+let balls = [];
+let ballCount = 0;
+
+let e = 0.95; // restitution coefficient
+let k = 1000; // spring constant
+let elasticityOn = true;
+
+let Ek = 0; // kinetic energy of the system
+let Ep_gravity = 0; // gravity potential energy of the system
+let Ep_elasticity = 0; // elasticity potential energy of the system
+let E = 0; // total energy of the system
+
+let gravityOn = true;
+let gSet = new Vector(0, 300); // acceleration of gravity
+let g = gSet;
+
+let airOn = true;
+let airResistanceConstant = 0.000001; // c as in scalar F = c * d * v^2, (d is diameter of a ball)
+
+
 function showInfo() {
     document.getElementById("info").innerHTML = `
         fps: ${fps} <br>
@@ -229,48 +268,6 @@ function toggleHelp() {
     }
 }
 
-const canvas = document.getElementById("canvas");
-const context = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let infoOn = false;
-let helpOn = false;
-
-let tpsSet = 125; // ticks per second; the web calculate once every tick
-let tickTime = floorToPrec(1/tpsSet, 3); // time for each tick (s); due to the limit of setInterval, the tickTime must be a integer with unit ms
-tpsSet = 1 / tickTime; // due to the limit of setInterval, the tpsSet would change as well
-console.log(`tpsSet actually: ${tpsSet}`)
-let tps = 0; // ticks per second actually
-let mspt = 0; // milliseconds per tick (ms)
-let fps = 0; // frames per second actually
-let frozen = false;
-let tickingOnce = false;
-
-let balls = [];
-let ballCount = 0;
-
-let e = 0.95; // restitution coefficient
-let k = 1000; // spring constant
-let elasticityOn = true;
-
-let Ek = 0; // kinetic energy of the system
-let Ep_gravity = 0; // gravity potential energy of the system
-let Ep_elasticity = 0; // elasticity potential energy of the system
-let E = 0; // total energy of the system
-
-let gravityOn = true;
-let gSet = new Vector(0, 300); // acceleration of gravity
-let g = gSet;
-
-let airOn = true;
-let airResistanceConstant = 0.000001; // c as in scalar F = c * d * v^2, (d is diameter of a ball)
-
-// initialize balls
-for (let i = 0; i < 5; i++) {
-    randomBall();
-}
-
 window.onresize = function() {
     let canvas = document.getElementById("canvas");
     canvas.width = window.innerWidth;
@@ -373,6 +370,12 @@ window.addEventListener("keydown", function(event) {
             break;
     }
 });
+
+
+// initialize balls
+for (let i = 0; i < 5; i++) {
+    randomBall();
+}
 
 tick();
 animate();
