@@ -1,5 +1,7 @@
 // 19-Tone equal temperament
 
+let helpOn = false;
+
 let reference = 440; // Reference frequency
 document.getElementById("reference").value = reference;
 
@@ -23,65 +25,131 @@ const activeNotes = new Set();
 const timeoutStopSound = {};
 
 const noteCodes = { // 0 -> A4
-    "q": -14,
-    "a": -13,
-    "z": -12,
+    "q": -33,
+    "a": -32,
+    "z": -31,
 
-    "w": -11,
-    "s": -10,
-    "x": -9,
+    "w": -30,
+    "s": -29,
+    "x": -28,
 
-    "e": -8,
-    "d": -7,
+    "e": -27,
+    "d": -26,
 
-    "r": -6,
-    "f": -5,
-    "v": -4,
+    "r": -25,
+    "f": -24,
+    "v": -23,
 
-    "t": -3,
-    "g": -2,
-    "b": -1,
+    "t": -22,
+    "g": -21,
+    "b": -20,
 
-    "y": 0,
-    "h": 1,
-    "n": 2,
+    "y": -19,
+    "h": -18,
+    "n": -17,
 
-    "u": 3,
-    "j": 4,
+    "u": -16,
+    "j": -15,
     
-    "i": 5,
-    "k": 6,
-    ",": 7,
+    "i": -14,
+    "k": -13,
+    ",": -12,
 
-    "o": 8,
-    "l": 9,
-    ".": 10,
+    "o": -11,
+    "l": -10,
+    ".": -9,
 
-    "p": 11,
-    ";": 12,
+    "p": -8,
+    ";": -7,
 
-    "[": 13,
-    "'": 14,
-    "/": 15,
+    "[": -6,
+    "'": -5,
+    "/": -4,
 
-    "]": 16,
-    "\\": 19,
-    "`": 22,
-    "1": 24,
-    "2": 27,
-    "3": 30,
-    "4": 32,
-    "5": 35,
-    "6": 38,
-    "7": 41,
-    "8": 43,
-    "9": 46,
-    "0": 49,
-    "-": 51,
-    "=": 54,
-};
+    "]": -3,
+    "\\": 0,
+    "`": 3,
+    "1": 5,
+    "2": 8,
+    "3": 11,
+    "4": 13,
+    "5": 16,
+    "6": 19,
+    "7": 22,
+    "8": 24,
+    "9": 27,
+    "0": 30,
+    "-": 32,
+    "=": 35,
+
+    "Q": -14,
+    "A": -13,
+    "Z": -12,
+
+    "W": -11,
+    "S": -10,
+    "X": -9,
+
+    "E": -8,
+    "D": -7,
+
+    "R": -6,
+    "F": -5,
+    "V": -4,
+
+    "T": -3,
+    "G": -2,
+    "B": -1,
+
+    "Y": 0,
+    "H": 1,
+    "N": 2,
+
+    "U": 3,
+    "J": 4,
+    
+    "I": 5,
+    "K": 6,
+    "<": 7,
+
+    "O": 8,
+    "L": 9,
+    ">": 10,
+
+    "P": 11,
+    ":": 12,
+
+    "{": 13,
+    "\"": 14,
+    "?": 15,
+
+    "}": 16,
+    "|": 19,
+    "~": 22,
+    "!": 24,
+    "@": 27,
+    "#": 30,
+    "$": 32,
+    "%": 35,
+    "^": 38,
+    "&": 41,
+    "*": 43,
+    "(": 46,
+    ")": 49,
+    "_": 51,
+    "+": 54,
+}
 
 const notes = ["A", "A♯", "B♭", "B", "B♯(C♭)", "C", "C♯", "D♭", "D", "D♯", "E♭", "E", "E♯(F♭)", "F", "F♯", "G♭", "G", "G♯", "A♭"]
+
+function toggleHelp() {
+    helpOn = !helpOn;
+    if (helpOn) {
+        document.getElementById("help").style.display = "block";
+    } else {
+        document.getElementById("help").style.display = "none";
+    }
+}
 
 function frequency(noteCode) {
     return reference * 2**((noteCode + keyInMusic)/19 + octave - 4);
@@ -399,15 +467,19 @@ window.addEventListener("keydown", (event) => {
         switch (keyCode) {
             case "ArrowDown": 
                 octaveDecrease();
+                event.preventDefault();
                 break;
             case "ArrowUp": 
                 octaveIncrease();
+                event.preventDefault();
                 break;
             case "ArrowLeft":
                 keyDecrease();
+                event.preventDefault();
                 break;
             case "ArrowRight":
                 keyIncrease();
+                event.preventDefault();
                 break;
             case " ":
                 pressPedal();
