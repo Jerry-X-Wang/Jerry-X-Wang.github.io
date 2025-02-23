@@ -128,17 +128,23 @@ function withNumbersMakeN(numbers, n) { // returns a Formula object
 function confirmNumbers() {
     if (!calculating) {
         calculating = true;
-        const startTime = new Date().getTime();
+        let startTime, endTime;
+
+        startTime = performance.now();
         const inputNumbers = document.getElementById("numbers").children;
         const numbers = [];
         for (i = 0; i < inputNumbers.length; i++) {
             numbers.push(parseFloat(inputNumbers[i].value));
         }
         const n = parseFloat(document.getElementById("result").value);
-        console.log(`Finding formulas with ${numbers} making ${n}`);
-        let formulas = withNumbersMakeN(numbers, n);
+        console.log(`Finding formulas with ${numbers} making ${n}...`);
+        let formulas = withNumbersMakeN(numbers, n); // find all formulas with the given numbers making the given result
+        
+        endTime = performance.now();
+        console.log(`Time elapsed - calculation: ${((endTime - startTime) / 1000).toFixed(4)} s`)
         
         // naturalize the formulas
+        startTime = performance.now();
         const naturalFormulas = [];
         formulas.forEach((formula, i) => {
             const naturalFormula = formula.natural().slice(1, -1); // slice(1, -1) to remove the outer parentheses
@@ -150,8 +156,13 @@ function confirmNumbers() {
         });
         formulas = formulas.filter(item => item !== undefined); // remove duplicates
 
+        endTime = performance.now();
+        console.log(`Time elapsed - naturalization: ${((endTime - startTime) / 1000).toFixed(4)} s`)
+
         console.log(`Done with ${formulas.length} formula(s) found`);
 
+        // display the results
+        startTime = performance.now();
         let output;
         if (formulas == "") {
             output = `${numbers} cannot make ${n}`;
@@ -168,8 +179,8 @@ function confirmNumbers() {
         document.getElementById("output").style.display = "block";
         document.getElementById("output").style.color = "#000";
 
-        const endTime = new Date().getTime();
-        console.log(`Time elapsed: ${(endTime - startTime) / 1000} s`);
+        endTime = performance.now();
+        console.log(`Time elapsed - display: ${((endTime - startTime) / 1000).toFixed(4)} s`);
 
         setTimeout(() => { // if do not use setTimeout, the calculating will not work
             calculating = false;
