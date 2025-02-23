@@ -103,6 +103,26 @@ function permutationsOfArray(array, n = array.length) {
     }
 }
 
+function combinationsOfArray(array, n) {
+    const result = [];
+
+    function combine(tempArr, start) {
+        if (tempArr.length === n) {
+            result.push([...tempArr]);
+            return;
+        }
+
+        for (let i = start; i < array.length; i++) {
+            tempArr.push(array[i]);
+            combine(tempArr, i + 1);
+            tempArr.pop();
+        }
+    }
+
+    combine([], 0);
+    return result;
+}
+
 function productOfArrays(...arrays) { // cartesian product of arrays
     return uniqueArray(arrays.reduce((acc, curr) => 
         acc.flatMap(x => 
