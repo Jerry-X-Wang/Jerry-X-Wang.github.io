@@ -70,6 +70,16 @@ class Formula {
 }
 
 
+let numberCount = document.getElementById("numberCount").value;
+let randomRange = [
+    document.getElementById("randomStart").value,
+    document.getElementById("randomEnd").value
+]
+const operators = ["+", "-", "*", "/"];
+let calculating = false; // to prevent calculation when it is already in progress
+let hidden = false; // whether the output is hidden
+
+
 function calculate(x, y, operator) {
     switch (operator) {
         case "+":
@@ -94,7 +104,7 @@ function createInput() {
     inputDiv.appendChild(input);
 }
 
-function withNumbersMakeN(numbers, n) { // returns a Formula object
+function withNumbersMakeN(numbers, n) { // returns an array including Formula objects
     // enumerate all the formulas and find whether its value is n
     const numberCount = numbers.length;
     let operatorsTried = powerOfArray(operators, numberCount - 1);
@@ -211,16 +221,6 @@ function toggleHidden() {
         document.getElementById("toggleHidden").innerHTML = "Show";
     }
 }
-
-
-let numberCount = document.getElementById("numberCount").value;
-let randomRange = [
-    document.getElementById("randomStart").value,
-    document.getElementById("randomEnd").value
-]
-const operators = ["+", "-", "*", "/"];
-let calculating = false; // to prevent calculation when it is already in progress
-let hidden = false; // whether the output is hidden
 
 
 document.getElementById("numbers").addEventListener("input", function() {
