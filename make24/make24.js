@@ -239,20 +239,12 @@ document.getElementById("numberCount").addEventListener("input", (event) => {
 
 document.getElementById("randomStart").addEventListener("input", (event) => {
     const randomStart = parseInt(event.target.value);
-    if (randomStart <= randomRange[1]) {
-        randomRange[0] = randomStart;
-    } else {
-        event.target.value = randomRange[0];
-    }
+    randomRange[0] = randomStart;
 });
 
 document.getElementById("randomEnd").addEventListener("input", (event) => {
     const randomEnd = parseInt(event.target.value);
-    if (randomEnd >= randomRange[0]) {
-        randomRange[1] = randomEnd;
-    } else {
-        event.target.value = randomRange[1];
-    }
+    randomRange[1] = randomEnd;
 });
 
 window.onload = function() {

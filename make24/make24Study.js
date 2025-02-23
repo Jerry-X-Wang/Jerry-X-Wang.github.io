@@ -197,35 +197,3 @@ function withNumbersMakeN(numbers, n) { // returns an array including Formula ob
     
     return uniqueArray(formulas);
 }
-
-document.getElementById("randomStart").addEventListener("input", (event) => {
-    const randomStart = parseInt(event.target.value);
-    const randomEnd = parseInt(document.getElementById("randomEnd").value);
-    if (randomStart > randomEnd) {
-        event.target.value = randomEnd;
-    }
-});
-
-document.getElementById("randomEnd").addEventListener("input", (event) => {
-    const randomEnd = parseInt(event.target.value);
-    const randomStart = parseInt(document.getElementById("randomStart").value);
-    if (randomEnd < randomStart) {
-        event.target.value = randomStart;
-    }
-});
-
-document.getElementById("targetStart").addEventListener("input", (event) => {
-    const targetStart = parseInt(event.target.value);
-    const targetEnd = parseInt(document.getElementById("targetEnd").value);
-    if (targetStart > targetEnd) {
-        event.target.value = targetEnd;
-    }
-});
-
-document.getElementById("targetEnd").addEventListener("input", (event) => {
-    const targetEnd = parseInt(event.target.value);
-    const targetStart = parseInt(document.getElementById("targetStart").value);
-    if (targetEnd < targetStart) {
-        event.target.value = targetStart;
-    }
-});
