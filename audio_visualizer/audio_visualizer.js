@@ -1,11 +1,11 @@
-// 创建音频上下文
+// Create audio context
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-// 获取全屏canvas元素
+// Get full-screen canvas element
 const canvas = document.getElementById('audio-visualizer');
 const canvasCtx = canvas.getContext('2d');
 
-// 设置全屏尺寸
+// Set full-screen dimensions
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -13,18 +13,18 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-// 对数参数配置
+// Logarithmic parameter configuration
 const LOG_BASE = 20;
 const MIN_FREQ = 20;
 const MAX_FREQ = 20000;
 const NUM_BARS = 16;
 
-// 页面加载完成后执行
+// Execute after the page is fully loaded
 window.addEventListener('DOMContentLoaded', () => {
     
     let mediaStream;
 
-    // 启动可视化
+    // Initialize visualization
     const initVisualization = async () => {
         try {
             mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -36,11 +36,11 @@ window.addEventListener('DOMContentLoaded', () => {
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
 
-            // 预计算对数映射表
+            // Pre-calculate logarithmic mapping table
             const logMap = [];
             const sampleRate = audioContext.sampleRate;
             
-            // 生成频率映射表
+            // Generate frequency mapping table
             const generateLogMap = () => {
                 for(let i = 0; i < NUM_BARS; i++) {
                     const logPosition = MIN_FREQ * (MAX_FREQ/MIN_FREQ) ** ((i+1) / NUM_BARS);
@@ -55,19 +55,19 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // 绘制函数
+            // Draw function
             const draw = () => {
                 requestAnimationFrame(draw);
                 analyser.getByteFrequencyData(dataArray);
 
-                // 背景
-                canvasCtx.fillStyle = 'rgb(0, 0, 0)';
+                // Clear canvas
+                canvasCtx.fillStyle = "rgb(0, 0, 0)";
                 canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
                 const totalLogWidth = Math.log10(MAX_FREQ/MIN_FREQ);
                 let x = 0;
 
-                // 可视化渲染
+                // Visualization rendering
                 const renderBars = () => {
                     for(let i = 0; i < NUM_BARS; i++) {
                         let sum = 0, count = 0;
@@ -83,8 +83,9 @@ window.addEventListener('DOMContentLoaded', () => {
                         const barWidth = widthRatio * canvas.width;
                         const barHeight = (avgValue / 255) * canvas.height;
 
+                        const marginRatio = 0.02;
                         canvasCtx.fillStyle = `hsl(${(i / NUM_BARS) * 240}, 100%, 70%)`;
-                        canvasCtx.fillRect(x, canvas.height - barHeight, barWidth * 0.98, barHeight);
+                        canvasCtx.fillRect(x + barWidth * marginRatio / 2, canvas.height - barHeight, barWidth * (1-marginRatio), barHeight);
                         x += barWidth;
                     }
                 }
@@ -99,6 +100,32 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 启动可视化流程
+    // Start visualization process
     initVisualization();
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    let homeLink = document.querySelector('a[title="Home"]');
+    let homeImg = homeLink.querySelector('img');
+    let timeoutId;
+
+    // Reset timer and show image when user interacts with the page
+    document.addEventListener('mousemove', resetTimer);
+    document.addEventListener('mousedown', resetTimer);
+
+    // Initialize timer
+    function resetTimer() {
+        clearTimeout(timeoutId);
+        // Show image again
+        homeImg.style.display = 'block';
+        // Set new timer
+        timeoutId = setTimeout(hideHomeImg, 1000);  // 1000ms
+    }
+
+    function hideHomeImg() {
+        homeImg.style.display = 'none';
+    }
+
+    // Initialize timer
+    resetTimer();
 });
