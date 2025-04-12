@@ -32,7 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const analyser = audioContext.createAnalyser();
 
             source.connect(analyser);
-            analyser.fftSize = 2 ** 12;
+            analyser.fftSize = 2 ** 11;
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
 
