@@ -1,11 +1,10 @@
-// Create audio context
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-// Get full-screen canvas element
-const canvas = document.getElementById('audio-visualizer');
+const canvas = document.getElementById('canvas');
 const canvasCtx = canvas.getContext('2d');
 
-// Set full-screen dimensions
+// Add click activation prompt style
+canvas.style.cursor = 'pointer';
+let showClickPrompt = true;
+
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -13,21 +12,65 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-// Logarithmic parameter configuration
-const LOG_BASE = 20;
 const MIN_FREQ = 20;
 const MAX_FREQ = 20000;
 const NUM_BARS = 16;
 
-// Execute after the page is fully loaded
-window.addEventListener('DOMContentLoaded', () => {
-    
-    let mediaStream;
+// Unified DOMContentLoaded listener
+document.addEventListener("DOMContentLoaded", function() {
+    // Home link logic
+    let homeLink = document.querySelector('a[title="Home"]');
+    let homeImg = homeLink.querySelector('img');
+    let timeoutId;
 
-    // Initialize visualization
+    document.addEventListener('mousemove', resetTimer);
+    document.addEventListener('mousedown', resetTimer);
+
+    function resetTimer() {
+        clearTimeout(timeoutId);
+        homeImg.style.display = 'block';
+        timeoutId = setTimeout(hideHomeImg, 1000);
+    }
+
+    function hideHomeImg() {
+        homeImg.style.display = 'none';
+    }
+
+    resetTimer();
+
+    // Audio visualization logic
     const initVisualization = async () => {
         try {
-            mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // Display initial click prompt
+            const drawPrompt = () => {
+                if (!showClickPrompt) return;
+                canvasCtx.fillStyle = "rgba(0, 0, 0, 0.7)";
+                canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+                canvasCtx.fillStyle = "white";
+                canvasCtx.font = "24px Arial";
+                canvasCtx.textAlign = "center";
+                canvasCtx.textBaseline = "middle";
+                canvasCtx.fillText("Click to start", canvas.width/2, canvas.height/2);
+                requestAnimationFrame(drawPrompt);
+            };
+            drawPrompt();
+
+            // Wait for user click
+            await new Promise(resolve => {
+                canvas.addEventListener('click', () => {
+                    showClickPrompt = false;
+                    resolve();
+                }, { once: true });
+            });
+            
+            // Remove click prompt
+            canvas.style.cursor = 'default';
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Initialize audio context after user interaction
+            let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            let mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const source = audioContext.createMediaStreamSource(mediaStream);
             const analyser = audioContext.createAnalyser();
 
@@ -36,11 +79,10 @@ window.addEventListener('DOMContentLoaded', () => {
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
 
-            // Pre-calculate logarithmic mapping table
+            // Frequency mapping configuration
             const logMap = [];
             const sampleRate = audioContext.sampleRate;
             
-            // Generate frequency mapping table
             const generateLogMap = () => {
                 for(let i = 0; i < NUM_BARS; i++) {
                     const logPosition = MIN_FREQ * (MAX_FREQ/MIN_FREQ) ** ((i+1) / NUM_BARS);
@@ -55,42 +97,38 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Draw function
             const draw = () => {
+                if (!audioContext || audioContext.state !== 'running') return;
+                
                 requestAnimationFrame(draw);
                 analyser.getByteFrequencyData(dataArray);
 
-                // Clear canvas
                 canvasCtx.fillStyle = "rgb(0, 0, 0)";
                 canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
                 const totalLogWidth = Math.log10(MAX_FREQ/MIN_FREQ);
                 let x = 0;
 
-                // Visualization rendering
-                const renderBars = () => {
-                    for(let i = 0; i < NUM_BARS; i++) {
-                        let sum = 0, count = 0;
-                        for(let j = logMap[i].startIdx; j <= logMap[i].endIdx; j++) {
-                            sum += dataArray[j];
-                            count++;
-                        }
-                        const avgValue = sum / count || 0;
-
-                        const widthRatio = (Math.log10(logMap[i].endFreq) - 
-                                          (i === 0 ? Math.log10(MIN_FREQ) : Math.log10(logMap[i-1].endFreq))) / totalLogWidth;
-                        
-                        const barWidth = widthRatio * canvas.width;
-                        const barHeight = (avgValue / 255) * canvas.height;
-
-                        const marginRatio = 0.02;
-                        canvasCtx.fillStyle = `hsl(${(i / NUM_BARS) * 240}, 100%, 70%)`;
-                        canvasCtx.fillRect(x + barWidth * marginRatio / 2, canvas.height - barHeight, barWidth * (1-marginRatio), barHeight);
-                        x += barWidth;
+                for(let i = 0; i < NUM_BARS; i++) {
+                    let sum = 0, count = 0;
+                    for(let j = logMap[i].startIdx; j <= logMap[i].endIdx; j++) {
+                        sum += dataArray[j];
+                        count++;
                     }
-                }
+                    const avgValue = sum / count || 0;
 
-                renderBars();
+                    const widthRatio = (Math.log10(logMap[i].endFreq) - 
+                                      (i === 0 ? Math.log10(MIN_FREQ) : Math.log10(logMap[i-1].endFreq))) / totalLogWidth;
+                    
+                    const barWidth = widthRatio * canvas.width;
+                    const barHeight = (avgValue / 255) * canvas.height;
+
+                    const marginRatio = 0.02;
+                    canvasCtx.fillStyle = `hsl(${(i / NUM_BARS) * 240}, 100%, 70%)`;
+                    canvasCtx.fillRect(x + barWidth * marginRatio / 2, canvas.height - barHeight, 
+                                     barWidth * (1-marginRatio), barHeight);
+                    x += barWidth;
+                }
             }
 
             generateLogMap();
@@ -100,32 +138,5 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Start visualization process
     initVisualization();
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    let homeLink = document.querySelector('a[title="Home"]');
-    let homeImg = homeLink.querySelector('img');
-    let timeoutId;
-
-    // Reset timer and show image when user interacts with the page
-    document.addEventListener('mousemove', resetTimer);
-    document.addEventListener('mousedown', resetTimer);
-
-    // Initialize timer
-    function resetTimer() {
-        clearTimeout(timeoutId);
-        // Show image again
-        homeImg.style.display = 'block';
-        // Set new timer
-        timeoutId = setTimeout(hideHomeImg, 1000);  // 1000ms
-    }
-
-    function hideHomeImg() {
-        homeImg.style.display = 'none';
-    }
-
-    // Initialize timer
-    resetTimer();
 });
