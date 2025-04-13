@@ -12,9 +12,10 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-const MIN_FREQ = 20;
-const MAX_FREQ = 20000;
-const NUM_BARS = 16;
+// bars configuration
+const MIN_FREQ = 106;
+const MAX_FREQ = 4310;
+const NUM_BARS = 64;
 
 // Unified DOMContentLoaded listener
 document.addEventListener("DOMContentLoaded", function() {
@@ -75,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const analyser = audioContext.createAnalyser();
 
             source.connect(analyser);
-            analyser.fftSize = 2 ** 11;
+            analyser.fftSize = 2 ** 13;
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
 
