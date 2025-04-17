@@ -16,7 +16,8 @@ let showClickPrompt = true;
 // Frequency bar configuration
 const MIN_FREQ = 106;
 const MAX_FREQ = 4310;
-const NUM_BARS = 64;
+const BAR_COUNT = 64;
+const MARGIN_RATIO = 0.05;
 let logMap = [];
 
 function resizeCanvas() {
@@ -90,15 +91,19 @@ document.addEventListener("DOMContentLoaded", function() {
         logMap = [];
         const bufferLength = analyser.frequencyBinCount;
         
-        for(let i = 0; i < NUM_BARS; i++) {
-            const logPosition = MIN_FREQ * (MAX_FREQ/MIN_FREQ) ** ((i+1)/NUM_BARS);
-            const freq = Math.min(logPosition, MAX_FREQ);
-            const index = Math.round(freq * analyser.fftSize / sampleRate);
+        for(let i = 0; i < BAR_COUNT; i++) {
+            const logStart = MIN_FREQ * (MAX_FREQ/MIN_FREQ) ** (i/BAR_COUNT);
+            const startFreq = Math.min(logStart, MAX_FREQ);
+            const startIndex = Math.round(startFreq * analyser.fftSize / sampleRate);
+            const logEnd = MIN_FREQ * (MAX_FREQ/MIN_FREQ) ** ((i+1)/BAR_COUNT);
+            const endFreq = Math.min(logEnd, MAX_FREQ);
+            const endIndex = Math.round(endFreq * analyser.fftSize / sampleRate);
             
             logMap.push({
-                startIdx: i === 0 ? 0 : logMap[i-1].endIdx + 1,
-                endIdx: Math.min(index, bufferLength - 1),
-                endFreq: freq
+                startIndex: startIndex,
+                endIndex: endIndex,
+                startFreq: startFreq,
+                endFreq: endFreq
             });
         }
     };
@@ -114,28 +119,24 @@ document.addEventListener("DOMContentLoaded", function() {
         canvasCtx.fillStyle = "rgb(0, 0, 0)";
         canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const totalLogWidth = Math.log10(MAX_FREQ/MIN_FREQ);
         let x = 0;
 
         logMap.forEach((band, i) => {
             let sum = 0, count = 0;
-            for(let j = band.startIdx; j <= band.endIdx; j++) {
+            for(let j = band.startIndex; j <= band.endIndex; j++) {
                 sum += dataArray[j];
                 count++;
             }
-            const avgValue = sum / count || 0;
+            const avgValue = sum / count;
 
-            const widthRatio = (Math.log10(band.endFreq) - 
-                              (i === 0 ? Math.log10(MIN_FREQ) : Math.log10(logMap[i-1].endFreq))) / totalLogWidth;
-            
-            const barWidth = widthRatio * canvas.width;
-            const barHeight = (avgValue / 255) * canvas.height * 0.9;
+            const barWidth = canvas.width / BAR_COUNT;
+            const barHeight = (avgValue / 255) * canvas.height;
 
-            canvasCtx.fillStyle = `hsl(${(i / NUM_BARS) * 240}, 100%, 70%)`;
+            canvasCtx.fillStyle = `hsl(${(i / BAR_COUNT) * 240}, 100%, 70%)`;
             canvasCtx.fillRect(
-                x + barWidth * 0.02, 
+                x + barWidth * MARGIN_RATIO / 2, 
                 canvas.height - barHeight,
-                barWidth * 0.96,
+                barWidth * (1 - MARGIN_RATIO),
                 barHeight
             );
             x += barWidth;
@@ -176,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 canvasCtx.fillStyle = "rgb(0, 0, 0)";
                 canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
                 canvasCtx.fillStyle = "white";
-                canvasCtx.font = "24px Arial";
+                canvasCtx.font = "36px Arial";
                 canvasCtx.textAlign = "center";
                 canvasCtx.textBaseline = "middle";
                 canvasCtx.fillText("Click to start", canvas.width/2, canvas.height/2);
@@ -199,8 +200,7 @@ document.addEventListener("DOMContentLoaded", function() {
             draw();
         } catch (error) {
             console.error("Initialization Failed", error);
-            canvasCtx.fillStyle = "red";
-            canvasCtx.fillText("Failed to initialize audio", canvas.width/2, canvas.height/2);
+            alert("Initialization failed")
         }
     };
 
