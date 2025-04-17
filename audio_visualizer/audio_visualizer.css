@@ -7,3 +7,29 @@ body {
     background-color: #000;
     margin: 0;
 }
+
+.audio-toggle {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    border: none;
+    background: rgba(0, 0, 0, 1);
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 1;
+}
+
+.audio-toggle:hover {
+    transform: scale(1.1);
+}
+
+.audio-icon {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 30px;
+    height: 30px;
+    display: block;
+}
