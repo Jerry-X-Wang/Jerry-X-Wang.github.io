@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function() {
         generateLogMap(audioContext.sampleRate, analyser);
     };
 
-    // Generate logarithmic frequency mapping (keep unchanged)
+    // Generate logarithmic frequency mapping
     const generateLogMap = (sampleRate, analyser) => {
         logMap = [];
         const bufferLength = analyser.frequencyBinCount;
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     };
 
-    // Drawing logic (keep unchanged)
+    // Drawing logic
     const draw = () => {
         if (!analyser || audioContext.state !== "running") return;
         
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // Initialize icon status
             updateButtonIcon();
 
-            // Click prompt (keep unchanged)
+            // Click prompt
             const drawPrompt = () => {
                 if (!showClickPrompt) return;
                 canvasCtx.fillStyle = "rgb(0, 0, 0)";
