@@ -14,10 +14,14 @@ canvas.style.cursor = "pointer";
 let showClickPrompt = true;
 
 // Frequency bar configuration
-const MIN_FREQ = 106;
-const MAX_FREQ = 4310;
-const BAR_COUNT = 64;
-const MARGIN_RATIO = 0.05;
+let referenceFreq = 440;  // A4
+let minFreq = referenceFreq * (2 ** (1/12)) ** (-2*12 - 0.5);  // A2
+let maxFreq = referenceFreq * (2 ** (1/12)) ** (3*12+3 + 0.5);  // C8
+console.log(`Reference freq: ${referenceFreq}Hz`);
+console.log(`Min freq: ${minFreq}Hz`);
+console.log(`Max freq: ${maxFreq}Hz`);
+let barCount = 64;
+let marginRatio = 0.05;
 let logMap = [];
 
 function resizeCanvas() {
@@ -79,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
-        analyser.fftSize = 2 ** 13;
+        analyser.fftSize = 2 ** 12;
         
         source = audioContext.createMediaStreamSource(stream);
         source.connect(analyser);
@@ -91,12 +95,12 @@ document.addEventListener("DOMContentLoaded", function() {
         logMap = [];
         const bufferLength = analyser.frequencyBinCount;
         
-        for(let i = 0; i < BAR_COUNT; i++) {
-            const logStart = MIN_FREQ * (MAX_FREQ/MIN_FREQ) ** (i/BAR_COUNT);
-            const startFreq = Math.min(logStart, MAX_FREQ);
+        for(let i = 0; i < barCount; i++) {
+            const logStart = minFreq * (maxFreq/minFreq) ** (i/barCount);
+            const startFreq = Math.min(logStart, maxFreq);
             const startIndex = Math.round(startFreq * analyser.fftSize / sampleRate);
-            const logEnd = MIN_FREQ * (MAX_FREQ/MIN_FREQ) ** ((i+1)/BAR_COUNT);
-            const endFreq = Math.min(logEnd, MAX_FREQ);
+            const logEnd = minFreq * (maxFreq/minFreq) ** ((i+1)/barCount);
+            const endFreq = Math.min(logEnd, maxFreq);
             const endIndex = Math.round(endFreq * analyser.fftSize / sampleRate);
             
             logMap.push({
@@ -129,14 +133,14 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             const avgValue = sum / count;
 
-            const barWidth = canvas.width / BAR_COUNT;
+            const barWidth = canvas.width / barCount;
             const barHeight = (avgValue / 255) * canvas.height;
 
-            canvasCtx.fillStyle = `hsl(${(i / BAR_COUNT) * 240}, 100%, 70%)`;
+            canvasCtx.fillStyle = `hsl(${(i / barCount) * 240}, 100%, 70%)`;
             canvasCtx.fillRect(
-                x + barWidth * MARGIN_RATIO / 2, 
+                x + barWidth * marginRatio / 2, 
                 canvas.height - barHeight,
-                barWidth * (1 - MARGIN_RATIO),
+                barWidth * (1 - marginRatio),
                 barHeight
             );
             x += barWidth;
