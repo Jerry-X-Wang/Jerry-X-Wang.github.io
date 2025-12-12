@@ -28,6 +28,7 @@ function reset() {
         BPM in 16 Beats: 0 <br>
         BPM Overall:     0 <br>
     `;
+     document.getElementById("reset").blur();
 }
 
 function pressReset() {
