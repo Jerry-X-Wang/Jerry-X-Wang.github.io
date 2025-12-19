@@ -108,7 +108,7 @@ function createInput() {
     inputDiv.appendChild(input);
 }
 
-function withNumbersMakeN(numbers, n) { // returns an array including Formula objects
+function numbersMakeN(numbers, n) { // returns an array including Formula objects
     // enumerate all the formulas and find whether its value is n
     const numberCount = numbers.length;
     let operatorses = powerOfArray(operators, numberCount - 1); // operatorses is the plural of operators
@@ -117,23 +117,25 @@ function withNumbersMakeN(numbers, n) { // returns an array including Formula ob
 
     let formulaCount = 0;
 
-    operatorses.forEach(operators => { // try all possible operators
+    for (let i = 0; i < operatorses.length; i++) { // try all possible operators
+        const operators = operatorses[i];
         const orders = [];
-        for (let i = 0; i < numberCount - 1; i++) {
-            orders.push(productOfArrays(permutationsOfArray(range(numberCount - i), 2), [operators[i]]));
+        for (let j = 0; j < numberCount - 1; j++) {
+            orders.push(productOfArrays(permutationsOfArray(range(numberCount - j), 2), [operators[j]]));
         }
         const operationses = productOfArrays(...orders); // operationses is the plural of operations
-        operationses.forEach(operations => { 
-            for (let i = 0; i < operations.length; i++) {
-                const operation = operations[i]
-                const index1 = operation[0][0]
-                const index2 = operation[0][1]
-                const operator = operation[1]
+        for (let j = 0; j < operationses.length; j++) { // try all possible operations
+            let operations = operationses[j]
+            for (let k = 0; k < operations.length; k++) { 
+                const operation = operations[k];
+                const index1 = operation[0][0];
+                const index2 = operation[0][1];
+                const operator = operation[1];
                 if (commutative && (operator == "+" || operator == "*") && index1 > index2) {
                     operations = null;
                     break;
                 }
-                operations[i] = new Operation(index1, index2, operator); // format the operations to fit the constructor of Formula
+                operations[k] = new Operation(index1, index2, operator); // format the operations to fit the constructor of Formula
             }
             if (operations != null) {
                 const formula = new Formula(numbers, operations);
@@ -142,11 +144,9 @@ function withNumbersMakeN(numbers, n) { // returns an array including Formula ob
                     answerFormulas.push(formula);
                 }
             }
-        });
-    });
+        }
+    }
     
-    console.log(`Tried ${formulaCount} formula(s)`);
-    console.log(`${answerFormulas.length}, ${uniqueArray(answerFormulas).length}`)
     return answerFormulas;
 }
 
@@ -166,7 +166,7 @@ function confirmNumbers() {
         if (commutative) {
             console.log("Considering commutative laws")
         }
-        let formulas = withNumbersMakeN(numbers, n); // find all formulas with the given numbers making the given result
+        let formulas = numbersMakeN(numbers, n); // find all formulas with the given numbers making the given result
         
         endTime = performance.now();
         console.log(`Time elapsed - calculation: ${((endTime - startTime) / 1000).toFixed(4)} s`)
