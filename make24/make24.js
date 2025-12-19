@@ -77,8 +77,10 @@ let numberCount = document.getElementById("numberCount").value;
 let randomRange = [
     document.getElementById("randomStart").value,
     document.getElementById("randomEnd").value
-]
-let commutative = document.getElementById("commutative").checked
+];
+let commutative = document.getElementById("commutative").checked;
+let enableMaxFormulas = document.getElementById("enableMaxFormulas").checked;
+let maxFormulas = document.getElementById("maxFormulas").value;
 const operators = ["+", "-", "*", "/"];
 let calculating = false; // to prevent calculation when it is already in progress
 let hidden = false; // whether the output is hidden
@@ -108,12 +110,13 @@ function createInput() {
     inputDiv.appendChild(input);
 }
 
-function numbersMakeN(numbers, n) { // returns an array including Formula objects
+function numbersMakeN(numbers, n, maxFormulas=Infinity) { // returns an array including Formula objects
     // enumerate all the formulas and find whether its value is n
     const numberCount = numbers.length;
     let operatorses = powerOfArray(operators, numberCount - 1); // operatorses is the plural of operators
 
     const answerFormulas = [];
+    const naturalFormulas = [];
 
     let formulaCount = 0;
 
@@ -125,7 +128,7 @@ function numbersMakeN(numbers, n) { // returns an array including Formula object
         }
         const operationses = productOfArrays(...orders); // operationses is the plural of operations
         for (let j = 0; j < operationses.length; j++) { // try all possible operations
-            let operations = operationses[j]
+            let operations = operationses[j];
             for (let k = 0; k < operations.length; k++) { 
                 const operation = operations[k];
                 const index1 = operation[0][0];
@@ -142,6 +145,15 @@ function numbersMakeN(numbers, n) { // returns an array including Formula object
                 formulaCount++;
                 if (formula.value() == n) {
                     answerFormulas.push(formula);
+                    if (maxFormulas != Infinity) {
+                        const naturalFormula = formula.natural()
+                        if (!naturalFormulas.includes(naturalFormula)) {
+                            naturalFormulas.push(naturalFormula);
+                            if (naturalFormulas.length >= maxFormulas) {
+                                return answerFormulas;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -166,7 +178,14 @@ function confirmNumbers() {
         if (commutative) {
             console.log("Considering commutative laws")
         }
-        let formulas = numbersMakeN(numbers, n); // find all formulas with the given numbers making the given result
+
+        let formulas;
+        if (enableMaxFormulas) { // find all formulas with the given numbers making the given result
+            formulas = numbersMakeN(numbers, n, maxFormulas); 
+            console.log(`Max formulas: ${maxFormulas}`)
+        } else {
+            formulas = numbersMakeN(numbers, n); // no max formulas limit
+        }
         
         endTime = performance.now();
         console.log(`Time elapsed - calculation: ${((endTime - startTime) / 1000).toFixed(4)} s`)
@@ -195,7 +214,11 @@ function confirmNumbers() {
         if (formulas == "") {
             output = `${numbers} cannot make ${n}`;
         } else {
-            output = `${formulas.length} formula(s) found <br>`
+            if (enableMaxFormulas && naturalFormulas.length >= maxFormulas) {
+                output = `${formulas.length} formula(s) found <br>(maybe existing more)<br>`
+            } else {
+                output = `${formulas.length} formula(s) found <br>`
+            }
             naturalFormulas.forEach(formula => {
                 output += formula + `\u2006=\u2006${n}<br>`;
             });
@@ -268,6 +291,15 @@ document.getElementById("randomEnd").addEventListener("input", (event) => {
 document.getElementById("commutative").addEventListener("input", (event) => {
     commutative = event.target.checked;
 });
+
+document.getElementById("enableMaxFormulas").addEventListener("input", (event) => {
+    enableMaxFormulas = event.target.checked;
+});
+
+document.getElementById("maxFormulas").addEventListener("input", (event) => {
+    maxFormulas = parseInt(event.target.value);
+});
+
 
 window.onload = function() {
     for (let i = 0; i < numberCount; i++) {

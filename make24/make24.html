@@ -30,7 +30,7 @@
 
     <div class="container" style="justify-content: center;">
         <div class="text">Number Count</div>
-        <input type="number" class="input" id="numberCount" value=4 min=2 max=6 step=1 style="width: 40px">
+        <input type="number" class="input" id="numberCount" value=4 min=2 max=8 step=1 style="width: 40px">
     </div>
 
     <div class="container" style="justify-content: center;">
@@ -44,7 +44,16 @@
     <div class="container" style="justify-content: center;">
         <div class="text" style="margin:0px;">Consider Commutative Law</div>
         <input type="checkbox" class="checkbox" id="commutative" checked>
-        <button class="button" onclick="confirmNumbers()" id="confirm">Calculate</button>
+    </div>
+
+    <div class="container" style="justify-content: center;">
+        <div class="text" style="margin:0px;">Max Formulas</div>
+        <input type="checkbox" class="checkbox" id="enableMaxFormulas" checked>
+        <input type="number" class="input" id="maxFormulas" value=100 min=1 step=1 style="width: 60px">
+    </div>
+
+    <div class="container" style="justify-content: center;">
+        <button class="button" style="height:40px;" onclick="confirmNumbers()" id="confirm">Calculate</button>
     </div>
     
     <div class="container" style="justify-content: center;">
