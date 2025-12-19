@@ -31,6 +31,7 @@ class Formula {
     }
 
     value() {
+        // recursion
         if (this.numbers.length == 2) {
             return calculate(
                 this.numbers[this.operations[0].index1], 
@@ -38,6 +39,7 @@ class Formula {
                 this.operations[0].operator
             );
         } else {
+            // operate once and put the result inplace of number at index1, and DELETE number at index2
             const value = calculate(
                 this.numbers[this.operations[0].index1], 
                 this.numbers[this.operations[0].index2], 
@@ -52,6 +54,7 @@ class Formula {
     }
 
     natural() {
+        // recursion
         if (this.numbers.length == 2) {
             return `(${this.numbers[this.operations[0].index1]}\u2006` + 
                 `${this.operations[0].naturalOperator()}\u2006` + 
@@ -75,6 +78,7 @@ let randomRange = [
     document.getElementById("randomStart").value,
     document.getElementById("randomEnd").value
 ]
+let commutative = document.getElementById("commutative").checked
 const operators = ["+", "-", "*", "/"];
 let calculating = false; // to prevent calculation when it is already in progress
 let hidden = false; // whether the output is hidden
@@ -107,32 +111,43 @@ function createInput() {
 function withNumbersMakeN(numbers, n) { // returns an array including Formula objects
     // enumerate all the formulas and find whether its value is n
     const numberCount = numbers.length;
-    let operatorsTried = powerOfArray(operators, numberCount - 1);
+    let operatorses = powerOfArray(operators, numberCount - 1); // operatorses is the plural of operators
 
-    const formulas = [];
+    const answerFormulas = [];
 
     let formulaCount = 0;
 
-    operatorsTried.forEach(operators => { // try all possible operators
+    operatorses.forEach(operators => { // try all possible operators
         const orders = [];
         for (let i = 0; i < numberCount - 1; i++) {
             orders.push(productOfArrays(permutationsOfArray(range(numberCount - i), 2), [operators[i]]));
         }
         const operationses = productOfArrays(...orders); // operationses is the plural of operations
         operationses.forEach(operations => { 
-            operations.forEach((operation, i) => { // try all possible operations
-                operations[i] = new Operation(operation[0][0], operation[0][1], operation[1]); // format the operations to fit the constructor of Formula
-            });
-            const formula = new Formula(numbers, operations);
-            formulaCount++;
-            if (formula.value() == n) {
-                formulas.push(formula);
+            for (let i = 0; i < operations.length; i++) {
+                const operation = operations[i]
+                const index1 = operation[0][0]
+                const index2 = operation[0][1]
+                const operator = operation[1]
+                if (commutative && (operator == "+" || operator == "*") && index1 > index2) {
+                    operations = null;
+                    break;
+                }
+                operations[i] = new Operation(index1, index2, operator); // format the operations to fit the constructor of Formula
+            }
+            if (operations != null) {
+                const formula = new Formula(numbers, operations);
+                formulaCount++;
+                if (formula.value() == n) {
+                    answerFormulas.push(formula);
+                }
             }
         });
     });
     
     console.log(`Tried ${formulaCount} formula(s)`);
-    return uniqueArray(formulas);
+    console.log(`${answerFormulas.length}, ${uniqueArray(answerFormulas).length}`)
+    return answerFormulas;
 }
 
 function confirmNumbers() {
@@ -148,6 +163,9 @@ function confirmNumbers() {
         }
         const n = parseFloat(document.getElementById("result").value);
         console.log(`Finding formulas with ${numbers} making ${n}...`);
+        if (commutative) {
+            console.log("Considering commutative laws")
+        }
         let formulas = withNumbersMakeN(numbers, n); // find all formulas with the given numbers making the given result
         
         endTime = performance.now();
@@ -161,10 +179,10 @@ function confirmNumbers() {
             if (!naturalFormulas.includes(naturalFormula)) {
                 naturalFormulas.push(naturalFormula);
             } else {
-                formulas[i] = undefined; // remove duplicates
+                formulas[i] = null; // remove duplicates
             }
         });
-        formulas = formulas.filter(item => item !== undefined); // remove duplicates
+        formulas = formulas.filter(item => item !== null); // remove duplicates
 
         endTime = performance.now();
         console.log(`Time elapsed - naturalization: ${((endTime - startTime) / 1000).toFixed(4)} s`)
@@ -245,6 +263,10 @@ document.getElementById("randomStart").addEventListener("input", (event) => {
 document.getElementById("randomEnd").addEventListener("input", (event) => {
     const randomEnd = parseInt(event.target.value);
     randomRange[1] = randomEnd;
+});
+
+document.getElementById("commutative").addEventListener("input", (event) => {
+    commutative = event.target.checked;
 });
 
 window.onload = function() {
