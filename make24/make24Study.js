@@ -124,11 +124,7 @@ function probability(n) {
 
     // check whether each combination can make n
     numberArrays.forEach((array, i) => {
-        if (withNumbersMakeN(array[0], n).length > 0) {
-            numberArrays[i].push(true);
-        } else {
-            numberArrays[i].push(false);
-        }
+        numberArrays[i].push(canNumbersMakeN(array[0], n))
     }); 
 
     let satisfiedWeight = 0;
@@ -168,32 +164,33 @@ function calculate(x, y, operator) {
     }
 }
 
-function withNumbersMakeN(numbers, n) { // returns an array including Formula objects
-    // enumerate all the formulas and find whether its value is n
+function canNumbersMakeN(numbers, n) {
+    // enumerate all the formulas and find whether there exist a formula whose value is n
     const numberCount = numbers.length;
-    let operatorsTried = powerOfArray(operators, numberCount - 1);
+    let operatorses = powerOfArray(operators, numberCount - 1); // operatorses is the plural of operators
 
-    const formulas = [];
-
-    let formulaCount = 0;
-
-    operatorsTried.forEach(operators => { // try all possible operators
+    for (let i = 0; i < operatorses.length; i++) { // try all possible operators
+        const operators = operatorses[i];
         const orders = [];
-        for (let i = 0; i < numberCount - 1; i++) {
-            orders.push(productOfArrays(permutationsOfArray(range(numberCount - i), 2), [operators[i]]));
+        for (let j = 0; j < numberCount - 1; j++) {
+            orders.push(productOfArrays(permutationsOfArray(range(numberCount - j), 2), [operators[j]]));
         }
         const operationses = productOfArrays(...orders); // operationses is the plural of operations
-        operationses.forEach(operations => { 
-            operations.forEach((operation, i) => { // try all possible operations
-                operations[i] = new Operation(operation[0][0], operation[0][1], operation[1]); // format the operations to fit the constructor of Formula
-            });
-            const formula = new Formula(numbers, operations);
-            formulaCount++;
-            if (formula.value() == n) {
-                formulas.push(formula);
+        for (let j = 0; j < operationses.length; j++) {
+            const operations = operationses[j];
+            for (let k = 0; k < operations.length; k++) { // try all possible operations
+                const operation = operations[k];
+                const index1 = operation[0][0];
+                const index2 = operation[0][1];
+                const operator = operation[1];
+                operations[k] = new Operation(index1, index2, operator); // format the operations to fit the constructor of Formula
             }
-        });
-    });
+            const formula = new Formula(numbers, operations);
+            if (formula.value() == n) {
+                return true;
+            }
+        }
+    }
     
-    return uniqueArray(formulas);
+    return false;
 }
