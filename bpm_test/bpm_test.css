@@ -30,6 +30,19 @@ button.active, button:active {
     background-color: #fff;
 }
 
+.input {
+    box-sizing: border-box;
+    width: 50px;
+    height: 30px;
+    margin: 5px;
+    border-radius: 0;
+    border: 2px solid #bbb; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 20px;
+    text-indent: 2px;
+}
+
+
 #tap {
     width: 80%;
 }

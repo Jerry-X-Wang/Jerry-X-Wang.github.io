@@ -1,4 +1,5 @@
 let timestamps = [];
+let customBeats = 32;
 
 function init() {
     document.getElementById("tap").style.height = window.innerHeight/3 + "px";
@@ -24,10 +25,13 @@ function reset() {
     document.getElementById("bpm").innerHTML = `
         BPM Current:     0 <br>
         BPM in 4 Beats:  0 <br>
-        BPM in 12 Beats: 0 <br>
         BPM in 16 Beats: 0 <br>
+        BPM in <input type="number" class="input" id="customBeats" value="${customBeats}" step=1 min=1> Beats: 0 <br>
         BPM Overall:     0 <br>
     `;
+    document.getElementById("customBeats").addEventListener("input", (event) => {
+        customBeats = parseInt(event.target.value);
+    });
      document.getElementById("reset").blur();
 }
 
@@ -44,10 +48,13 @@ function updateBPM() {
     document.getElementById("bpm").innerHTML = `
         BPM Current:     ${calculateBPM(1).toFixed(0)} <br>
         BPM in 4 Beats:  ${calculateBPM(4).toFixed(0)} <br>
-        BPM in 12 Beats: ${calculateBPM(12).toFixed(0)} <br>
         BPM in 16 Beats: ${calculateBPM(16).toFixed(0)} <br>
+        BPM in <input type="number" class="input" id="customBeats" value="${customBeats}" step=1 min=1> Beats: ${calculateBPM(customBeats).toFixed(0)} <br>
         BPM Overall:     ${calculateBPM(timestamps.length - 1).toFixed(Math.max(0, Math.floor(Math.log10(timestamps.length)) - 1))} <br>
     `;
+    document.getElementById("customBeats").addEventListener("input", (event) => {
+        customBeats = parseInt(event.target.value);
+    });
 }
 
 function calculateBPM(beatCount) {
@@ -67,10 +74,30 @@ function handlePress(event) {
 document.addEventListener("DOMContentLoaded", function() {
     let button = document.querySelector("button");
     button.addEventListener("pointerdown", handlePress);
-    
 });
 
+
 window.addEventListener("keydown", (event) => {
+    if (document.activeElement == document.getElementById("customBeats")) {
+        switch (event.key) {
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+            case "9":
+            case "0":
+            case "Delete":
+            case "Backspace":
+                return;
+            default:
+                break;
+        }
+    }
+
     switch (event.key) {
         case "Escape":
             pressReset();
