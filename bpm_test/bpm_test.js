@@ -91,28 +91,24 @@ document.addEventListener("DOMContentLoaded", function() {
 
 window.addEventListener("keydown", (event) => {
     if (document.activeElement == document.getElementById("customBeats")) {
-        switch (event.key) {
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "8":
-            case "9":
-            case "0":
-            case "Delete":
-            case "Backspace":
-            case "ArrowLeft":
-            case "ArrowRight":
-            case "ArrowUp":
-            case "ArrowDown":
-                return;
-            default:
-                customBeatsInput.blur();
-                customBeats = parseInt(customBeatsInput.value) || 32;
-                break;
+        if (!(event.key >=0 || event.key <= 9)) {
+            switch (event.key) {
+                case "Delete":
+                case "Backspace":
+                case "ArrowLeft":
+                case "ArrowRight":
+                case "ArrowUp":
+                case "ArrowDown":
+                    return;
+                default:
+                    customBeatsInput.blur();
+                    if (parseInt(customBeatsInput.value) >= 1) {
+                        customBeats = parseInt(customBeatsInput.value)
+                    } else {
+                        customBeats = 1;
+                    }
+                    break;
+            }
         }
     }
 
