@@ -32,9 +32,9 @@ button.active, button:active {
 
 .input {
     box-sizing: border-box;
-    width: 50px;
+    width: 60px;
     height: 30px;
-    margin: 5px;
+    margin: 0px;
     border-radius: 0;
     border: 2px solid #bbb; 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -51,4 +51,25 @@ button.active, button:active {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 24px;
     margin: 10px;
+}
+
+.bpm-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.bpm-label {
+    text-align: left;
+    flex: 1;
+}
+
+.bpm-value {
+    text-align: right;
+    flex: 0 0 auto;
+    min-width: 50px;
 }

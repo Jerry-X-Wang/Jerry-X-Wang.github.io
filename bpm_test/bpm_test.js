@@ -1,8 +1,10 @@
 let timestamps = [];
 let customBeats = 32;
+let bpmCurrent, bpm4, bpm16, customBeatsInput, bpmCustom, bpmOverall;
 
 function init() {
     document.getElementById("tap").style.height = window.innerHeight/3 + "px";
+    reset();
 }
 
 function tap() {
@@ -22,17 +24,31 @@ function releaseTap() {
 
 function reset() {
     timestamps = [];
-    document.getElementById("bpm").innerHTML = `
-        BPM Current:     0 <br>
-        BPM in 4 Beats:  0 <br>
-        BPM in 16 Beats: 0 <br>
-        BPM in <input type="number" class="input" id="customBeats" value="${customBeats}" step=1 min=1> Beats: 0 <br>
-        BPM Overall:     0 <br>
-    `;
-    document.getElementById("customBeats").addEventListener("input", (event) => {
-        customBeats = parseInt(event.target.value);
-    });
-     document.getElementById("reset").blur();
+    bpmCurrent = document.getElementById("bpmCurrent");
+    bpm4 = document.getElementById("bpm4");
+    bpm16 = document.getElementById("bpm16");
+    bpmCustom = document.getElementById("bpmCustomValue");
+    bpmOverall = document.getElementById("bpmOverall");
+
+    customBeatsInput = document.getElementById("customBeats");
+
+    bpmCurrent.textContent = "0";
+    bpm4.textContent = "0";
+    bpm16.textContent = "0";
+    bpmCustom.textContent = "0";
+    bpmOverall.textContent = "0";
+
+    customBeatsInput.value = customBeats;
+
+    if (!customBeatsInput.hasEventListener) {
+        customBeatsInput.addEventListener("input", (event) => {
+            customBeats = parseInt(event.target.value);
+            updateBPM();
+        });
+        customBeatsInput.hasEventListener = true;
+    }
+
+    document.getElementById("reset").blur();
 }
 
 function pressReset() {
@@ -45,16 +61,13 @@ function releaseReset() {
 }
 
 function updateBPM() {
-    document.getElementById("bpm").innerHTML = `
-        BPM Current:     ${calculateBPM(1).toFixed(0)} <br>
-        BPM in 4 Beats:  ${calculateBPM(4).toFixed(0)} <br>
-        BPM in 16 Beats: ${calculateBPM(16).toFixed(0)} <br>
-        BPM in <input type="number" class="input" id="customBeats" value="${customBeats}" step=1 min=1> Beats: ${calculateBPM(customBeats).toFixed(0)} <br>
-        BPM Overall:     ${calculateBPM(timestamps.length - 1).toFixed(Math.max(0, Math.floor(Math.log10(timestamps.length)) - 1))} <br>
-    `;
-    document.getElementById("customBeats").addEventListener("input", (event) => {
-        customBeats = parseInt(event.target.value);
-    });
+    bpmCurrent.textContent = calculateBPM(1).toFixed(0);
+    bpm4.textContent = calculateBPM(4).toFixed(0);
+    bpm16.textContent = calculateBPM(16).toFixed(0);
+    bpmCustom.textContent = calculateBPM(customBeats).toFixed(0);
+    bpmOverall.textContent = calculateBPM(timestamps.length - 1).toFixed(Math.max(0, Math.floor(Math.log10(timestamps.length)) - 1));
+
+    customBeatsInput.value = customBeats;
 }
 
 function calculateBPM(beatCount) {
@@ -64,7 +77,6 @@ function calculateBPM(beatCount) {
         return 0;
     }
 }
-
 
 function handlePress(event) {
     event.preventDefault();
@@ -92,8 +104,14 @@ window.addEventListener("keydown", (event) => {
             case "0":
             case "Delete":
             case "Backspace":
+            case "ArrowLeft":
+            case "ArrowRight":
+            case "ArrowUp":
+            case "ArrowDown":
                 return;
             default:
+                customBeatsInput.blur();
+                customBeats = parseInt(customBeatsInput.value) || 32;
                 break;
         }
     }
@@ -152,5 +170,4 @@ window.addEventListener("blur", () => {
 
 window.addEventListener("resize", init);
 
-reset();
 init();

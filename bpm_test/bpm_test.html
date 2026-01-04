@@ -15,7 +15,32 @@
     <div class="title">
         BPM Test
     </div>
-    <div class="text" id="bpm"></div>
+    <div class="text" id="bpm">
+        <div class="bpm-line">
+            <span class="bpm-label">BPM Current</span>
+            <span id="bpmCurrent" class="bpm-value">0</span>
+        </div>
+        <div class="bpm-line">
+            <span class="bpm-label">BPM in 4 Beats</span>
+            <span id="bpm4" class="bpm-value">0</span>
+        </div>
+        <div class="bpm-line">
+            <span class="bpm-label">BPM in 16 Beats</span>
+            <span id="bpm16" class="bpm-value">0</span>
+        </div>
+        <div class="bpm-line">
+            <div>
+                <span class="bpm-label">BPM in</span>
+                <input type="number" class="input" id="customBeats" value="32" step="1" min="1">
+                <span class="bpm-label">Beats</span>
+            </div>
+            <span id="bpmCustomValue" class="bpm-value">0</span>
+        </div>
+        <div class="bpm-line">
+            <span class="bpm-label">BPM Overall</span>
+            <span id="bpmOverall" class="bpm-value">0</span>
+        </div>
+    </div>
     <div>
         <button id="tap">Tap here <br> or <br> Press any key</button>
     </div>
