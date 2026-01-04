@@ -91,51 +91,36 @@ document.addEventListener("DOMContentLoaded", function() {
 
 window.addEventListener("keydown", (event) => {
     if (document.activeElement == document.getElementById("customBeats")) {
+        if (/^[a-zA-Z]$/.test(event.key)) {
+            customBeatsInput.blur();
+            if (parseInt(customBeatsInput.value) >= 1) {
+                customBeats = parseInt(customBeatsInput.value)
+            } else {
+                customBeats = 32;
+            }
+        } 
+    } else {
         switch (event.key) {
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "8":
-            case "9":
-            case "0":
-            case "Delete":
-            case "Backspace":
-            case "ArrowLeft":
-            case "ArrowRight":
-            case "ArrowUp":
-            case "ArrowDown":
-                return;
+            case "Escape":
+                pressReset();
+                break;
+            case "F1":
+            case "F2":
+            case "F3":
+            case "F4":
+            case "F5":
+            case "F6":
+            case "F7":
+            case "F8":
+            case "F9":
+            case "F10":
+            case "F11":
+            case "F12":
+                break;
             default:
-                customBeatsInput.blur();
-                customBeats = parseInt(customBeatsInput.value) || 32;
+                pressTap();
                 break;
         }
-    }
-
-    switch (event.key) {
-        case "Escape":
-            pressReset();
-            break;
-        case "F1":
-        case "F2":
-        case "F3":
-        case "F4":
-        case "F5":
-        case "F6":
-        case "F7":
-        case "F8":
-        case "F9":
-        case "F10":
-        case "F11":
-        case "F12":
-            break;
-        default:
-            pressTap();
-            break;
     }
 });
 
