@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="metronome.png" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metronome</title>
+    <link rel="stylesheet" href="metronome.css">
+</head>
+<body>
+    <a href="/" title="Home" style="position: absolute; top: 5px; left: 5px;">
+        <img src="/home.png" alt="Home" style="width: 30px; height: 30px;">
+    </a>
+
+    <div class="title">
+        Metronome
+    </div>
+
+    <div class="bpm-controls">
+        <label for="bpm-slider">BPM</label> 
+        <br>
+        <input type="range" id="bpm-slider" min="30" max="300" value="120" step="1">
+        <br>
+        <button id="bpm-minus">-</button>
+        <input type="number" id="bpm-input" min="1" max="5000" value="120">
+        <button id="bpm-plus">+</button>
+    </div>
+
+    <div class="beats-per-measure">
+        <label for="beats-input">Beats</label>
+        <input type="number" id="beats-input" min="1" max="16" value="4">
+    </div>
+
+    <div class="beat-dots" id="beat-dots">
+        <!-- Dots will be generated here -->
+    </div>
+
+    <div class="controls">
+        <button id="start-stop">Start</button>
+    </div>
+
+    <audio id="normal-beat" src="audio/normal_beat.ogg" preload="auto"></audio>
+    <audio id="stressed-beat" src="audio/stressed_beat.ogg" preload="auto"></audio>
+    <audio id="accented-beat" src="audio/accented_beat.ogg" preload="auto"></audio>
+
+    <script src="metronome.js"></script>
+</body>
+</html>

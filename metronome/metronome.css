@@ -1,0 +1,161 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding-top: 30px;
+}
+
+.title {
+    font-size: 32px;
+    margin-bottom: 20px;
+    font-family: sans-serif;
+    font-weight: bold;
+}
+
+.bpm-controls {
+    margin: 20px;
+}
+
+#bpm-slider {
+    width: 400px;
+    height: 12px;
+    margin: 20px;
+}
+
+.bpm-controls label {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.bpm-controls input[type="number"] {
+    width: 60px;
+    height: 30px;
+    margin: 0 10px;
+    border: 2px solid #bbb;
+    font-size: 20px;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.bpm-controls button {
+    font-size: 20px;
+    width: 36px;
+    height: 36px;
+    border: 2px solid #bbb;
+    background-color: #eee;
+    cursor: pointer;
+}
+
+.beats-per-measure {
+    margin-bottom: 20px;
+}
+
+.beats-per-measure label {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.beats-per-measure input {
+    width: 40px;
+    height: 30px;
+    border: 2px solid #bbb;
+    font-size: 20px;
+    text-align: center;
+}
+
+.beat-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.beat-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin: 0 5px;
+    cursor: pointer;
+    border: 2px solid #000;
+}
+
+.beat-dot.normal {
+    background-color: #ccc;
+}
+
+.beat-dot.stressed {
+    background-color: #0e0;
+}
+
+.beat-dot.accented {
+    background-color: #ee0;
+}
+
+.beat-dot.disabled {
+    background-color: #fff;
+    border: 2px solid #bbb;
+}
+
+.beat-dot.active {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.controls button {
+    font-size: 24px;
+    border: 2px solid #bbb;
+    background-color: #eee;
+    cursor: pointer;
+    padding: 10px 20px;
+    margin: 0 10px;
+}
+
+.controls button:active {
+    background-color: #fff;
+}
+
+input[type="range"] {
+    text-align: center; 
+    border-radius: 0; 
+    border: 2px solid #bbb; 
+    padding: 0;
+}
+
+input[type="range"] {
+    -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
+    appearance: none; /* Remove default style */
+    width: 12px;
+    height: 22px; 
+    border-radius: 0; 
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Remove default style */
+    appearance: none; /* Remove default style */
+    width: 12px;
+    height: 22px; 
+    background: #bbb; 
+    border-radius: 0; 
+    cursor: pointer; 
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 12px; 
+    height: 22px; 
+    background: #bbb; 
+    border-radius: 0;
+    cursor: pointer; 
+}
+
+input[type="range"]::-ms-thumb {
+    width: 12px;
+    height: 22px; 
+    background: #bbb; 
+    border-radius: 0;
+    cursor: pointer;
+}
+
+/* Hide range input's default style */
+input[type="range"] {
+    -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
+    appearance: none; /* Remove default style */
+}
