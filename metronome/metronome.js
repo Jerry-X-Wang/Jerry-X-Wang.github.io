@@ -19,6 +19,8 @@ const stressedBeat = 'audio/stressed_beat.ogg';
 const accentedBeat = 'audio/accented_beat.ogg';
 
 let timer;
+let previousTime;
+let timeInterval;
 
 function init() {
     bpmInput.value = bpm;
@@ -49,7 +51,7 @@ function updateBPMFromSlider() {
 
 function updateBPMFromInput() {
     const newBPM = parseInt(bpmInput.value);
-    if (newBPM >= 1 && newBPM <= 5000) {
+    if (newBPM >= bpmInput.min && newBPM <= bpmInput.max) {
         bpm = newBPM;
         bpmSlider.value = bpm;
         updateBPM();
@@ -57,7 +59,7 @@ function updateBPMFromInput() {
 }
 
 function adjustBPM(delta) {
-    bpm = Math.max(1, Math.min(10000, bpm + delta));
+    bpm = Math.max(bpmInput.min, Math.min(bpmInput.max, bpm + delta));
     bpmSlider.value = bpm;
     bpmInput.value = bpm;
     updateBPM();
@@ -66,6 +68,7 @@ function adjustBPM(delta) {
 function updateBPM() {
     bpmInput.value = bpm;
     bpmSlider.value = bpm;
+    timeInterval = 60000 / bpm;
 }
 
 function updateBeatsPerMeasure() {
@@ -157,7 +160,7 @@ function beat() {
     updateActiveDot();
     playBeat();
     currentBeat = (currentBeat + 1) % beatsPerMeasure;
-    timer = setTimeout(beat, 60000 / bpm);
+    timer = setTimeout(beat, timeInterval);
 }
 
 function playBeat() {
