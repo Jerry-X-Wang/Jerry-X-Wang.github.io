@@ -18,13 +18,10 @@ const normalBeat = 'audio/normal_beat.ogg';
 const stressedBeat = 'audio/stressed_beat.ogg';
 const accentedBeat = 'audio/accented_beat.ogg';
 
-let timer;
-let previousTime;
-let timeInterval;
+let timer, timeInterval, nextTime;
 
 function init() {
-    bpmInput.value = bpm;
-    bpmSlider.value = bpm;
+    updateBPM();
     updateBeatsPerMeasure();
     setupEventListeners();
 }
@@ -140,8 +137,16 @@ function start() {
     clearTimeout(timer);
     currentBeat = 0;
     isPlaying = true;
-    beat();
+    nextTime = performance.now();
+    timer = setInterval(tryToBeat, 1); // this is better than setTimeout, at least ensure the bpm is accurate
     startStopButton.textContent = 'Stop';
+}
+
+function tryToBeat() {
+    if (performance.now() >= nextTime) {
+        playBeat();
+        nextTime += timeInterval;
+    }
 }
 
 function stop() {
@@ -156,14 +161,8 @@ function playAudio(audio_src) {
     audio.play();
 }
 
-function beat() {
-    updateActiveDot();
-    playBeat();
-    currentBeat = (currentBeat + 1) % beatsPerMeasure;
-    timer = setTimeout(beat, timeInterval);
-}
-
 function playBeat() {
+    updateActiveDot();
     const beatType = beatTypes[currentBeatTypes[currentBeat]];
     switch (beatType) {
         case 'stressed':
@@ -180,6 +179,7 @@ function playBeat() {
             playAudio(normalBeat);
             break;
     }
+    currentBeat = (currentBeat + 1) % beatsPerMeasure;
 }
 
 function updateActiveDot() {
