@@ -36,7 +36,7 @@ You tap more, BPM Overall will be more precise.
 
 This page is to visualize an audio in your microphone or in your system sound, using FFT.
 
-The 88 bars correspond to the 88 keys on the piano.
+The bars correspond from A2 to C8.
 
 ## Metronome
 
