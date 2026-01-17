@@ -1,40 +1,72 @@
-class Vector { // 2d vector
+class Vector {
 
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    toString(prec=0) {
-        if (prec == 0) {
-            return `(${this.x}, ${this.y})`;
-        } else {
-            return `(${this.x.toPrecision(prec)}, ${this.y.toPrecision(prec)})`;
+    constructor(...args) {
+        this.x = [];
+        for (let i = 0; i < args.length; i++) {
+            this.x[i] = args[i];
         }
     }
 
-    plus(vector) {
-        return new Vector(this.x + vector.x, this.y + vector.y);
+    toString(prec=0) {
+        let string = '(';
+        if (prec == 0) {
+            for (let i = 0; i < this.x.length; i++) {
+                string += this.x[i];
+            }
+        } else {
+            for (let i = 0; i < this.x.length; i++) {
+                string += this.x[i].toPrecision(prec);
+            }
+        }
+        string += ')'
+        return string;
     }
 
+    plus(vector) {
+        const x = [];
+        for (let i = 0; i < this.x.length; i++) {
+            x.push(this.x[i] + vector.x[i]);
+        }
+        return new Vector(...x);
+    }
     minus(vector) {
-        return new Vector(this.x - vector.x, this.y - vector.y);
+        const x = [];
+        for (let i = 0; i < this.x.length; i++) {
+            x.push(this.x[i] - vector.x[i]);
+        }
+        return new Vector(...x);
     }
 
     oppo() { // opposite vector
-        return new Vector(-this.x, -this.y);
+        const x = [];
+        for (let i = 0; i < this.x.length; i++) {
+            x.push(-this.x[i]);
+        }
+        return new Vector(...x);
     } 
 
     multi(scalar) {  // scalar multiplication
-        return new Vector(this.x * scalar, this.y * scalar);
+        const x = [];
+        for (let i = 0; i < this.x.length; i++) {
+            x.push(this.x[i] * scalar);   
+        }
+        return new Vector(...x);
     }
 
     norm() { // norm, or modulus, or length of vector
-        return (this.x ** 2 + this.y ** 2) ** 0.5;
+        let normSquare = 0;
+        for (let i = 0; i < this.x.length; i++) {
+            normSquare += this.x[i] ** 2;
+        }
+        return normSquare ** 0.5;
     }
 
     dot(vector) { // dot product
-        return this.x * vector.x + this.y * vector.y;
+        let dotProduct = 0;
+        for (let i = 0; i < this.x.length; i++) {
+            dotProduct += this.x[i] * vector.x[i];   
+        }
+        return dotProduct;
     }
 
     unit() { // unit vector

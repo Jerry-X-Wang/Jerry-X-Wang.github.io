@@ -12,7 +12,7 @@ class Ball {
 
     draw() {
         context.beginPath();
-        context.arc(this.pos.x, this.pos.y, this.r, 0, Math.PI * 2);
+        context.arc(this.pos.x[0], this.pos.x[1], this.r, 0, Math.PI * 2);
         context.fillStyle = this.colour;
         context.fill();
         context.closePath();
@@ -21,36 +21,36 @@ class Ball {
     move() {
         // check whether the ball is out of the canvas
         let overBound = 0;
-        if (this.pos.x > canvas.width - this.r) {
-            if (this.v.x > g.project(new Vector(1, 0)).norm()*tickTime*2) {
-                this.v.x = -this.v.x * e;
+        if (this.pos.x[0] > canvas.width - this.r) {
+            if (this.v.x[0] > g.project(new Vector(1, 0)).norm()*tickTime*2) {
+                this.v.x[0] = -this.v.x[0] * e;
             } else if (elasticityOn) { // if the ball is out of the canvas but is not going outwards, apply a force to it
-                overBound = this.pos.x - (canvas.width - this.r);
-                this.F.x = this.F.x - k * overBound;
+                overBound = this.pos.x[0] - (canvas.width - this.r);
+                this.F.x[0] = this.F.x[0] - k * overBound;
             }
         }
-        if (this.pos.x < this.r) {
-            if (this.v.x < -g.project(new Vector(-1, 0)).norm()*tickTime*2) {
-                this.v.x = -this.v.x * e;
+        if (this.pos.x[0] < this.r) {
+            if (this.v.x[0] < -g.project(new Vector(-1, 0)).norm()*tickTime*2) {
+                this.v.x[0] = -this.v.x[0] * e;
             } else if (elasticityOn) { // same as above
-                overBound = this.pos.x - this.r;
-                this.F.x = this.F.x - k * overBound;
+                overBound = this.pos.x[0] - this.r;
+                this.F.x[0] = this.F.x[0] - k * overBound;
             }
         }
-        if (this.pos.y > canvas.height - this.r) {
-            if (this.v.y > g.project(new Vector(0, 1)).norm()*tickTime*2) {
-                this.v.y = -this.v.y * e;
+        if (this.pos.x[1] > canvas.height - this.r) {
+            if (this.v.x[1] > g.project(new Vector(0, 1)).norm()*tickTime*2) {
+                this.v.x[1] = -this.v.x[1] * e;
             } else if (elasticityOn) { // same as above
-                overBound = this.pos.y - (canvas.height - this.r);
-                this.F.y = this.F.y - k * overBound;
+                overBound = this.pos.x[1] - (canvas.height - this.r);
+                this.F.x[1] = this.F.x[1] - k * overBound;
             }
         } 
-        if (this.pos.y < this.r) {
-            if (this.v.y < -g.project(new Vector(0, -1)).norm()*tickTime*2) {
-                this.v.y = -this.v.y * e;
+        if (this.pos.x[1] < this.r) {
+            if (this.v.x[1] < -g.project(new Vector(0, -1)).norm()*tickTime*2) {
+                this.v.x[1] = -this.v.x[1] * e;
             } else if (elasticityOn) { // same as above
-                overBound = this.pos.y - this.r;
-                this.F.y = this.F.y - k * overBound;
+                overBound = this.pos.x[1] - this.r;
+                this.F.x[1] = this.F.x[1] - k * overBound;
             }
         }
         Ep_elasticity += 0.5 * k * overBound ** 2; // E = 1/2 * k * x^2
@@ -281,7 +281,7 @@ canvas.addEventListener("contextmenu", function(event) {
 canvas.addEventListener("mousedown", function(event) {
     const pos = new Vector(event.clientX, event.clientY);
     if (event.button == 0 || event.button == 2) {
-        if (pos.x <= 30 && pos.y <= 30) {
+        if (pos.x[0] <= 30 && pos.x[1] <= 30) {
             infoOn = !infoOn;
         } else {
             randomBallAt(pos);
