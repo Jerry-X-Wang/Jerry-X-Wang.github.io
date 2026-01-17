@@ -73,37 +73,37 @@ class Formula {
 const operators = ["+", "-", "*", "/"];
 let numberCount;
 let numbers;
-let targets;
+let results;
 
 
 function main() {
     numberCount = parseInt(document.getElementById("numberCount").value);
-    const randomStart = parseInt(document.getElementById("randomStart").value);
-    const randomEnd = parseInt(document.getElementById("randomEnd").value);
-    const targetStart = parseInt(document.getElementById("targetStart").value);
-    const targetEnd = parseInt(document.getElementById("targetEnd").value);
-    numbers = range(randomStart, randomEnd + 1);
-    targets = range(targetStart, targetEnd + 1);
+    const numberStart = parseInt(document.getElementById("numberStart").value);
+    const numberEnd = parseInt(document.getElementById("numberEnd").value);
+    const resultStart = parseInt(document.getElementById("resultStart").value);
+    const resultEnd = parseInt(document.getElementById("resultEnd").value);
+    numbers = range(numberStart, numberEnd + 1);
+    results = range(resultStart, resultEnd + 1);
     
     document.getElementById("output").innerHTML = `
         Number Count: ${numberCount} <br>
-        Random: ${randomStart} - ${randomEnd} <br>
-        Target: ${targetStart} - ${targetEnd} <br>
+        Number: ${numberStart} - ${numberEnd} <br>
+        Result: ${resultStart} - ${resultEnd} <br>
     `;
     
     let i = 0;
-    function nextTarget() {
-        if (i == targets.length) {
+    function nextResult() {
+        if (i == results.length) {
             console.log("Done.");
             document.getElementById("output").innerHTML += "Done.";
         }
-        if (i < targets.length) {
-            probability(targets[i]);
+        if (i < results.length) {
+            probability(results[i]);
             i++;
-            setTimeout(nextTarget, 10); // use setTimeout to avoid stack overflow
+            setTimeout(nextResult, 10); // use setTimeout to avoid stack overflow
         }
     }
-    setTimeout(nextTarget, 50);
+    setTimeout(nextResult, 50);
 }
 
 function probability(n) {
