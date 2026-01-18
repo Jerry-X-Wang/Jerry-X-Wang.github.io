@@ -11,14 +11,15 @@ class Vector {
         let string = '(';
         if (prec == 0) {
             for (let i = 0; i < this.x.length; i++) {
-                string += this.x[i];
+                string += this.x[i] + ', ';
             }
         } else {
             for (let i = 0; i < this.x.length; i++) {
-                string += this.x[i].toPrecision(prec);
+                string += this.x[i].toPrecision(prec) + ', ';
             }
         }
-        string += ')'
+        string = string.slice(0, -2);
+        string += ')';
         return string;
     }
 
