@@ -7,6 +7,7 @@ let dimensions = parseInt(dimensionInput.value);
 let controls = [];
 let points = [];
 let projectedPoints = [];
+let drawAxis = false;
 
 dimensionInput.addEventListener('change', () => {
     dimensions = parseInt(dimensionInput.value);
@@ -27,7 +28,7 @@ function generateControls() {
         controlDiv.className = 'control';
 
         const label = document.createElement('label');
-        label.textContent = `Dim ${i + 1}:`;
+        label.textContent = `Dim ${i}:`;
         label.style.textAlign = 'right';
 
         const freqInput = document.createElement('input');
@@ -67,29 +68,52 @@ function generatePoints() {
     points = [];
     const numPoints = 1000;
     const minFreq = Math.min(...controls.map(c => parseFloat(c.freq.value)));
+    const maxFreq = Math.max(...controls.map(c => parseFloat(c.freq.value)));
+    if (drawAxis) {
+        const originPoint = new Vector(...new Array(dimensions).fill(0));
+        for (let i = 0; i < dimensions; i++) {
+            points.push(originPoint);
+            let axis = new Array(dimensions).fill(0);
+            axis[i] = 1;
+            axis = new Vector(...axis);
+            points.push(axis);
+        }
+    }
     for (let t = 0; t < numPoints; t++) {
         const point = [];
         for (let i = 0; i < dimensions; i++) {
             const freq = parseFloat(controls[i].freq.value);
             const phase = parseFloat(controls[i].phase.value);
             const amp = parseFloat(controls[i].amp.value);
-            point.push(amp * Math.sin(freq * t * 0.1/minFreq + phase));
+            point.push(amp * Math.sin(freq * t * 0.1/Math.max((maxFreq - minFreq), minFreq) + phase));
         }
         points.push(new Vector(...point));
     }
 }
 
 function projectPoints() {
-    let vector1 = new Array(dimensions).fill(1);
-    vector1 = new Vector(...vector1); // (1, 1, 1, ..., 1)
-    let vector2 = new Array(dimensions).fill(1);
-    vector2[0] = -1;
-    vector2 = new Vector(...vector2); // (-1, 1, 1, ..., 1)
+    let vector1, vector2; // two vectors span the plane which is the projection plane on the screen
+    if (dimensions === 2) {
+        vector1 = new Vector(1, 0);
+        vector2 = new Vector(0, 1);
+    } else {
+        vector1 = [];
+        vector2 = [];
+        let angle = 2*Math.PI / dimensions;
+        for (let i = 0; i < dimensions; i++) {
+            vector1.push(Math.cos(angle*i));
+            vector2.push(Math.sin(angle*i));
+            // ensure the axes are evenly distributed around a circle
+            // but this works weirdly in 2D, so 2D need to be specified
+        }
+        vector1 = new Vector(...vector1);
+        vector2 = new Vector(...vector2);
+    }
     projectedPoints = points.map(point => {
         const unit1 = vector1.unit();
-        const unit2 = vector2.minus(unit1.multi(vector2.dot(unit1)));
+        const unit2 = vector2.minus(vector2.project(vector1)).unit();
         let projectedPoint = new Vector(point.dot(unit1), point.dot(unit2));
-        return projectedPoint; // project points into plane coordinates with vector1 and
+        return projectedPoint; // project points into  coordinates plane with vector1 and vector2, orthonormal
     });
 }
 
@@ -104,23 +128,70 @@ function draw() {
     const maxY = Math.max(...projectedPoints.map(p => p.x[1]));
     let scaleX = canvas.width / (maxX - minX || 1);
     let scaleY = canvas.height / (maxY - minY || 1);
-    const scale = Math.min(scaleX, scaleY) * 0.9;
-    const offsetX = canvas.width / 2 - ((maxX + minX) / 2) * scale;
-    const offsetY = canvas.height / 2 - ((maxY + minY) / 2) * scale;
+    const canvasLength = Math.min(canvas.width, canvas.height); 
+    let scale = Math.min(scaleX, scaleY) * 0.8;
+    if (scale > canvasLength/4) scale = canvasLength/4;
+    const offsetX = canvas.width / 2;
+    const offsetY = canvas.height / 2;
 
-    ctx.beginPath();
-    for (let i = 0; i < projectedPoints.length; i++) {
-        const x = projectedPoints[i].x[0] * scale + offsetX;
-        const y = projectedPoints[i].x[1] * scale + offsetY;
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
+    if (drawAxis) {
+        // figure
+        ctx.beginPath();
+        for (let i = dimensions*2; i < projectedPoints.length; i++) {
+            const x = projectedPoints[i].x[0] * scale + offsetX;
+            const y = projectedPoints[i].x[1] * scale + offsetY;
+            if (i === dimensions*2) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
         }
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // axes
+        ctx.beginPath();
+        for (let i = 0; i < dimensions*2; i++) {
+            const x = projectedPoints[i].x[0] * scale;
+            const y = projectedPoints[i].x[1] * scale;
+            if (i === 0) {
+                ctx.moveTo(x + offsetX, y + offsetX);
+            } else {
+                ctx.lineTo(x + offsetX, y + offsetX);
+            }
+            if (i % 2 === 1) {
+                ctx.font = '20px consolas';
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${Math.floor(i/2)}`, x*1.15 + offsetX, y*1.15 + offsetX);
+            }
+        }
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // origin point
+        ctx.beginPath();
+        ctx.arc(offsetX, offsetY, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+        ctx.fill();
+    } else {
+        ctx.beginPath();
+        for (let i = 0; i < projectedPoints.length; i++) {
+            const x = projectedPoints[i].x[0] * scale + offsetX;
+            const y = projectedPoints[i].x[1] * scale + offsetY;
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.stroke();
     }
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
-    ctx.stroke();
 }
 
 // Initialize
