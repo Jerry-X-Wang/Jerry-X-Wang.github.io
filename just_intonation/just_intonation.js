@@ -10,6 +10,8 @@ let projectedPoints = [];
 let drawAxis = false;
 let lastFrameTime = performance.now();
 
+ctx.lineJoin = 'round';
+
 dimensionInput.addEventListener('change', () => {
     dimensions = parseInt(dimensionInput.value);
     generateControls();
@@ -37,8 +39,11 @@ function generateControls() {
         freqInput.value = 440 * (1 + i * 0.25);
         freqInput.min = 0.1;
         freqInput.step = 0.1;
-        freqInput.addEventListener('input', () => { 
-            waves[i].freq = parseFloat(freqInput.value);
+        freqInput.addEventListener('input', () => {
+            const freq = Number(freqInput.value);
+            if (freq != NaN && freq != 0) {
+                waves[i].freq = freq;
+            }
         });
 
         const phaseInput = document.createElement('input');
@@ -59,7 +64,10 @@ function generateControls() {
         ampInput.min = 0;
         ampInput.step = 0.1;
         ampInput.addEventListener('input', () => { 
-            waves[i].amp = Number(ampInput.value);
+            const amp = Number(ampInput.value)
+            if (amp != NaN) {
+                waves[i].amp = amp;
+            }
         });
 
         controlDiv.appendChild(label);
