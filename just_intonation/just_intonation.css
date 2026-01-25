@@ -40,18 +40,12 @@ body {
 }
 
 button {
-    outline: none;
-    font-size: 22px;
-    font-family: Arial;
-    width: 24px;
-    height: 24px;
-    border: none;
-    background-color: #bbb;
-    color: white;
-    cursor: pointer;
-    margin-left: 5px;
+    height: 30px;
+    margin: 5px;
     border-radius: 0;
-    padding: 0;
+    border: 2px solid #bbb; 
+    font-size: 16px;
+    color: #000;
 }
 
 button:active {
