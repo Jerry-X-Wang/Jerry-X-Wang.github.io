@@ -88,6 +88,12 @@ function generateControls() {
     }
 }
 
+function resetPhase() {
+    for (let i = 0; i < waves.length; i++) {
+        waves[i].phase = waves[i].phase0;
+    }
+}
+
 function generatePoints() {
     points = [];
     const numPoints = 1000;
