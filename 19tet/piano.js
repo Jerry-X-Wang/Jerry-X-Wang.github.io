@@ -53,7 +53,7 @@ const greyKeys = [2, 5, 7, 10, 13, 16, 18];
 for (let noteCode = startNote; noteCode <= endNote; noteCode++) {
     // for noteCode, 0 -> A4; for i, 0 -> C4
     i = noteCode + 14; // 14 is because there are 14 semitones between C and A
-    // offset of the key from the left edge of the piano (Math.floor is to round down to the nearest multiple of whiteKeyWidth)
+    // offset of the keyboard from the left edge of the piano (Math.floor is to round down to the nearest multiple of whiteKeyWidth)
     const offset = -Math.floor(((startNote+14) * (7/19)*whiteKeyWidth) / whiteKeyWidth) * whiteKeyWidth; 
     const key = document.createElement("div");
     piano.appendChild(key);
