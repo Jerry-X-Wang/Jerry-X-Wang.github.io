@@ -27,6 +27,14 @@
         <div class="container" id="panel" style="flex: 0.6">
 
             <div class="control">
+                <label class="panel" for="temperament">Temperament</label>
+                <select id="temperament">
+                    <option value="autoJust">Auto Just Intonation</option>
+                    <option value="12tet">12-TET</option>
+                </select>
+            </div>
+
+            <div class="control">
                 <label class="panel" for="reference">Reference Frequency</label>
                 <input type="number" id="reference" value="440" min="1" pattern="[0-9]*">
             </div>
