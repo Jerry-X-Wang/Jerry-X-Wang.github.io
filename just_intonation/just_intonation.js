@@ -252,7 +252,7 @@ function updateActiveFrequencies() {
 
 function octaveDecrease() {
     octave--;
-    document.getElementById("octave").value = octave; 
+    document.getElementById('octave').value = octave; 
     //updateActiveFrequencies(); 
     //updateNoteDisplay();
     refreshKeyNames();
@@ -260,7 +260,7 @@ function octaveDecrease() {
 
 function octaveIncrease() {
     octave++;
-    document.getElementById("octave").value = octave; 
+    document.getElementById('octave').value = octave; 
     //updateActiveFrequencies(); 
     //updateNoteDisplay();
     refreshKeyNames();
@@ -269,12 +269,12 @@ function octaveIncrease() {
 function keyDecrease() {
     if (keyInMusic == 0) {
         octave--;
-        document.getElementById("octave").value = octave;
+        document.getElementById('octave').value = octave;
         keyInMusic = 18;
     } else {
         keyInMusic--;
     }
-    document.getElementById("key").value = keyInMusic;
+    document.getElementById('key').value = keyInMusic;
     //updateActiveFrequencies(); 
     //updateNoteDisplay();
     refreshKeyNames();
@@ -283,21 +283,21 @@ function keyDecrease() {
 function keyIncrease() {
     if (keyInMusic == 18) {
         octave++;
-        document.getElementById("octave").value = octave;
+        document.getElementById('octave').value = octave;
         keyInMusic = 0;
     } else {
         keyInMusic++;
     }
-    document.getElementById("key").value = keyInMusic;
+    document.getElementById('key').value = keyInMusic;
     //updateActiveFrequencies(); 
     //updateNoteDisplay();
     refreshKeyNames();
 }
 
 
-window.addEventListener("keydown", (event) => {
-    if (event.target.tagName.toLowerCase() === "input") {
-        if (event.key === "Enter") {
+window.addEventListener('keydown', (event) => {
+    if (event.target.tagName.toLowerCase() === 'input') {
+        if (event.key === 'Enter') {
             event.target.blur();
             return; 
         }
@@ -313,35 +313,35 @@ window.addEventListener("keydown", (event) => {
         }
     } else {
         switch (keyCode) {
-            case "ArrowDown": 
+            case 'ArrowDown': 
                 octaveDecrease();
                 event.preventDefault();
                 break;
-            case "ArrowUp": 
+            case 'ArrowUp': 
                 octaveIncrease();
                 event.preventDefault();
                 break;
-            case "ArrowLeft":
+            case 'ArrowLeft':
                 keyDecrease();
                 event.preventDefault();
                 break;
-            case "ArrowRight":
+            case 'ArrowRight':
                 keyIncrease();
                 event.preventDefault();
                 break;
-            case " ":
+            case ' ':
                 pressPedal();
                 break;
         }
     }
 });
 
-window.addEventListener("keyup", (event) => {
+window.addEventListener('keyup', (event) => {
     const keyCode = event.key;
     const noteCode = keyMap[keyCode];
 
     switch (keyCode) {
-        case " ":
+        case ' ':
             releasePedal();
             break;
     }
@@ -349,54 +349,54 @@ window.addEventListener("keyup", (event) => {
     stopNote(noteCode);
 });
 
-document.getElementById("volume").addEventListener("input", (event) => {
+document.getElementById('volume').addEventListener('input', (event) => {
     const rawVolume = Number(event.target.value);
     for (let noteCode in oscillators) {
         noteCode = parseInt(noteCode);
-        if (soundMode === "strings") {
+        if (soundMode === 'strings') {
             gainNodes[noteCode].gain.value = volumeCurve(rawVolume); // set gain value
         }
     }
 });
 
-document.getElementById("reference").addEventListener("input", (event) => {
+document.getElementById('reference').addEventListener('input', (event) => {
     reference = Number(event.target.value);
     //updateActiveFrequencies(); 
     //updateNoteDisplay();
 });
 
-document.getElementById("octave").addEventListener("input", (event) => {
+document.getElementById('octave').addEventListener('input', (event) => {
     octave = parseInt(event.target.value);
     //updateActiveFrequencies(); 
     //updateNoteDisplay();
     refreshKeyNames();
 });
 
-document.getElementById("key").addEventListener("input", (event) => {
+document.getElementById('key').addEventListener('input', (event) => {
     keyInMusic = parseInt(event.target.value);
     //updateActiveFrequencies(); 
     //updateNoteDisplay();
     refreshKeyNames();
 });
 
-document.getElementById("waveType").addEventListener("change", (event) => {
+document.getElementById('waveType').addEventListener('change', (event) => {
     waveType = event.target.value;
 });   
 
-document.getElementById("soundMode").addEventListener("change", (event) => {
+document.getElementById('soundMode').addEventListener('change', (event) => {
     soundMode = event.target.value;
 });  
 
-window.addEventListener("blur", () => {
+window.addEventListener('blur', () => {
     stopAllSounds();
 });
 
-window.addEventListener("contextmenu", () => {
+window.addEventListener('contextmenu', () => {
     stopAllSounds();
 });
 
-const controls = document.querySelectorAll(".control input, .control select, .control button");
-document.addEventListener("mousemove", (event) => {
+const controls = document.querySelectorAll('.control input, .control select, .control button');
+document.addEventListener('mousemove', (event) => {
     controls.forEach(control => {
         const rect = control.getBoundingClientRect(); // get the bounding rect of the control
         const controlCenterX = rect.left + rect.width / 2; // x center of the control
@@ -413,22 +413,22 @@ document.addEventListener("mousemove", (event) => {
     });
 });
 
-document.getElementById("pedal").addEventListener("mousedown", () => {
+document.getElementById('pedal').addEventListener('mousedown', () => {
     pressPedal();
 });
-document.getElementById("pedal").addEventListener("mouseup", () => {
+document.getElementById('pedal').addEventListener('mouseup', () => {
     releasePedal();
 });
-document.getElementById("pedal").addEventListener("mouseleave", () => {
+document.getElementById('pedal').addEventListener('mouseleave', () => {
     releasePedal();
 }); 
-document.getElementById("pedal").addEventListener("touchstart", (event) => {
+document.getElementById('pedal').addEventListener('touchstart', (event) => {
     event.preventDefault(); // prevent the page from scrolling
     pressPedal();
 });
-document.getElementById("pedal").addEventListener("touchend", () => {
+document.getElementById('pedal').addEventListener('touchend', () => {
     releasePedal();
 });
-document.getElementById("pedal").addEventListener("contextmenu", (event) => {
+document.getElementById('pedal').addEventListener('contextmenu', (event) => {
     event.preventDefault();
 });

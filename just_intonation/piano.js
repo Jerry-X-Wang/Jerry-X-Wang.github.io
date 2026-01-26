@@ -1,18 +1,18 @@
-let reference = Number(document.getElementById("reference").value); // Reference frequency
+let reference = Number(document.getElementById('reference').value); // Reference frequency
 
-let octave = Number(document.getElementById("octave").value); // Octave number
+let octave = Number(document.getElementById('octave').value); // Octave number
 
 let keyInMusic = 0; // key in music
 
-let waveType = document.getElementById("waveType").value; // Wave type: sine, square, sawtooth, or triangle
+let waveType = document.getElementById('waveType').value; // Wave type: sine, square, sawtooth, or triangle
 
-let soundMode = document.getElementById("soundMode").value; // Sound mode: piano, strings, or bells
+let soundMode = document.getElementById('soundMode').value; // Sound mode: piano, strings, or bells
 
 let pedal = false; // Whether the pedal is pressed or not
 
-const piano = document.getElementById("piano");
+const piano = document.getElementById('piano');
 
-const notes = ["C", "C♯(D♭)", "D", "D♯(E♭)", "E", "F", "F♯(G♭)", "G", "G♯(A♭)", "A", "A♯(B♭)", "B"]
+const notes = ['C', 'C♯(D♭)', 'D', 'D♯(E♭)', 'E', 'F', 'F♯(G♭)', 'G', 'G♯(A♭)', 'A', 'A♯(B♭)', 'B']
 
 // use midi note number: 60 -> C4
 const startNote = 21; // A0
@@ -75,7 +75,7 @@ function keyPosition(noteNumber) {
             position = 6 * whiteKeyWidth;
             break;
         default:
-            console.error("Invalid noteNumber");
+            console.error('Invalid noteNumber');
             break;
     }
     position += whiteKeyWidth * (7*Math.floor(noteNumber/12)) + offset;
@@ -93,8 +93,8 @@ function keyPosition(noteNumber) {
 
 function removeAllActiveKeys() {
     keys.forEach(key => {
-        if (key.classList.contains("active")) {
-            key.classList.remove("active");
+        if (key.classList.contains('active')) {
+            key.classList.remove('active');
         }
     });
 }
@@ -112,10 +112,10 @@ function noteName(noteNumber) {
 
 function keyName(noteNumber) {
     let keyName = noteName(noteNumber);
-    if (keyName.includes("(")) { // change name like E♯(F♭)4 into E♯4 \n F♭4
+    if (keyName.includes('(')) { // change name like E♯(F♭)4 into E♯4 \n F♭4
         const octave = keyName.slice(-1);
-        keyName = keyName.slice(0, keyName.indexOf("(")) + octave + "\n" +
-            keyName.slice(keyName.indexOf("(") + 1, keyName.indexOf(")")) + octave;
+        keyName = keyName.slice(0, keyName.indexOf('(')) + octave + '\n' +
+            keyName.slice(keyName.indexOf('(') + 1, keyName.indexOf(')')) + octave;
     }
     return keyName;
 }
@@ -134,22 +134,22 @@ function playSound(noteNumber) {
     const gainNode = audioContext.createGain();
     gainNode.connect(audioContext.destination);
     gainNodes[noteNumber] = gainNode;
-    const volume = volumeCurve(Number(document.getElementById("volume").value))
+    const volume = volumeCurve(Number(document.getElementById('volume').value))
     switch (waveType) { // set gain value in different cases
-        case "sine":
+        case 'sine':
             if (freq >= 440) {
                 gainNode.gain.value = volume
             } else {
                 gainNode.gain.value = volume * (440/freq)**0.5;
             }
             break;
-        case "square":
+        case 'square':
             gainNode.gain.value = volume;
             break;
-        case "sawtooth":
+        case 'sawtooth':
             gainNode.gain.value = volume;
             break;
-        case "triangle":
+        case 'triangle':
             if (freq >= 440) {
                 gainNode.gain.value = volume
             } else {
@@ -181,7 +181,7 @@ function playSound(noteNumber) {
     const timeCurve = gain => (halfLife * Math.log2(currentGain / gain)); // inverse function of gainCurve
 
     switch (soundMode) {
-        case "piano":
+        case 'piano':
             halfLife = 0.5 * (440/freq)**0.5;
 
             for (; gain > 0.0001; gain -= 0.0001) { // set the gains from now on, until it's too quiet
@@ -195,7 +195,7 @@ function playSound(noteNumber) {
                 }
             }, time * 1000);
             break;
-        case "bells":
+        case 'bells':
             halfLife = 0.5 * (440/freq)**0.5;
 
             for (; gain > 0.0001; gain -= 0.0001) { // set the gains from now on, until it's too quiet
@@ -218,7 +218,7 @@ function playSound(noteNumber) {
                 }, 100); // if pedal is pressed, stop the sound after 100ms, just like you are holding a bell
             }
             break;
-        case "strings":
+        case 'strings':
             gainNodes[noteNumber].gain.setValueAtTime(0.7 * currentGain, currentTime);
             break;
         default:
@@ -259,8 +259,8 @@ function stopAllSounds() {
 
 function playNote(noteNumber) {
     keys.forEach(key => {
-        if (key.noteNumber == noteNumber && !key.classList.contains("active")) {
-            key.classList.add("active");
+        if (key.noteNumber == noteNumber && !key.classList.contains('active')) {
+            key.classList.add('active');
         }
     });
     if (oscillators[noteNumber]) {
@@ -272,20 +272,20 @@ function playNote(noteNumber) {
 
 function stopNote(noteNumber) {
     keys.forEach(key => {
-        if (key.noteNumber == noteNumber && key.classList.contains("active")) {
-            key.classList.remove("active");
+        if (key.noteNumber == noteNumber && key.classList.contains('active')) {
+            key.classList.remove('active');
         }
     });
     switch (soundMode) {
-        case "piano":
-        case "strings":
+        case 'piano':
+        case 'strings':
             if (!pedal) {
                 if (oscillators[noteNumber]) {
                     stopSound(noteNumber);
                 }
             }
             break;
-        case "bells":
+        case 'bells':
             break;
         default:
             console.error(`Invalid sound mode: ${soundMode}`);
@@ -300,12 +300,12 @@ function stopNote(noteNumber) {
 
 function pressPedal() {
     pedal = true;
-    document.getElementById("pedal").style.backgroundColor = "#bbb";
+    document.getElementById('pedal').style.backgroundColor = '#bbb';
     switch (soundMode) {
-        case "piano":
-        case "strings":
+        case 'piano':
+        case 'strings':
             break;
-        case "bells":
+        case 'bells':
             stopAllSounds();
             break;
         default:
@@ -316,10 +316,10 @@ function pressPedal() {
 
 function releasePedal() {
     pedal = false;
-    document.getElementById("pedal").style.backgroundColor = "#eee";
+    document.getElementById('pedal').style.backgroundColor = '#eee';
     switch (soundMode) {
-        case "piano":
-        case "strings":
+        case 'piano':
+        case 'strings':
             for (let noteNumber in oscillators) {
                 noteNumber = parseInt(noteNumber);
                 if (!activeNotes.has(noteNumber)) {
@@ -327,7 +327,7 @@ function releasePedal() {
                 }
             }
             break;
-        case "bells":
+        case 'bells':
             break;
         default:
             console.error(`Invalid sound mode: ${soundMode}`);
@@ -335,23 +335,23 @@ function releasePedal() {
     }
 }
 
-document.getElementById("key").addEventListener("input", function() {
+document.getElementById('key').addEventListener('input', function() {
     refreshKeyNames();
 });
 
 
-window.addEventListener("resize", function() {
+window.addEventListener('resize', function() {
     windowHeight = window.innerHeight;
     restHeight = windowHeight - pianoHeight - pedalHeight - titleHeight - margin
-    document.getElementById("panel").style.height = `${restHeight}px`;
-    document.getElementById("canvas").style.height = `${restHeight}px`;
+    document.getElementById('panel').style.height = `${restHeight}px`;
+    document.getElementById('canvas').style.height = `${restHeight}px`;
 });
 
-window.addEventListener("blur", () => {
+window.addEventListener('blur', () => {
     removeAllActiveKeys();
 });
 
-window.addEventListener("contextmenu", () => {
+window.addEventListener('contextmenu', () => {
     removeAllActiveKeys();
 });
 
@@ -360,47 +360,47 @@ function init() {
     // create keys
     for (let noteNumber = startNote; noteNumber <= endNote; noteNumber++) {
         // noteNumber, 60 -> C4
-        const key = document.createElement("div");
+        const key = document.createElement('div');
         piano.appendChild(key);
         key.noteNumber = noteNumber;
 
-        const span = document.createElement("span");
+        const span = document.createElement('span');
         span.innerText = keyName(noteNumber);
         key.appendChild(span);
 
         if (whiteKeyNumbers.includes(mod(noteNumber, 12))) { // white keys
             key.style.left = `${keyPosition(noteNumber)}px`;
             key.style.border = `${borderWidth}px solid #bbb`;
-            key.classList.add("white-key");
+            key.classList.add('white-key');
             const keyWidth = whiteKeyWidth - 2*borderWidth;
             key.style.width = `${keyWidth}px`;
 
-            span.style.position = "absolute";
+            span.style.position = 'absolute';
             span.style.width = `${keyWidth}px`;
             switch (mod(noteNumber, 12)) {
                 case 0:
                 case 5:
-                    span.style.left = "-20%";
+                    span.style.left = '-20%';
                     break;
                 case 4:
                 case 11:
-                    span.style.left = "20%";
+                    span.style.left = '20%';
                     break;
                 case 7:
-                    span.style.left = "-7%";
+                    span.style.left = '-7%';
                     break;
                 case 9:
-                    span.style.left = "7%";
+                    span.style.left = '7%';
                     break
                 default:
-                    span.style.left = "0";
+                    span.style.left = '0';
                     break;
             }
 
         } else if (blackKeyNumbers.includes(mod(noteNumber, 12))) { // black keys
             key.style.left = `${keyPosition(noteNumber) - borderWidth}px`;
             key.style.border = `${borderWidth}px solid #bbb`;
-            key.classList.add("black-key");
+            key.classList.add('black-key');
             const keyWidth = whiteKeyWidth*7/12;
             key.style.width = `${keyWidth}px`;
 
@@ -411,68 +411,68 @@ function init() {
 
     let windowHeight = window.innerHeight;
     const margin = 70;
-    const pianoHeight = document.getElementsByClassName("piano-container")[0].clientHeight;
-    const pedalHeight = document.getElementById("pedal").clientHeight;
-    const titleHeight = document.getElementsByClassName("title")[0].clientHeight;
+    const pianoHeight = document.getElementsByClassName('piano-container')[0].clientHeight;
+    const pedalHeight = document.getElementById('pedal').clientHeight;
+    const titleHeight = document.getElementsByClassName('title')[0].clientHeight;
     let restHeight = windowHeight - pianoHeight - pedalHeight - titleHeight - margin
-    document.getElementById("panel").style.height = `${restHeight}px`;
-    document.getElementById("canvas").style.height = `${restHeight}px`;
+    document.getElementById('panel').style.height = `${restHeight}px`;
+    document.getElementById('canvas').style.height = `${restHeight}px`;
 
     // set the scroll bar to the center
-    const pianoContainer = document.getElementsByClassName("piano-container")[0];
+    const pianoContainer = document.getElementsByClassName('piano-container')[0];
     const keysWidth = piano.scrollWidth; 
     const containerWidth = pianoContainer.clientWidth; 
     const scrollPosition = (keysWidth - containerWidth) / 2; 
     pianoContainer.scrollLeft = scrollPosition; 
 
-    keys = document.querySelectorAll(".white-key, .black-key");
+    keys = document.querySelectorAll('.white-key, .black-key');
 
-    pianoContainer.addEventListener("wheel", function(event) {
+    pianoContainer.addEventListener('wheel', function(event) {
         pianoContainer.scrollBy({
             left: event.deltaY,
         });
     });
 
     keys.forEach(key => {
-        key.addEventListener("touchstart", function(event) {
+        key.addEventListener('touchstart', function(event) {
             event.preventDefault(); // prevent the page from scrolling
             const noteNumber = parseInt(key.noteNumber);
             playNote(noteNumber);
         });
 
-        key.addEventListener("touchend", function() {
+        key.addEventListener('touchend', function() {
             const noteNumber = parseInt(key.noteNumber);
             stopNote(noteNumber);
         });
 
-        key.addEventListener("touchleave", function() {
+        key.addEventListener('touchleave', function() {
             const noteNumber = parseInt(key.noteNumber);
             stopNote(noteNumber);
         });
 
-        key.addEventListener("mousedown", function() {
+        key.addEventListener('mousedown', function() {
             const noteNumber = parseInt(key.noteNumber);
             playNote(noteNumber);
         });
 
-        key.addEventListener("mouseup", function() {
+        key.addEventListener('mouseup', function() {
             const noteNumber = parseInt(key.noteNumber);
             stopNote(noteNumber);
         });
 
-        key.addEventListener("mouseleave", function() {
+        key.addEventListener('mouseleave', function() {
             const noteNumber = parseInt(key.noteNumber);
             stopNote(noteNumber);
         });
 
-        key.addEventListener("mousemove", function(event) {
-            if (event.buttons == 1 && !key.classList.contains("active")) { // left mouse button is down
+        key.addEventListener('mousemove', function(event) {
+            if (event.buttons == 1 && !key.classList.contains('active')) { // left mouse button is down
                 const noteNumber = parseInt(key.noteNumber);
                 playNote(noteNumber);
             }
         });
 
-        key.addEventListener("contextmenu", function(event) {
+        key.addEventListener('contextmenu', function(event) {
             event.preventDefault(); // prevent the default context menu from appearing
         });
     });
