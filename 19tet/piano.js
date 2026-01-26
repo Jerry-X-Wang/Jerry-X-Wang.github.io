@@ -1,16 +1,16 @@
-function keyPosition(noteCode, offset) {
-  if ([0, 3, 6].includes(mod(noteCode, 19))) {
+function keyPosition(noteCode) {
+    if ([0, 3, 6].includes(mod(noteCode, 19))) {
         return whiteKeyWidth/3 * (noteCode + 2*Math.floor(noteCode/19)) + offset;
 
-  } else if ([2, 5, 8, 11, 14, 17].includes(mod(noteCode, 19))) {
+    } else if ([2, 5, 8, 11, 14, 17].includes(mod(noteCode, 19))) {
         return whiteKeyWidth/3 * (noteCode + 2*Math.floor(noteCode/19) + 1) + offset;
 
-  } else if ([1, 4, 7, 10, 13, 16].includes(mod(noteCode, 19))) {
+    } else if ([1, 4, 7, 10, 13, 16].includes(mod(noteCode, 19))) {
         return whiteKeyWidth/3 * (noteCode + 2*Math.floor(noteCode/19) + 2) + offset;
       
-  } else if ([9, 12, 15, 18].includes(mod(noteCode, 19))) {
+    } else if ([9, 12, 15, 18].includes(mod(noteCode, 19))) {
         return whiteKeyWidth/3 * (noteCode + 2*Math.floor(noteCode/19) + 3) + offset;
-  }
+    }
 }
 
 function removeAllActiveKeys() {
@@ -56,7 +56,7 @@ for (let noteCode = startNote; noteCode <= endNote; noteCode++) {
     i = noteCode + 14; // 14 is because there are 14 semitones between C and A
     const key = document.createElement("div");
     piano.appendChild(key);
-    key.style.left = `${keyPosition(i, offset)}px`;
+    key.style.left = `${keyPosition(i)}px`;
     key.style.border = `${borderWidth}px solid #bbb`;
     key.noteCode = noteCode;
     key.innerText = keyName(noteCode);
