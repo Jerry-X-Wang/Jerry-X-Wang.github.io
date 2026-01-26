@@ -1,5 +1,5 @@
 body {
-    font-family: Arial;
+    font-family: sans-serif;
     text-align: center;
     margin: 0; /* Remove default margin */
     padding-top: 30px; 
@@ -74,7 +74,7 @@ button:active {
 }
 
 .display {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: sans-serif;
     font-size: 25px;
     overflow: auto;
     justify-content: center;
@@ -141,6 +141,10 @@ input[type="range"] {
 #key {
     width: 66px;
     text-align: center;
+}
+
+#piano {
+    font-size: 12px;
 }
 
 #pedal {
