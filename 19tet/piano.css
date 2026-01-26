@@ -11,7 +11,7 @@
     background-color: #eee;
     overflow-x: auto; 
     position: absolute; 
-    bottom: 90px;
+    bottom: 65px;
     transform: scaleY(-1); /* let the scroll bar appear on the top */
 }
 

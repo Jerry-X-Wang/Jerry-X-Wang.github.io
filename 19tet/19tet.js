@@ -597,9 +597,6 @@ document.getElementById("pedal").addEventListener("mousedown", () => {
 document.getElementById("pedal").addEventListener("mouseup", () => {
     releasePedal();
 });
-document.getElementById("pedal").addEventListener("mouseleave", () => {
-    releasePedal();
-}); 
 document.getElementById("pedal").addEventListener("touchstart", (event) => {
     event.preventDefault(); // prevent the page from scrolling
     pressPedal();
