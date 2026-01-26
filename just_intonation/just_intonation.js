@@ -1,9 +1,9 @@
-const canvas = document.getElementById('lissajousCanvas');
+const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const dimensionInput = document.getElementById('dimensionInput');
 const dimensionControls = document.getElementById('dimensionControls');
 
-let dimensions = parseInt(dimensionInput.value);
+// let dimensions = parseInt(dimensionInput.value);
 let waves = [];
 let points = [];
 let projectedPoints = [];
@@ -12,81 +12,81 @@ let lastFrameTime = performance.now();
 
 ctx.lineJoin = 'round';
 
-dimensionInput.addEventListener('change', () => {
-    dimensions = parseInt(dimensionInput.value);
-    generateControls();
-    generatePoints();
-    projectPoints();
-    draw();
-});
+// dimensionInput.addEventListener('change', () => {
+//     dimensions = parseInt(dimensionInput.value);
+//     generateControls();
+//     generatePoints();
+//     projectPoints();
+//     draw();
+// });
 
-function generateControls() {
-    // Clear existing controls except the dimension selector
-    const existingControls = dimensionControls.querySelectorAll('.control:not(:first-child)');
-    existingControls.forEach(control => control.remove());
+// function generateControls() {
+//     // Clear existing controls except the dimension selector
+//     const existingControls = dimensionControls.querySelectorAll('.control:not(:first-child)');
+//     existingControls.forEach(control => control.remove());
 
-    waves = [];
-    for (let i = 0; i < dimensions; i++) {
-        const controlDiv = document.createElement('div');
-        controlDiv.className = 'control';
+//     waves = [];
+//     for (let i = 0; i < dimensions; i++) {
+//         const controlDiv = document.createElement('div');
+//         controlDiv.className = 'control';
 
-        const label = document.createElement('label');
-        label.textContent = `Dim ${i}:`;
-        label.style.textAlign = 'right';
+//         const label = document.createElement('label');
+//         label.textContent = `Dim ${i}:`;
+//         label.style.textAlign = 'right';
 
-        const freqInput = document.createElement('input');
-        freqInput.type = 'number';
-        freqInput.value = 440 * (1 + i * 0.25);
-        freqInput.min = 0.1;
-        freqInput.step = 0.1;
-        freqInput.addEventListener('input', () => {
-            const freq = Number(freqInput.value);
-            if (freq != NaN && freq != 0) {
-                waves[i].freq = freq;
-            }
-        });
+//         const freqInput = document.createElement('input');
+//         freqInput.type = 'number';
+//         freqInput.value = 440 * (1 + i * 0.25);
+//         freqInput.min = 0.1;
+//         freqInput.step = 0.1;
+//         freqInput.addEventListener('input', () => {
+//             const freq = Number(freqInput.value);
+//             if (freq != NaN && freq != 0) {
+//                 waves[i].freq = freq;
+//             }
+//         });
 
-        const phaseInput = document.createElement('input');
-        phaseInput.type = 'number';
-        phaseInput.value = 0;
-        phaseInput.step = 0.1;
-        phaseInput.addEventListener('input', () => {
-            const phase0 = Number(phaseInput.value);
-            if (phase0 != NaN) {
-                waves[i].phase += phase0 - waves[i].phase0;
-                waves[i].phase0 = phase0;
-            }
-        });
+//         const phaseInput = document.createElement('input');
+//         phaseInput.type = 'number';
+//         phaseInput.value = 0;
+//         phaseInput.step = 0.1;
+//         phaseInput.addEventListener('input', () => {
+//             const phase0 = Number(phaseInput.value);
+//             if (phase0 != NaN) {
+//                 waves[i].phase += phase0 - waves[i].phase0;
+//                 waves[i].phase0 = phase0;
+//             }
+//         });
 
-        const ampInput = document.createElement('input');
-        ampInput.type = 'number';
-        ampInput.value = 1;
-        ampInput.min = 0;
-        ampInput.step = 0.1;
-        ampInput.addEventListener('input', () => { 
-            const amp = Number(ampInput.value)
-            if (amp != NaN) {
-                waves[i].amp = amp;
-            }
-        });
+//         const ampInput = document.createElement('input');
+//         ampInput.type = 'number';
+//         ampInput.value = 1;
+//         ampInput.min = 0;
+//         ampInput.step = 0.1;
+//         ampInput.addEventListener('input', () => { 
+//             const amp = Number(ampInput.value)
+//             if (amp != NaN) {
+//                 waves[i].amp = amp;
+//             }
+//         });
 
-        controlDiv.appendChild(label);
-        controlDiv.appendChild(freqInput);
-        controlDiv.appendChild(phaseInput);
-        controlDiv.appendChild(ampInput);
+//         controlDiv.appendChild(label);
+//         controlDiv.appendChild(freqInput);
+//         controlDiv.appendChild(phaseInput);
+//         controlDiv.appendChild(ampInput);
 
-        dimensionControls.appendChild(controlDiv);
+//         dimensionControls.appendChild(controlDiv);
 
-        waves.push(
-            {   
-                amp: Number(ampInput.value),
-                freq: Number(freqInput.value), 
-                phase0: Number(phaseInput.value), 
-                phase: Number(phaseInput.value), 
-            }
-        );
-    }
-}
+//         waves.push(
+//             {   
+//                 amp: Number(ampInput.value),
+//                 freq: Number(freqInput.value), 
+//                 phase0: Number(phaseInput.value), 
+//                 phase: Number(phaseInput.value), 
+//             }
+//         );
+//     }
+// }
 
 function resetPhase() {
     for (let i = 0; i < waves.length; i++) {
@@ -237,5 +237,198 @@ function animate() {
 }
 
 // Initialize
-generateControls();
-animate();
+// generateControls();
+// animate();
+
+function updateActiveFrequencies() {
+    for (let noteCode in oscillators) {
+        noteCode = parseInt(noteCode);
+        const activeFrequency = frequency(noteCode);
+        if (oscillators[noteCode]) {
+            oscillators[noteCode].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
+        }
+    }
+}
+
+function octaveDecrease() {
+    octave--;
+    document.getElementById("octave").value = octave; 
+    //updateActiveFrequencies(); 
+    //updateNoteDisplay();
+    refreshKeyNames();
+}
+
+function octaveIncrease() {
+    octave++;
+    document.getElementById("octave").value = octave; 
+    //updateActiveFrequencies(); 
+    //updateNoteDisplay();
+    refreshKeyNames();
+}
+
+function keyDecrease() {
+    if (keyInMusic == 0) {
+        octave--;
+        document.getElementById("octave").value = octave;
+        keyInMusic = 18;
+    } else {
+        keyInMusic--;
+    }
+    document.getElementById("key").value = keyInMusic;
+    //updateActiveFrequencies(); 
+    //updateNoteDisplay();
+    refreshKeyNames();
+}
+
+function keyIncrease() {
+    if (keyInMusic == 18) {
+        octave++;
+        document.getElementById("octave").value = octave;
+        keyInMusic = 0;
+    } else {
+        keyInMusic++;
+    }
+    document.getElementById("key").value = keyInMusic;
+    //updateActiveFrequencies(); 
+    //updateNoteDisplay();
+    refreshKeyNames();
+}
+
+
+window.addEventListener("keydown", (event) => {
+    if (event.target.tagName.toLowerCase() === "input") {
+        if (event.key === "Enter") {
+            event.target.blur();
+            return; 
+        }
+    }
+    
+    const keyCode = event.key;
+    const noteCode = keyMap[keyCode];
+    const freq = frequency(noteCode);
+    
+    if (freq) {
+        if (!activeNotes.has(noteCode)) {
+            playNote(noteCode);
+        }
+    } else {
+        switch (keyCode) {
+            case "ArrowDown": 
+                octaveDecrease();
+                event.preventDefault();
+                break;
+            case "ArrowUp": 
+                octaveIncrease();
+                event.preventDefault();
+                break;
+            case "ArrowLeft":
+                keyDecrease();
+                event.preventDefault();
+                break;
+            case "ArrowRight":
+                keyIncrease();
+                event.preventDefault();
+                break;
+            case " ":
+                pressPedal();
+                break;
+        }
+    }
+});
+
+window.addEventListener("keyup", (event) => {
+    const keyCode = event.key;
+    const noteCode = keyMap[keyCode];
+
+    switch (keyCode) {
+        case " ":
+            releasePedal();
+            break;
+    }
+
+    stopNote(noteCode);
+});
+
+document.getElementById("volume").addEventListener("input", (event) => {
+    const rawVolume = Number(event.target.value);
+    for (let noteCode in oscillators) {
+        noteCode = parseInt(noteCode);
+        if (soundMode === "strings") {
+            gainNodes[noteCode].gain.value = volumeCurve(rawVolume); // set gain value
+        }
+    }
+});
+
+document.getElementById("reference").addEventListener("input", (event) => {
+    reference = Number(event.target.value);
+    //updateActiveFrequencies(); 
+    //updateNoteDisplay();
+});
+
+document.getElementById("octave").addEventListener("input", (event) => {
+    octave = parseInt(event.target.value);
+    //updateActiveFrequencies(); 
+    //updateNoteDisplay();
+    refreshKeyNames();
+});
+
+document.getElementById("key").addEventListener("input", (event) => {
+    keyInMusic = parseInt(event.target.value);
+    //updateActiveFrequencies(); 
+    //updateNoteDisplay();
+    refreshKeyNames();
+});
+
+document.getElementById("waveType").addEventListener("change", (event) => {
+    waveType = event.target.value;
+});   
+
+document.getElementById("soundMode").addEventListener("change", (event) => {
+    soundMode = event.target.value;
+});  
+
+window.addEventListener("blur", () => {
+    stopAllSounds();
+});
+
+window.addEventListener("contextmenu", () => {
+    stopAllSounds();
+});
+
+const controls = document.querySelectorAll(".control input, .control select, .control button");
+document.addEventListener("mousemove", (event) => {
+    controls.forEach(control => {
+        const rect = control.getBoundingClientRect(); // get the bounding rect of the control
+        const controlCenterX = rect.left + rect.width / 2; // x center of the control
+        const controlCenterY = rect.top + rect.height / 2; // y center of the control
+        const xDistanceThreshold = rect.width / 2 + 10; 
+        const yDistanceThreshold = rect.height / 2 + 10;
+
+        const xDistance = Math.abs(event.clientX - controlCenterX)
+        const yDistance = Math.abs(event.clientY - controlCenterY)
+
+        if (xDistance > xDistanceThreshold || yDistance > yDistanceThreshold) {
+            control.blur(); // blur the focus if mouse cursor is too far from the control
+        }
+    });
+});
+
+document.getElementById("pedal").addEventListener("mousedown", () => {
+    pressPedal();
+});
+document.getElementById("pedal").addEventListener("mouseup", () => {
+    releasePedal();
+});
+document.getElementById("pedal").addEventListener("mouseleave", () => {
+    releasePedal();
+}); 
+document.getElementById("pedal").addEventListener("touchstart", (event) => {
+    event.preventDefault(); // prevent the page from scrolling
+    pressPedal();
+});
+document.getElementById("pedal").addEventListener("touchend", () => {
+    releasePedal();
+});
+document.getElementById("pedal").addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+});

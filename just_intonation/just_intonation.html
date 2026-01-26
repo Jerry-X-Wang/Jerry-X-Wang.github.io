@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <link rel="icon" href="just_intonation.png" type="image/x-icon">
-    <title>Lissajous Figures</title>
+    <title>Just Intonation</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="just_intonation.css">
+    <link rel="stylesheet" href="piano.css">
     <!-- Add any additional CSS links here if needed -->
 </head>
 <body>
@@ -14,26 +15,98 @@
     </a>
 
     <div class="title">
-        Lissajous Figures
+        Just Intonation
     </div>
 
-    <div class="container" style="display: flex; justify-self: center;">
-        <canvas id="lissajousCanvas" width="300" height="300"></canvas>
+
+    <!-- <div class="container" id="resetPhase">
+        <button class="button" onclick="resetPhase()">Reset Phase</button>
+    </div> -->
+
+    <div style="display: flex;">
+        <div class="container" id="panel" style="flex: 0.6">
+
+            <div class="control">
+                <label class="panel" for="reference">Reference Frequency</label>
+                <input type="number" id="reference" value="440" min="1" pattern="[0-9]*" style="width: 120px;">
+            </div>
+
+            <div class="control">
+                <label class="panel" for="octave">Octave</label>
+                <input type="number" id="octave" value="4" step="1" pattern="[0-9]*" style="width: 120px;">
+            </div>
+
+            <div class="control">
+                <label class="panel" for="key">Key</label>
+                <select id="key">
+                    <option value=0>C</option>
+                    <option value=1>C♯(D♭)</option>
+                    <option value=3>D</option>
+                    <option value=4>D♯(E♭)</option>
+                    <option value=6>E</option>
+                    <option value=8>F</option>
+                    <option value=9>F♯(G♭)</option>
+                    <option value=11>G</option>
+                    <option value=12>G♯(A♭)</option>
+                    <option value=14>A</option>
+                    <option value=15>A♯(B♭)</option>
+                    <option value=17>B</option>
+                </select>
+            </div>
+
+            <div class="control">
+                <label class="panel" for="volume">Volume</label>
+                <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
+            </div>
+
+            <div class="control">
+                <label class="panel" for="waveType">Wave Type</label>
+                <select id="waveType">
+                    <option value="sine">Sine</option>
+                    <option value="square">Square</option>
+                    <option value="sawtooth">Sawtooth</option>
+                    <option value="triangle">Triangle</option>
+                </select>
+            </div>
+
+            <div class="control">
+                <label class="panel" for="soundMode">Sound Mode</label>
+                <select id="soundMode">
+                    <option value="piano">Piano</option>
+                    <option value="strings" selected>Strings</option>
+                    <option value="bells">Bells</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="container" style="display: flex; justify-self: center; flex: 0.4">
+            <canvas id="canvas" width="300" height="300"></canvas>
+        </div>
     </div>
 
-    <div class="container" id="resetPhase">
-        <button class="button" style="width:auto" onclick="resetPhase()">Reset Phase</button>
+    <div class="piano-keyboard">
+        <div class="piano-container">
+            <div class="piano" id="piano"></div>
+        </div>
     </div>
 
-    <div id="dimensionControls">
+    <div class="control">
+        <button id="pedal">
+            Pedal (Space)
+        </button>
+    </div>
+
+    <!-- <div id="dimensionControls" style="visibility: hidden;">
         <div class="control">
             <label for="dimensionInput">Dimensions:</label>
             <input type="number" id="dimensionInput" value="3" step="1" min="1" max="10">
         </div>
-    </div>
+    </div> -->
+
 
     <script src="/utilities.js"></script>
     <script src="just_intonation.js"></script>
+    <script src="piano.js"></script>
     <!-- Add any additional scripts here if needed -->
 </body>
 </html>

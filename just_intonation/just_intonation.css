@@ -1,5 +1,5 @@
 body {
-    font-family: Arial;
+    font-family: sans-serif;
     text-align: center;
     margin: 0; /* Remove default margin */
     padding-top: 30px; 
@@ -29,6 +29,10 @@ body {
     text-align: right; 
 }
 
+.panel {
+    flex-basis: 160px;
+}
+
 .control input[type="number"], 
 .control input[type="range"] {
     width: 62px; 
@@ -54,9 +58,14 @@ button:active {
 
 .text {
     font-size: 16px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 5px;
     text-align: left;
+}
+
+#volume {
+    width: 120px;
+    height: 12px;
+    margin: 5px 0px;
 }
 
 .control input[type="range"] {
@@ -113,4 +122,8 @@ input[type="range"] {
     border: 2px solid #bbb; 
     border-radius: 0; 
     padding: 0; 
+}
+
+#key {
+    text-align: center;
 }
