@@ -34,15 +34,15 @@
     <div class="container" id="panel" style="flex: 0.6;">
 
         <div class="control">
-            <label for="reference">Reference Frequency (Hz)</label>
-            <input type="number" id="reference" min="1" pattern="[0-9]*">
+            <label for="reference">Reference Frequency</label>
+            <input type="number" id="reference" value="440" min="1" pattern="[0-9]*">
             <button id="refDecrease">-</button>
             <button id="refIncrease">+</button>
         </div>
 
         <div class="control">
             <label for="octave">Octave</label>
-            <input type="number" id="octave" step="1" pattern="[0-9]*">
+            <input type="number" id="octave" value="4" step="1" pattern="[0-9]*">
             <button id="octaveDecrease" title="(ArrowDown ↓)">-</button>
             <button id="octaveIncrease" title="(ArrowUp ↑)">+</button>
         </div>
@@ -85,7 +85,7 @@
                 <option value="sine">Sine</option>
                 <option value="square">Square</option>
                 <option value="sawtooth">Sawtooth</option>
-                <option value="triangle">Triangle</option>
+                <option value="triangle" selected>Triangle</option>
             </select>
         </div>
 

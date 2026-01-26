@@ -2,19 +2,15 @@
 
 let helpOn = false;
 
-let reference = 440; // Reference frequency
-document.getElementById("reference").value = reference;
+let reference = Number(document.getElementById("reference").value); // Reference frequency
 
-let octave = 4; // Octave number
-document.getElementById("octave").value = octave;
+let octave = Number(document.getElementById("octave").value); // Octave number
 
 let keyInMusic = 0; // key in music
 
-let waveType = "triangle"; // Wave type: sine, square, sawtooth, or triangle
-document.getElementById("waveType").value = waveType;
+let waveType = document.getElementById("waveType").value; // Wave type: sine, square, sawtooth, or triangle
 
-let soundMode = "piano"; // Sound mode: piano, strings, or bells
-document.getElementById("soundMode").value = soundMode;
+let soundMode = document.getElementById("soundMode").value; // Sound mode: piano, strings, or bells
 
 let pedal = false; // Whether the pedal is pressed or not
 
@@ -201,7 +197,7 @@ function playSound(noteCode) {
     const gainNode = audioContext.createGain();
     gainNode.connect(audioContext.destination);
     gainNodes[noteCode] = gainNode;
-    const volume = volumeCurve(parseFloat(document.getElementById("volume").value))
+    const volume = volumeCurve(Number(document.getElementById("volume").value))
     switch (waveType) { // set gain value in different cases
         case "sine":
             if (freq >= 440) {
@@ -502,7 +498,7 @@ window.addEventListener("keyup", (event) => {
 });
 
 document.getElementById("volume").addEventListener("input", (event) => {
-    const rawVolume = parseFloat(event.target.value);
+    const rawVolume = Number(event.target.value);
     for (let noteCode in oscillators) {
         noteCode = parseInt(noteCode);
         if (soundMode === "strings") {
@@ -512,7 +508,7 @@ document.getElementById("volume").addEventListener("input", (event) => {
 });
 
 document.getElementById("reference").addEventListener("input", (event) => {
-    reference = parseFloat(event.target.value);
+    reference = Number(event.target.value);
     updateActiveFrequencies(); 
     updateNoteDisplay();
 });
