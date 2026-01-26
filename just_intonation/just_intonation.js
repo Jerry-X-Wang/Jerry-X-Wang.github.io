@@ -240,30 +240,20 @@ function animate() {
 // generateControls();
 // animate();
 
-function updateActiveFrequencies() {
-    for (let noteCode in oscillators) {
-        noteCode = parseInt(noteCode);
-        const activeFrequency = frequency(noteCode);
-        if (oscillators[noteCode]) {
-            oscillators[noteCode].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
-        }
-    }
-}
-
 function octaveDecrease() {
     octave--;
     document.getElementById('octave').value = octave; 
-    //updateActiveFrequencies(); 
+    updateActiveFrequencies();
     //updateNoteDisplay();
-    refreshKeyNames();
+    updateKeyNames();
 }
 
 function octaveIncrease() {
     octave++;
     document.getElementById('octave').value = octave; 
-    //updateActiveFrequencies(); 
+    updateActiveFrequencies();
     //updateNoteDisplay();
-    refreshKeyNames();
+    updateKeyNames();
 }
 
 function keyDecrease() {
@@ -275,9 +265,9 @@ function keyDecrease() {
         keyInMusic--;
     }
     document.getElementById('key').value = keyInMusic;
-    //updateActiveFrequencies(); 
+    updateActiveFrequencies();
     //updateNoteDisplay();
-    refreshKeyNames();
+    updateKeyNames();
 }
 
 function keyIncrease() {
@@ -289,9 +279,9 @@ function keyIncrease() {
         keyInMusic++;
     }
     document.getElementById('key').value = keyInMusic;
-    //updateActiveFrequencies(); 
+    updateActiveFrequencies();
     //updateNoteDisplay();
-    refreshKeyNames();
+    updateKeyNames();
 }
 
 
@@ -361,22 +351,22 @@ document.getElementById('volume').addEventListener('input', (event) => {
 
 document.getElementById('reference').addEventListener('input', (event) => {
     reference = Number(event.target.value);
-    //updateActiveFrequencies(); 
+    updateActiveFrequencies();
     //updateNoteDisplay();
 });
 
 document.getElementById('octave').addEventListener('input', (event) => {
     octave = parseInt(event.target.value);
-    //updateActiveFrequencies(); 
+    updateActiveFrequencies();
     //updateNoteDisplay();
-    refreshKeyNames();
+    updateKeyNames();
 });
 
 document.getElementById('key').addEventListener('input', (event) => {
     keyInMusic = parseInt(event.target.value);
-    //updateActiveFrequencies(); 
+    updateActiveFrequencies();
     //updateNoteDisplay();
-    refreshKeyNames();
+    updateKeyNames();
 });
 
 document.getElementById('waveType').addEventListener('change', (event) => {
@@ -419,9 +409,6 @@ document.getElementById('pedal').addEventListener('mousedown', () => {
 document.getElementById('pedal').addEventListener('mouseup', () => {
     releasePedal();
 });
-document.getElementById('pedal').addEventListener('mouseleave', () => {
-    releasePedal();
-}); 
 document.getElementById('pedal').addEventListener('touchstart', (event) => {
     event.preventDefault(); // prevent the page from scrolling
     pressPedal();
