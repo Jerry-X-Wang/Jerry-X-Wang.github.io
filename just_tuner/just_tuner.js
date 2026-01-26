@@ -423,7 +423,7 @@ function keyDecrease() {
     if (keyInMusic == 0) {
         octave--;
         document.getElementById('octave').value = octave;
-        keyInMusic = 18;
+        keyInMusic = 11;
     } else {
         keyInMusic--;
     }
@@ -434,7 +434,7 @@ function keyDecrease() {
 }
 
 function keyIncrease() {
-    if (keyInMusic == 18) {
+    if (keyInMusic == 11) {
         octave++;
         document.getElementById('octave').value = octave;
         keyInMusic = 0;
