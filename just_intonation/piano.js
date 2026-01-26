@@ -31,8 +31,52 @@ const gainNodes = {};
 const activeNotes = new Set();
 const timeoutStopSound = {};
 
-const keyMap = { // 60 -> C4
-    
+const keyMap = {
+    'z': 48, // C3
+    's': 49,
+    'x': 50,
+    'd': 51,
+    'c': 52,
+
+    'v': 53,
+    'g': 54,
+    'b': 55,
+    'h': 56,
+    'n': 57,
+    'j': 58,
+    'm': 59,
+
+    ',': 60, // C4
+    'l': 61,
+    '.': 62,
+    ';': 63,
+    '/': 64,
+
+    'q': 65,
+    '2': 66,
+    'w': 67,
+    '3': 68,
+    'e': 69,
+    '4': 70,
+    'r': 71,
+
+    't': 72, // C5
+    '6': 73,
+    'y': 74,
+    '7': 75,
+    'u': 76,
+
+    'i': 77,
+    '9': 78,
+    'o': 79,
+    '0': 80,
+    'p': 81,
+    '-': 82,
+    '[': 83,
+
+    ']': 84, // C6
+    'Backspace': 85,
+    '\\': 86,
 }
 
 function keyPosition(noteNumber) {
@@ -99,9 +143,9 @@ function removeAllActiveKeys() {
     });
 }
 
-function refreshKeyNames() {
+function updateKeyNames() {
     keys.forEach(key => {
-        key.innerText = noteName(key.noteNumber);
+        key.querySelector('span').innerText = keyName(key.noteNumber);
     });
 }
 
@@ -335,16 +379,18 @@ function releasePedal() {
     }
 }
 
+function updateActiveFrequencies() {
+    for (let noteNumber in oscillators) {
+        noteNumber = parseInt(noteNumber);
+        const activeFrequency = frequency(noteNumber);
+        if (oscillators[noteNumber]) {
+            oscillators[noteNumber].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
+        }
+    }
+}
+
 document.getElementById('key').addEventListener('input', function() {
-    refreshKeyNames();
-});
-
-
-window.addEventListener('resize', function() {
-    windowHeight = window.innerHeight;
-    restHeight = windowHeight - pianoHeight - pedalHeight - titleHeight - margin
-    document.getElementById('panel').style.height = `${restHeight}px`;
-    document.getElementById('canvas').style.height = `${restHeight}px`;
+    updateKeyNames();
 });
 
 window.addEventListener('blur', () => {
@@ -377,7 +423,7 @@ function init() {
 
             span.style.position = 'absolute';
             span.style.width = `${keyWidth}px`;
-            switch (mod(noteNumber, 12)) {
+            switch (mod(noteNumber, 12)) { // adjust text position
                 case 0:
                 case 5:
                     span.style.left = '-20%';
@@ -417,6 +463,13 @@ function init() {
     let restHeight = windowHeight - pianoHeight - pedalHeight - titleHeight - margin
     document.getElementById('panel').style.height = `${restHeight}px`;
     document.getElementById('canvas').style.height = `${restHeight}px`;
+
+    window.addEventListener('resize', function() {
+        windowHeight = window.innerHeight;
+        restHeight = windowHeight - pianoHeight - pedalHeight - titleHeight - margin
+        document.getElementById('panel').style.height = `${restHeight}px`;
+        document.getElementById('canvas').style.height = `${restHeight}px`;
+    });
 
     // set the scroll bar to the center
     const pianoContainer = document.getElementsByClassName('piano-container')[0];
