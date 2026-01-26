@@ -35,7 +35,7 @@ body {
 
 .control input[type="number"], 
 .control input[type="range"] {
-    width: 62px; 
+    width: 100px;
     height: 20px; 
     text-align: center; 
     border-radius: 0; 
@@ -63,7 +63,7 @@ button:active {
 }
 
 #volume {
-    width: 120px;
+    width: 100px;
     height: 12px;
     margin: 5px 0px;
 }
@@ -117,9 +117,10 @@ input[type="range"] {
 
 .control select {
     color: black;
-    width: 124px; 
-    height: 24px;
-    border: 2px solid #bbb; 
+    min-width: 100px;
+    height: 20px;
+    outline: 2px solid #bbb; 
+    border: none;
     border-radius: 0; 
     padding: 0; 
 }
