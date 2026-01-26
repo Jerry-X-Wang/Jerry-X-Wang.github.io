@@ -456,7 +456,7 @@ function init() {
     }
 
     let windowHeight = window.innerHeight;
-    const margin = 70;
+    const margin = 50;
     const pianoHeight = document.getElementsByClassName('piano-container')[0].clientHeight;
     const pedalHeight = document.getElementById('pedal').clientHeight;
     const titleHeight = document.getElementsByClassName('title')[0].clientHeight;
