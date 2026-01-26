@@ -2,6 +2,7 @@ let temperament = document.getElementById('temperament').value; // autoJust, or 
 let reference = Number(document.getElementById('reference').value); // Reference frequency
 let octave = Number(document.getElementById('octave').value); // Octave number
 let keyInMusic = 0; // key in music
+let rawVolume = Number(document.getElementById('volume').value) // raw volume
 let waveType = document.getElementById('waveType').value; // Wave type: sine, square, sawtooth, or triangle
 let soundMode = document.getElementById('soundMode').value; // Sound mode: piano, strings, or bells
 let pedal = false; // Whether the pedal is pressed or not
@@ -180,7 +181,7 @@ function playSound(noteNumber) {
     const gainNode = audioContext.createGain();
     gainNode.connect(audioContext.destination);
     gainNodes[noteNumber] = gainNode;
-    const volume = volumeCurve(Number(document.getElementById('volume').value))
+    const volume = volumeCurve(rawVolume)
     switch (waveType) { // set gain value in different cases
         case 'sine':
             if (freq >= 440) {
@@ -214,7 +215,7 @@ function playSound(noteNumber) {
     oscillator.start();
     oscillators[noteNumber] = oscillator;
 
-    //updateNoteDisplay();
+    addWave(noteNumber, gainNode.gain.value ** 0.5 * 2 / rawVolume, freq, 0);
 
     const currentGain = gainNodes[noteNumber].gain.value;
     const currentTime = audioContext.currentTime;
@@ -293,7 +294,7 @@ function stopSound(noteNumber) {
     oscillators[noteNumber].stop(currentTime + time);
     delete oscillators[noteNumber];
     delete gainNodes[noteNumber];
-    //updateNoteDisplay();
+    removeWave(noteNumber);
 }
 
 function stopAllSounds() {
@@ -535,6 +536,10 @@ document.getElementById('key').addEventListener('input', (event) => {
     updateActiveFrequencies();
     //updateNoteDisplay();
     updateKeyNames();
+});
+
+document.getElementById('volume').addEventListener('change', (event) => {
+    rawVolume = Number(document.getElementById('volume').value);
 });
 
 document.getElementById('waveType').addEventListener('change', (event) => {

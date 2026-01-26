@@ -1,10 +1,8 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const dimensionInput = document.getElementById('dimensionInput');
-const dimensionControls = document.getElementById('dimensionControls');
 
-// let dimensions = parseInt(dimensionInput.value);
-let waves = [];
+let dimensions = 0;
+const waves = {};
 let points = [];
 let projectedPoints = [];
 let drawAxis = false;
@@ -12,93 +10,32 @@ let lastFrameTime = performance.now();
 
 ctx.lineJoin = 'round';
 
-// dimensionInput.addEventListener('change', () => {
-//     dimensions = parseInt(dimensionInput.value);
-//     generateControls();
-//     generatePoints();
-//     projectPoints();
-//     draw();
-// });
+function addWave(index, amp, freq, phase0, phase=phase0) {
+    waves[index] = {
+        amp: amp,
+        freq: freq,
+        phase0: phase0,
+        phase: phase,
+    };
+    dimensions = Object.keys(waves).length;
+}
 
-// function generateControls() {
-//     // Clear existing controls except the dimension selector
-//     const existingControls = dimensionControls.querySelectorAll('.control:not(:first-child)');
-//     existingControls.forEach(control => control.remove());
-
-//     waves = [];
-//     for (let i = 0; i < dimensions; i++) {
-//         const controlDiv = document.createElement('div');
-//         controlDiv.className = 'control';
-
-//         const label = document.createElement('label');
-//         label.textContent = `Dim ${i}:`;
-//         label.style.textAlign = 'right';
-
-//         const freqInput = document.createElement('input');
-//         freqInput.type = 'number';
-//         freqInput.value = 440 * (1 + i * 0.25);
-//         freqInput.min = 0.1;
-//         freqInput.step = 0.1;
-//         freqInput.addEventListener('input', () => {
-//             const freq = Number(freqInput.value);
-//             if (freq != NaN && freq != 0) {
-//                 waves[i].freq = freq;
-//             }
-//         });
-
-//         const phaseInput = document.createElement('input');
-//         phaseInput.type = 'number';
-//         phaseInput.value = 0;
-//         phaseInput.step = 0.1;
-//         phaseInput.addEventListener('input', () => {
-//             const phase0 = Number(phaseInput.value);
-//             if (phase0 != NaN) {
-//                 waves[i].phase += phase0 - waves[i].phase0;
-//                 waves[i].phase0 = phase0;
-//             }
-//         });
-
-//         const ampInput = document.createElement('input');
-//         ampInput.type = 'number';
-//         ampInput.value = 1;
-//         ampInput.min = 0;
-//         ampInput.step = 0.1;
-//         ampInput.addEventListener('input', () => { 
-//             const amp = Number(ampInput.value)
-//             if (amp != NaN) {
-//                 waves[i].amp = amp;
-//             }
-//         });
-
-//         controlDiv.appendChild(label);
-//         controlDiv.appendChild(freqInput);
-//         controlDiv.appendChild(phaseInput);
-//         controlDiv.appendChild(ampInput);
-
-//         dimensionControls.appendChild(controlDiv);
-
-//         waves.push(
-//             {   
-//                 amp: Number(ampInput.value),
-//                 freq: Number(freqInput.value), 
-//                 phase0: Number(phaseInput.value), 
-//                 phase: Number(phaseInput.value), 
-//             }
-//         );
-//     }
-// }
+function removeWave(index) {
+    delete waves[index];
+    dimensions = Object.keys(waves).length;
+}
 
 function resetPhase() {
-    for (let i = 0; i < waves.length; i++) {
+    for (let i in waves) {
         waves[i].phase = waves[i].phase0;
     }
 }
 
 function generatePoints() {
     points = [];
-    const numPoints = 1000;
-    const minFreq = Math.min(...waves.map(c => c.freq));
-    const maxFreq = Math.max(...waves.map(c => c.freq));
+    const minFreq = Math.min(...Object.values(waves).map(c => c.freq));
+    const maxFreq = Math.max(...Object.values(waves).map(c => c.freq));
+    const numPoints = Math.min(10000, maxFreq*2);
     if (drawAxis) {
         const originPoint = new Vector(...new Array(dimensions).fill(0));
         for (let i = 0; i < dimensions; i++) {
@@ -111,7 +48,7 @@ function generatePoints() {
     }
     for (let t = 0; t < numPoints; t++) {
         const point = [];
-        for (let i = 0; i < dimensions; i++) {
+        for (let i in waves) {
             const freq = parseFloat(waves[i].freq);
             const phase = parseFloat(waves[i].phase);
             const amp = parseFloat(waves[i].amp);
@@ -229,13 +166,11 @@ function animate() {
     projectPoints();
     draw();
     const timeInterval = performance.now() - lastFrameTime;
-    for (let i = 0; i < waves.length; i++) {
+    for (let i in waves) {
         waves[i].phase += 2*Math.PI * waves[i].freq * timeInterval/1000;
     }
     lastFrameTime = performance.now();
     requestAnimationFrame(animate);
 }
 
-// Initialize
-// generateControls();
-// animate();
+document.addEventListener('DOMContentLoaded', animate);
