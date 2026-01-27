@@ -28,9 +28,11 @@ let keys;
 
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const oscillators = {};
-const gainNodes = {}; 
+const gainNodes = {};
 const activeNotes = new Set();
 const timeoutStopSound = {};
+
+let midiAccess;
 
 const keyMap = {
     'z': 48, // C3
@@ -382,7 +384,7 @@ function releasePedal() {
         case 'piano':
         case 'strings':
             for (let noteNumber in oscillators) {
-                if (!activeNotes.has(noteNumber)) {
+                if (!activeNotes.has(Number(noteNumber))) {
                     stopSound(noteNumber);
                 }
             }
@@ -636,6 +638,22 @@ document.getElementById('pedal').addEventListener('contextmenu', (event) => {
     event.preventDefault();
 });
 
+function handleMIDIMessage(message) {
+    const [status, data1, data2] = message.data;
+    if (status >= 144 && status <= 159 && data2 > 0) { // Note on
+        const noteNumber = data1;
+        playNote(noteNumber);
+    } else if ((status >= 128 && status <= 143) || (status >= 144 && status <= 159 && data2 === 0)) { // Note off
+        const noteNumber = data1;
+        stopNote(noteNumber);
+    } else if (status >= 176 && status <= 191 && data1 === 64) { // Control Change: Sustain pedal (CC 64)
+        if (data2 >= 64) { // Pedal pressed (values 64-127)
+            pressPedal();
+        } else { // Pedal released (values 0-63)
+            releasePedal();
+        }
+    }
+}
 
 function init() {
     // create keys
@@ -764,6 +782,21 @@ function init() {
             event.preventDefault(); // prevent the default context menu from appearing
         });
     });
+
+    // Request MIDI access
+    if (navigator.requestMIDIAccess) {
+        navigator.requestMIDIAccess().then(function(access) {
+            midiAccess = access;
+            const inputs = midiAccess.inputs.values();
+            for (let input = inputs.next(); input && !input.done; input = inputs.next()) {
+                input.value.onmidimessage = handleMIDIMessage;
+            }
+        }).catch(function(error) {
+            console.error('MIDI access denied or not available:', error);
+        });
+    } else {
+        console.warn('Web MIDI API not supported in this browser.');
+    }
 
     changeTuningBaseDisplay();
     updateWaves();
