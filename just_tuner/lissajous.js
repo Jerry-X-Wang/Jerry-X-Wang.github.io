@@ -3,6 +3,8 @@ const ctx = canvas.getContext('2d');
 
 let dimensions = 0;
 const waves = {};
+const pointsPerPeriod = 100;
+const periods = 20;
 let points = [];
 let projectedPoints = [];
 let drawAxis = false;
@@ -33,9 +35,8 @@ function resetPhase() {
 
 function generatePoints() {
     points = [];
-    const minFreq = Math.min(...Object.values(waves).map(c => c.freq));
     const maxFreq = Math.max(...Object.values(waves).map(c => c.freq));
-    const numPoints = Math.min(10000, maxFreq*2);
+    const pointCount = pointsPerPeriod * periods; // set proper point count
     if (drawAxis) {
         const originPoint = new Vector(...new Array(dimensions).fill(0));
         for (let i = 0; i < dimensions; i++) {
@@ -46,13 +47,13 @@ function generatePoints() {
             points.push(axis);
         }
     }
-    for (let t = 0; t < numPoints; t++) {
+    for (let t = 0; t < pointCount; t++) {
         const point = [];
         for (let i in waves) {
             const freq = parseFloat(waves[i].freq);
             const phase = parseFloat(waves[i].phase);
             const amp = parseFloat(waves[i].amp);
-            point.push(amp * Math.sin(freq * t * 0.1/Math.max((maxFreq - minFreq), minFreq) + phase));
+            point.push(amp * Math.sin(2*Math.PI * freq * t / (maxFreq * pointsPerPeriod) + phase));
         }
         points.push(new Vector(...point));
     }
@@ -80,7 +81,7 @@ function projectPoints() {
         const unit1 = vector1.unit();
         const unit2 = vector2.minus(vector2.project(vector1)).unit();
         let projectedPoint = new Vector(point.dot(unit1), point.dot(unit2));
-        return projectedPoint; // project points into  coordinates plane with vector1 and vector2, orthonormal
+        return projectedPoint; // project points into coordinates plane with vector1 and vector2, orthonormal
     });
 }
 
