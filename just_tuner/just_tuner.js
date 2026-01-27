@@ -1,7 +1,7 @@
 let temperament = document.getElementById('temperament').value; // autoJust, or 12tet
 let baseFreq = Number(document.getElementById('baseFreq').value); // Base frequency
 let octave = Number(document.getElementById('octave').value); // Octave number
-let keyInMusic = 0; // key in music
+let keyOffset = 0; // key in music
 let rawVolume = Number(document.getElementById('volume').value) // raw volume
 let waveType = document.getElementById('waveType').value; // Wave type: sine, square, sawtooth, or triangle
 let soundMode = document.getElementById('soundMode').value; // Sound mode: piano, strings, or bells
@@ -143,7 +143,7 @@ function updateKeyNames() {
 }
 
 function noteName(noteNumber) {
-    return notes[mod(noteNumber + keyInMusic, 12)] + (Math.floor((noteNumber + keyInMusic) / 12) + octave - 5);
+    return notes[mod(noteNumber + keyOffset, 12)] + (Math.floor((noteNumber + keyOffset) / 12) + octave - 5);
     //     note name                                  octave
 }
 
@@ -161,7 +161,7 @@ function frequency(noteNumber) {
     if (temperament == 'autoJust') {
         
     } else if (temperament == '12tet') {
-        return baseFreq * 2**((noteNumber + keyInMusic - 69) / 12 + octave - 4);
+        return baseFreq * 2**((noteNumber + keyOffset - 69) / 12 + octave - 4);
     } else {
         console.error(`Invalid temperament: ${temperament}`);
     }
@@ -410,27 +410,27 @@ function octaveIncrease() {
 }
 
 function keyDecrease() {
-    if (keyInMusic == 0) {
+    if (keyOffset == 0) {
         octave--;
         document.getElementById('octave').value = octave;
-        keyInMusic = 11;
+        keyOffset = 11;
     } else {
-        keyInMusic--;
+        keyOffset--;
     }
-    document.getElementById('key').value = keyInMusic;
+    document.getElementById('keyOffset').value = keyOffset;
     updateActiveFrequencies();
     updateKeyNames();
 }
 
 function keyIncrease() {
-    if (keyInMusic == 11) {
+    if (keyOffset == 11) {
         octave++;
         document.getElementById('octave').value = octave;
-        keyInMusic = 0;
+        keyOffset = 0;
     } else {
-        keyInMusic++;
+        keyOffset++;
     }
-    document.getElementById('key').value = keyInMusic;
+    document.getElementById('keyOffset').value = keyOffset;
     updateActiveFrequencies();
     updateKeyNames();
 }
@@ -490,7 +490,7 @@ window.addEventListener('keyup', (event) => {
     stopNote(noteNumber);
 });
 
-document.getElementById('key').addEventListener('input', function() {
+document.getElementById('keyOffset').addEventListener('input', function() {
     updateKeyNames();
 });
 
@@ -521,8 +521,8 @@ document.getElementById('octave').addEventListener('input', (event) => {
     updateKeyNames();
 });
 
-document.getElementById('key').addEventListener('input', (event) => {
-    keyInMusic = parseInt(event.target.value);
+document.getElementById('keyOffset').addEventListener('input', (event) => {
+    keyOffset = parseInt(event.target.value);
     updateActiveFrequencies();
     updateKeyNames();
 });
