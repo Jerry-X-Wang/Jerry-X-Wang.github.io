@@ -42,9 +42,15 @@ button {
     flex-basis: 160px;
 }
 
+.checkbox {
+    flex-basis: 104px;
+}
+
 .control input[type="number"], 
 .control input[type="range"] {
     width: 100px;
+    min-width: 50px;
+    max-width: 100px;
     height: 20px; 
     text-align: center; 
     border-radius: 0; 
@@ -65,23 +71,23 @@ button:active {
     background-color: #ddd;
 }
 
+.checkbox {
+    margin: 0px;
+    width: 20px;
+    height: 20px;
+}
+
 .text {
     font-size: 16px;
     padding: 5px;
     text-align: left;
 }
 
-#volume {
-    width: 100px;
-    height: 12px;
-    margin: 5px 0px;
-}
-
 .control input[type="range"] {
     -webkit-appearance: none; /* Remove default style (for Webkit browsers) */
     appearance: none; /* Remove default style */
-    width: 12px;
-    height: 22px; 
+    height: 12px;
+    margin: 5px 0px;
     border-radius: 0; 
 }
 
@@ -89,7 +95,7 @@ button:active {
     -webkit-appearance: none; /* Remove default style */
     appearance: none; /* Remove default style */
     width: 12px;
-    height: 22px; 
+    height: 24px; 
     background: #bbb; 
     border-radius: 0; 
     cursor: pointer; 
@@ -97,7 +103,7 @@ button:active {
 
 .control input[type="range"]::-moz-range-thumb {
     width: 12px; 
-    height: 22px; 
+    height: 24px; 
     background: #bbb; 
     border-radius: 0;
     cursor: pointer; 
@@ -105,7 +111,7 @@ button:active {
 
 .control input[type="range"]::-ms-thumb {
     width: 12px;
-    height: 22px; 
+    height: 24px; 
     background: #bbb; 
     border-radius: 0;
     cursor: pointer;
@@ -126,11 +132,11 @@ input[type="range"] {
 
 .control select {
     color: black;
-    min-width: 100px;
-    max-width: 100px;
-    height: 20px;
-    outline: 2px solid #bbb; 
-    border: none;
+    width: 104px;
+    min-width: 52px;
+    max-width: 104px;
+    height: 24px;
+    border: 2px solid #bbb;
     border-radius: 0; 
     padding: 0; 
 }

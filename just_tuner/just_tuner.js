@@ -5,6 +5,9 @@ let keyInMusic = 0; // key in music
 let rawVolume = Number(document.getElementById('volume').value) // raw volume
 let waveType = document.getElementById('waveType').value; // Wave type: sine, square, sawtooth, or triangle
 let soundMode = document.getElementById('soundMode').value; // Sound mode: piano, strings, or bells
+let phaseDiff = document.getElementById('phaseDiff').checked; // whether to consider phase difference
+console.log(phaseDiff);
+
 let pedal = false; // Whether the pedal is pressed or not
 
 const piano = document.getElementById('piano');
@@ -16,7 +19,7 @@ const startNote = 21; // A0
 const endNote = 108; // C8
 let whiteKeyWidth = 60; // pixel width of a white key
 let borderWidth = 2; // pixel width of key border
-const offset = -Math.floor(((startNote + 8) * (5/12)*whiteKeyWidth) / whiteKeyWidth) * whiteKeyWidth; // offset of the keyboard from the left edge of the piano (Math.floor is to round down to the nearest multiple of whiteKeyWidth)
+const offset = -Math.floor((startNote * (7/12)*whiteKeyWidth) / whiteKeyWidth) * whiteKeyWidth; // offset of the keyboard from the left edge of the piano (Math.floor is to round down to the nearest multiple of whiteKeyWidth)
 // in the following arrays, 0 -> C
 const whiteKeyNumbers = [0, 2, 4, 5, 7, 9, 11];
 const blackKeyNumbers = [1, 3, 6, 8, 10];
@@ -216,6 +219,9 @@ function playSound(noteNumber) {
     oscillators[noteNumber] = oscillator;
 
     addWave(noteNumber, gainNode.gain.value ** 0.5 * 2 / rawVolume, freq, 0);
+    if (!phaseDiff) {
+        resetPhase();
+    }
 
     const currentGain = gainNodes[noteNumber].gain.value;
     const currentTime = audioContext.currentTime;
@@ -392,18 +398,6 @@ function updateActiveFrequencies() {
     }
 }
 
-document.getElementById('key').addEventListener('input', function() {
-    updateKeyNames();
-});
-
-window.addEventListener('blur', () => {
-    removeAllActiveKeys();
-});
-
-window.addEventListener('contextmenu', () => {
-    removeAllActiveKeys();
-});
-
 function octaveDecrease() {
     octave--;
     document.getElementById('octave').value = octave; 
@@ -503,15 +497,20 @@ window.addEventListener('keyup', (event) => {
     stopNote(noteCode);
 });
 
-document.getElementById('volume').addEventListener('input', (event) => {
-    const rawVolume = Number(event.target.value);
-    for (let noteCode in oscillators) {
-        noteCode = parseInt(noteCode);
-        if (soundMode === 'strings') {
-            gainNodes[noteCode].gain.value = volumeCurve(rawVolume); // set gain value
-        }
-    }
+document.getElementById('key').addEventListener('input', function() {
+    updateKeyNames();
 });
+
+window.addEventListener('blur', () => {
+    stopAllSounds();
+    removeAllActiveKeys();
+});
+
+window.addEventListener('contextmenu', () => {
+    removeAllActiveKeys();
+    stopAllSounds();
+});
+
 
 document.getElementById('temperament').addEventListener('change', (event) => {
     temperament = event.target.value;
@@ -538,8 +537,14 @@ document.getElementById('key').addEventListener('input', (event) => {
     updateKeyNames();
 });
 
-document.getElementById('volume').addEventListener('change', (event) => {
-    rawVolume = Number(document.getElementById('volume').value);
+document.getElementById('volume').addEventListener('input', (event) => {
+    rawVolume = Number(event.target.value);
+    for (let noteCode in oscillators) {
+        noteCode = parseInt(noteCode);
+        if (soundMode === 'strings') {
+            gainNodes[noteCode].gain.value = volumeCurve(rawVolume); // set gain value
+        }
+    }
 });
 
 document.getElementById('waveType').addEventListener('change', (event) => {
@@ -550,13 +555,13 @@ document.getElementById('soundMode').addEventListener('change', (event) => {
     soundMode = event.target.value;
 });  
 
-window.addEventListener('blur', () => {
-    stopAllSounds();
-});
-
-window.addEventListener('contextmenu', () => {
-    stopAllSounds();
-});
+document.getElementById('phaseDiff').addEventListener('change', (event) => {
+    phaseDiff = event.target.checked;
+    if (!phaseDiff) {
+        resetPhase();
+        console.log('reset phase')
+    }
+});  
 
 const controls = document.querySelectorAll('.control input, .control select, .control button');
 document.addEventListener('mousemove', (event) => {
