@@ -1,18 +1,19 @@
 let temperament = document.getElementById('temperament').value; // autoJust, or 12tet
+let tuningBase = document.getElementById('tuningBase').value; // Base of tuning, only for (auto) just tuning
+let rawVolume = Number(document.getElementById('volume').value) // raw volume
 let baseFreq = Number(document.getElementById('baseFreq').value); // Base frequency
 let octave = Number(document.getElementById('octave').value); // Octave number
 let keyOffset = 0; // key in music
-let rawVolume = Number(document.getElementById('volume').value) // raw volume
 let waveType = document.getElementById('waveType').value; // Wave type: sine, square, sawtooth, or triangle
 let soundMode = document.getElementById('soundMode').value; // Sound mode: piano, strings, or bells
 let phaseDiff = document.getElementById('phaseDiff').checked; // whether to consider phase difference
-console.log(phaseDiff);
 
 let pedal = false; // Whether the pedal is pressed or not
 
 const piano = document.getElementById('piano');
 
 const notes = ['C', 'C♯(D♭)', 'D', 'D♯(E♭)', 'E', 'F', 'F♯(G♭)', 'G', 'G♯(A♭)', 'A', 'A♯(B♭)', 'B']
+const justRatio = [1, 16/15, 9/8, 6/5, 5/4, 4/3, 45/32, 3/2, 8/5, 5/3, 9/5, 15/8] // frequency ratio of just intonation
 
 // use midi note number: 60 -> C4
 const startNote = 21; // A0
@@ -158,51 +159,59 @@ function keyName(noteNumber) {
 }
 
 function frequency(noteNumber) {
-    if (temperament == 'autoJust') {
-        
-    } else if (temperament == '12tet') {
-        return baseFreq * 2**((noteNumber + keyOffset - 69) / 12 + octave - 4);
-    } else {
-        console.error(`Invalid temperament: ${temperament}`);
+    switch (temperament) {
+        case 'autoJust':
+            return;
+        case 'just':
+            const tuningBaseRatio = 1 / justRatio[mod(9 - tuningBase, 12)];
+            let tuningBaseFreq = baseFreq * tuningBaseRatio;
+            if (tuningBase > 9) { // lower by a octave if the tuning base is lower than A
+                tuningBaseFreq *= 2;
+            }
+            const ratioInOctave = justRatio[mod(noteNumber + keyOffset - tuningBase, 12)];
+            const ratioOctave = 2 ** Math.floor((noteNumber + keyOffset - tuningBase - 60) / 12);
+            return tuningBaseFreq * ratioInOctave * ratioOctave;
+        case '12tet':
+            return baseFreq * 2**((noteNumber + keyOffset - 69) / 12 + octave - 4);
+        default:
+            console.error(`Invalid temperament: ${temperament}`);
+            break;
     }
 }
 
-function volumeCurve(rawVolume) {
-    return (rawVolume / 2) ** 2;
+function volumeCurve(rawVolume, freq=440) {
+    let volume = (rawVolume / 2) ** 2;
+        switch (waveType) { // set gain value in different cases
+        case 'sine':
+            if (freq < 440) {
+                volume *= (440/freq)**0.5;
+            }
+            break;
+        case 'square':
+        case 'sawtooth':
+            break;
+        case 'triangle':
+            if (freq < 440) {
+                volume *= (440/freq)**0.5;
+            }
+            break;
+        default:
+            break;
+    } 
+    if (soundMode == 'strings') {
+        volume *= 0.7;
+    }
+    return volume;
 }
 
 function playSound(noteNumber) {
     const freq = frequency(noteNumber);
+    console.log(`Playing sound: ${freq} Hz` )
     
     const gainNode = audioContext.createGain();
     gainNode.connect(audioContext.destination);
     gainNodes[noteNumber] = gainNode;
-    const volume = volumeCurve(rawVolume)
-    switch (waveType) { // set gain value in different cases
-        case 'sine':
-            if (freq >= 440) {
-                gainNode.gain.value = volume
-            } else {
-                gainNode.gain.value = volume * (440/freq)**0.5;
-            }
-            break;
-        case 'square':
-            gainNode.gain.value = volume;
-            break;
-        case 'sawtooth':
-            gainNode.gain.value = volume;
-            break;
-        case 'triangle':
-            if (freq >= 440) {
-                gainNode.gain.value = volume
-            } else {
-                gainNode.gain.value = volume * (440/freq)**0.5;
-            }
-            break;
-        default:
-            gainNode.gain.value = volume; 
-            break;
-    } 
+    gainNode.gain.value = volumeCurve(rawVolume, freq)
 
     const oscillator = audioContext.createOscillator();
     oscillator.type = waveType; // wave type
@@ -265,7 +274,6 @@ function playSound(noteNumber) {
             }
             break;
         case 'strings':
-            gainNodes[noteNumber].gain.setValueAtTime(0.7 * currentGain, currentTime);
             break;
         default:
             oscillators[noteNumber].stop(currentTime);
@@ -387,6 +395,20 @@ function updateActiveFrequencies() {
     }
 }
 
+function tuningBaseDecrease() {
+    tuningBase--;
+    tuningBase = mod(tuningBase, 12);
+    document.getElementById('tuningBase').value = tuningBase;
+    updateActiveFrequencies();
+}
+
+function tuningBaseIncrease() {
+    tuningBase++;
+    tuningBase = mod(tuningBase, 12);
+    document.getElementById('tuningBase').value = tuningBase;
+    updateActiveFrequencies();
+}
+
 function updateWaves() {
     for (let noteNumber in waves) {
         waves[noteNumber].amp = gainNodes[noteNumber].gain.value * 4 / rawVolume ** 2;
@@ -435,6 +457,20 @@ function keyIncrease() {
     updateKeyNames();
 }
 
+function changeTuningBaseDisplay() {
+    switch (temperament) {
+        case 'autoJust':
+        case 'just':
+            document.getElementById('tuningBase').parentNode.style.display = 'flex';
+            break;
+        case '12tet':
+            document.getElementById('tuningBase').parentNode.style.display = 'none';
+            break;
+        default:
+            console.error(`Invalid temperament ${temperament}`)
+            break;
+    }
+}
 
 window.addEventListener('keydown', (event) => {
     if (event.target.tagName.toLowerCase() === 'input') {
@@ -463,11 +499,11 @@ window.addEventListener('keydown', (event) => {
                 event.preventDefault();
                 break;
             case 'ArrowLeft':
-                keyDecrease();
+                tuningBaseDecrease();
                 event.preventDefault();
                 break;
             case 'ArrowRight':
-                keyIncrease();
+                tuningBaseIncrease();
                 event.preventDefault();
                 break;
             case ' ':
@@ -504,10 +540,23 @@ window.addEventListener('contextmenu', () => {
     stopAllSounds();
 });
 
-
 document.getElementById('temperament').addEventListener('change', (event) => {
     temperament = event.target.value;
     updateActiveFrequencies();
+    changeTuningBaseDisplay();
+});
+
+document.getElementById('tuningBase').addEventListener('change', (event) => {
+    tuningBase = event.target.value;
+});
+
+document.getElementById('volume').addEventListener('input', (event) => {
+    rawVolume = Number(event.target.value);
+    for (let noteNumber in oscillators) {
+        if (soundMode === 'strings') {
+            gainNodes[noteNumber].gain.value = volumeCurve(rawVolume, oscillators[noteNumber].frequency.value); // set gain value
+        }
+    }
 });
 
 document.getElementById('baseFreq').addEventListener('input', (event) => {
@@ -527,15 +576,6 @@ document.getElementById('keyOffset').addEventListener('input', (event) => {
     updateKeyNames();
 });
 
-document.getElementById('volume').addEventListener('input', (event) => {
-    rawVolume = Number(event.target.value);
-    for (let noteNumber in oscillators) {
-        if (soundMode === 'strings') {
-            gainNodes[noteNumber].gain.value = volumeCurve(rawVolume); // set gain value
-        }
-    }
-});
-
 document.getElementById('waveType').addEventListener('change', (event) => {
     waveType = event.target.value;
 });   
@@ -548,7 +588,6 @@ document.getElementById('phaseDiff').addEventListener('change', (event) => {
     phaseDiff = event.target.checked;
     if (!phaseDiff) {
         resetPhase();
-        console.log('reset phase')
     }
 });  
 
@@ -716,6 +755,7 @@ function init() {
         });
     });
 
+    changeTuningBaseDisplay();
     updateWaves();
 }
 

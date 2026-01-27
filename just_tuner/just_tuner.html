@@ -29,8 +29,32 @@
                 <label class="panel" for="temperament">Temperament</label>
                 <select id="temperament">
                     <option value="autoJust">Auto Just Intonation</option>
-                    <option value="12tet" selected>12-TET</option>
+                    <option value="just" selected>Just Intonation</option>
+                    <option value="12tet">12-TET</option>
                 </select>
+            </div>
+
+            <div class="control" style="display: none;">
+                <label class="panel" for="tuningBase">Tuning Base</label>
+                <select id="tuningBase">
+                    <option value=0>C</option>
+                    <option value=1>C♯(D♭)</option>
+                    <option value=2>D</option>
+                    <option value=3>D♯(E♭)</option>
+                    <option value=4>E</option>
+                    <option value=5>F</option>
+                    <option value=6>F♯(G♭)</option>
+                    <option value=7>G</option>
+                    <option value=8>G♯(A♭)</option>
+                    <option value=9>A</option>
+                    <option value=10>A♯(B♭)</option>
+                    <option value=11>B</option>
+                </select>
+            </div>
+
+            <div class="control">
+                <label class="panel" for="volume">Volume</label>
+                <input type="range" id="volume" min="0" max="1" step="0.01" value="0.7">
             </div>
 
             <div class="control">
@@ -62,11 +86,6 @@
             </div>
 
             <div class="control">
-                <label class="panel" for="volume">Volume</label>
-                <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
-            </div>
-
-            <div class="control">
                 <label class="panel" for="waveType">Wave Type</label>
                 <select id="waveType">
                     <option value="sine">Sine</option>
@@ -87,7 +106,7 @@
 
             <div class="control">
                 <label class="panel" for="Phase Difference">Phase Difference</label>
-                <input type="checkbox" class="checkbox" id="phaseDiff" checked>
+                <input type="checkbox" class="checkbox" id="phaseDiff">
             </div>
         </div>
 
