@@ -162,7 +162,13 @@ function frequency(noteNumber) {
     switch (temperament) {
         case 'autoJust':
             return;
-        case 'just':
+        case '12tetPlusJust': {
+            const tuningBaseFreq = baseFreq * 2**((tuningBase + keyOffset - 9) / 12 + octave - 4);
+            const ratioInOctave = justRatio[mod(noteNumber + keyOffset - tuningBase, 12)];
+            const ratioOctave = 2 ** Math.floor((noteNumber + keyOffset - tuningBase - 60) / 12);
+            return tuningBaseFreq * ratioInOctave * ratioOctave;
+        }
+        case 'just': {
             const tuningBaseRatio = 1 / justRatio[mod(9 - tuningBase, 12)];
             let tuningBaseFreq = baseFreq * tuningBaseRatio;
             if (tuningBase > 9) { // lower by a octave if the tuning base is lower than A
@@ -171,11 +177,14 @@ function frequency(noteNumber) {
             const ratioInOctave = justRatio[mod(noteNumber + keyOffset - tuningBase, 12)];
             const ratioOctave = 2 ** Math.floor((noteNumber + keyOffset - tuningBase - 60) / 12);
             return tuningBaseFreq * ratioInOctave * ratioOctave;
-        case '12tet':
+        }
+        case '12tet': {
             return baseFreq * 2**((noteNumber + keyOffset - 69) / 12 + octave - 4);
-        default:
+        }
+        default: {
             console.error(`Invalid temperament: ${temperament}`);
             break;
+        }
     }
 }
 
@@ -461,6 +470,7 @@ function changeTuningBaseDisplay() {
     switch (temperament) {
         case 'autoJust':
         case 'just':
+        case '12tetPlusJust':
             document.getElementById('tuningBase').parentNode.style.display = 'flex';
             break;
         case '12tet':
@@ -547,7 +557,7 @@ document.getElementById('temperament').addEventListener('change', (event) => {
 });
 
 document.getElementById('tuningBase').addEventListener('change', (event) => {
-    tuningBase = event.target.value;
+    tuningBase = Number(event.target.value);
 });
 
 document.getElementById('volume').addEventListener('input', (event) => {
