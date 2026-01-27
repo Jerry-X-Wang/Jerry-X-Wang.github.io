@@ -2,7 +2,7 @@
 
 let helpOn = false;
 
-let reference = Number(document.getElementById("reference").value); // Reference frequency
+let baseFreq = Number(document.getElementById("baseFreq").value); // Base frequency
 
 let octave = Number(document.getElementById("octave").value); // Octave number
 
@@ -148,7 +148,7 @@ function toggleHelp() {
 }
 
 function frequency(noteCode) {
-    return reference * 2**((noteCode + keyInMusic)/19 + octave - 4);
+    return baseFreq * 2**((noteCode + keyInMusic)/19 + octave - 4);
 }
 
 function volumeCurve(rawVolume) {
@@ -507,21 +507,21 @@ document.getElementById("volume").addEventListener("input", (event) => {
     }
 });
 
-document.getElementById("reference").addEventListener("input", (event) => {
-    reference = Number(event.target.value);
+document.getElementById("baseFreq").addEventListener("input", (event) => {
+    baseFreq = Number(event.target.value);
     updateActiveFrequencies(); 
     updateNoteDisplay();
 });
-document.getElementById("refIncrease").addEventListener("click", () => {
-    reference++;
-    document.getElementById("reference").value = reference;
+document.getElementById("freqIncrease").addEventListener("click", () => {
+    baseFreq++;
+    document.getElementById("baseFreq").value = baseFreq;
     updateActiveFrequencies();
     updateNoteDisplay();
     document.activeElement.blur();
 });
-document.getElementById("refDecrease").addEventListener("click", () => {
-    if (reference > 1) reference--;
-    document.getElementById("reference").value = reference;
+document.getElementById("freqDecrease").addEventListener("click", () => {
+    if (baseFreq > 1) baseFreq--;
+    document.getElementById("baseFreq").value = baseFreq;
     updateActiveFrequencies();
     updateNoteDisplay();
     document.activeElement.blur();
