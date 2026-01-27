@@ -190,39 +190,19 @@ function frequency(noteNumber) {
     }
 }
 
-function volumeCurve(rawVolume, freq=440) {
+function volumeCurve(rawVolume) {
     let volume = (rawVolume / 2) ** 2;
-        switch (waveType) { // set gain value in different cases
-        case 'sine':
-            if (freq < 440) {
-                volume *= (440/freq)**0.5;
-            }
-            break;
-        case 'square':
-        case 'sawtooth':
-            break;
-        case 'triangle':
-            if (freq < 440) {
-                volume *= (440/freq)**0.5;
-            }
-            break;
-        default:
-            break;
-    } 
-    if (soundMode == 'strings') {
-        volume *= 0.7;
-    }
     return volume;
 }
 
-function playSound(noteNumber) {
+function playSound(noteNumber, velocity=95) {
     const freq = frequency(noteNumber);
     console.log(`Playing sound: ${freq} Hz` )
     
     const gainNode = audioContext.createGain();
     gainNode.connect(audioContext.destination);
     gainNodes[noteNumber] = gainNode;
-    gainNode.gain.value = volumeCurve(rawVolume, freq)
+    gainNode.gain.value = volumeCurve(rawVolume) * (velocity/127)**2
 
     const oscillator = audioContext.createOscillator();
     oscillator.type = waveType; // wave type
@@ -321,7 +301,7 @@ function stopAllSounds() {
     }
 }
 
-function playNote(noteNumber) {
+function playNote(noteNumber, velocity=95) {
     keys.forEach(key => {
         if (key.noteNumber == noteNumber && !key.classList.contains('active')) {
             key.classList.add('active');
@@ -331,7 +311,7 @@ function playNote(noteNumber) {
         stopSound(noteNumber); // if the note is already playing, stop the sound first, then we can start the new sound
     }
     activeNotes.add(noteNumber);
-    playSound(noteNumber);
+    playSound(noteNumber, velocity);
 }
 
 function stopNote(noteNumber) {
@@ -422,7 +402,7 @@ function tuningBaseIncrease() {
 
 function updateWaves() {
     for (let noteNumber in waves) {
-        waves[noteNumber].amp = gainNodes[noteNumber].gain.value * 4 / rawVolume ** 2;
+        waves[noteNumber].amp = gainNodes[noteNumber].gain.value * 16 / rawVolume ** 2;
         waves[noteNumber].freq = frequency(Number(noteNumber));
     }
     requestAnimationFrame(updateWaves);
@@ -483,6 +463,22 @@ function changeTuningBaseDisplay() {
             break;
     }
 }
+
+function handleMIDIMessage(message) {
+    const [status, noteNumber, velocity] = message.data;
+    if (status >= 144 && status <= 159 && velocity > 0) { // Note on
+        playNote(noteNumber, velocity);
+    } else if ((status >= 128 && status <= 143) || (status >= 144 && status <= 159 && velocity === 0)) { // Note off
+        stopNote(noteNumber);
+    } else if (status >= 176 && status <= 191 && noteNumber === 64) { // Control Change: Sustain pedal (CC 64)
+        if (velocity >= 64) { // Pedal pressed (values 64-127)
+            pressPedal();
+        } else { // Pedal released (values 0-63)
+            releasePedal();
+        }
+    }
+}
+
 
 window.addEventListener('keydown', (event) => {
     if (event.target.tagName.toLowerCase() === 'input') {
@@ -564,11 +560,6 @@ document.getElementById('tuningBase').addEventListener('change', (event) => {
 
 document.getElementById('volume').addEventListener('input', (event) => {
     rawVolume = Number(event.target.value);
-    for (let noteNumber in oscillators) {
-        if (soundMode === 'strings') {
-            gainNodes[noteNumber].gain.value = volumeCurve(rawVolume, oscillators[noteNumber].frequency.value); // set gain value
-        }
-    }
 });
 
 document.getElementById('baseFreq').addEventListener('input', (event) => {
@@ -637,23 +628,6 @@ document.getElementById('pedal').addEventListener('touchend', () => {
 document.getElementById('pedal').addEventListener('contextmenu', (event) => {
     event.preventDefault();
 });
-
-function handleMIDIMessage(message) {
-    const [status, data1, data2] = message.data;
-    if (status >= 144 && status <= 159 && data2 > 0) { // Note on
-        const noteNumber = data1;
-        playNote(noteNumber);
-    } else if ((status >= 128 && status <= 143) || (status >= 144 && status <= 159 && data2 === 0)) { // Note off
-        const noteNumber = data1;
-        stopNote(noteNumber);
-    } else if (status >= 176 && status <= 191 && data1 === 64) { // Control Change: Sustain pedal (CC 64)
-        if (data2 >= 64) { // Pedal pressed (values 64-127)
-            pressPedal();
-        } else { // Pedal released (values 0-63)
-            releasePedal();
-        }
-    }
-}
 
 function init() {
     // create keys
