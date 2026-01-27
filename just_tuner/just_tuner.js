@@ -1,5 +1,5 @@
 let temperament = document.getElementById('temperament').value; // autoJust, or 12tet
-let reference = Number(document.getElementById('reference').value); // Reference frequency
+let baseFreq = Number(document.getElementById('baseFreq').value); // Base frequency
 let octave = Number(document.getElementById('octave').value); // Octave number
 let keyInMusic = 0; // key in music
 let rawVolume = Number(document.getElementById('volume').value) // raw volume
@@ -77,6 +77,8 @@ const keyMap = {
     ']': 84, // C6
     'Backspace': 85,
     '\\': 86,
+
+    '`': 88,
 }
 
 function keyPosition(noteNumber) {
@@ -124,15 +126,6 @@ function keyPosition(noteNumber) {
     }
     position += whiteKeyWidth * (7*Math.floor(noteNumber/12)) + offset;
     return position;
-    // if ([0, 2, 4].includes(mod(noteNumber, 12))) {
-    //     return whiteKeyWidth/2 * (noteNumber + 2*Math.floor(noteNumber/12)) + offset;
-
-    // } else if ([5, 7, 9, 11].includes(mod(noteNumber, 12))) {
-    //     return whiteKeyWidth/2 * (noteNumber + 2*Math.floor(noteNumber/12) + 1) + offset;
-
-    // } else if ((mod(noteNumber, 12)) == 1) {
-    //     return whiteKeyWidth * (7*Math.floor(noteNumber/12)) + offset;
-    // }
 }
 
 function removeAllActiveKeys() {
@@ -168,7 +161,7 @@ function frequency(noteNumber) {
     if (temperament == 'autoJust') {
         
     } else if (temperament == '12tet') {
-        return reference * 2**((noteNumber + keyInMusic - 69) / 12 + octave - 4);
+        return baseFreq * 2**((noteNumber + keyInMusic - 69) / 12 + octave - 4);
     } else {
         console.error(`Invalid temperament: ${temperament}`);
     }
@@ -218,7 +211,7 @@ function playSound(noteNumber) {
     oscillator.start();
     oscillators[noteNumber] = oscillator;
 
-    addWave(noteNumber, gainNode.gain.value ** 0.5 * 2 / rawVolume, freq, 0);
+    addWave(noteNumber, 0, freq, 0); // amp will be updated in updateWaves()
     if (!phaseDiff) {
         resetPhase();
     }
@@ -305,7 +298,6 @@ function stopSound(noteNumber) {
 
 function stopAllSounds() {
     for (let noteNumber in oscillators) {
-        noteNumber = parseInt(noteNumber);
         stopSound(noteNumber);
     }
 }
@@ -347,7 +339,6 @@ function stopNote(noteNumber) {
     
     if (activeNotes.has(noteNumber)) {
         activeNotes.delete(noteNumber);
-        //updateNoteDisplay();
     }
 }
 
@@ -374,7 +365,6 @@ function releasePedal() {
         case 'piano':
         case 'strings':
             for (let noteNumber in oscillators) {
-                noteNumber = parseInt(noteNumber);
                 if (!activeNotes.has(noteNumber)) {
                     stopSound(noteNumber);
                 }
@@ -390,19 +380,25 @@ function releasePedal() {
 
 function updateActiveFrequencies() {
     for (let noteNumber in oscillators) {
-        noteNumber = parseInt(noteNumber);
-        const activeFrequency = frequency(noteNumber);
+        const activeFrequency = frequency(Number(noteNumber));
         if (oscillators[noteNumber]) {
             oscillators[noteNumber].frequency.setValueAtTime(activeFrequency, audioContext.currentTime);
         }
     }
 }
 
+function updateWaves() {
+    for (let noteNumber in waves) {
+        waves[noteNumber].amp = gainNodes[noteNumber].gain.value * 4 / rawVolume ** 2;
+        waves[noteNumber].freq = frequency(Number(noteNumber));
+    }
+    requestAnimationFrame(updateWaves);
+}
+
 function octaveDecrease() {
     octave--;
     document.getElementById('octave').value = octave; 
     updateActiveFrequencies();
-    //updateNoteDisplay();
     updateKeyNames();
 }
 
@@ -410,7 +406,6 @@ function octaveIncrease() {
     octave++;
     document.getElementById('octave').value = octave; 
     updateActiveFrequencies();
-    //updateNoteDisplay();
     updateKeyNames();
 }
 
@@ -424,7 +419,6 @@ function keyDecrease() {
     }
     document.getElementById('key').value = keyInMusic;
     updateActiveFrequencies();
-    //updateNoteDisplay();
     updateKeyNames();
 }
 
@@ -438,7 +432,6 @@ function keyIncrease() {
     }
     document.getElementById('key').value = keyInMusic;
     updateActiveFrequencies();
-    //updateNoteDisplay();
     updateKeyNames();
 }
 
@@ -452,12 +445,12 @@ window.addEventListener('keydown', (event) => {
     }
     
     const keyCode = event.key;
-    const noteCode = keyMap[keyCode];
-    const freq = frequency(noteCode);
+    const noteNumber = keyMap[keyCode];
+    const freq = frequency(noteNumber);
     
     if (freq) {
-        if (!activeNotes.has(noteCode)) {
-            playNote(noteCode);
+        if (!activeNotes.has(noteNumber)) {
+            playNote(noteNumber);
         }
     } else {
         switch (keyCode) {
@@ -486,7 +479,7 @@ window.addEventListener('keydown', (event) => {
 
 window.addEventListener('keyup', (event) => {
     const keyCode = event.key;
-    const noteCode = keyMap[keyCode];
+    const noteNumber = keyMap[keyCode];
 
     switch (keyCode) {
         case ' ':
@@ -494,7 +487,7 @@ window.addEventListener('keyup', (event) => {
             break;
     }
 
-    stopNote(noteCode);
+    stopNote(noteNumber);
 });
 
 document.getElementById('key').addEventListener('input', function() {
@@ -517,32 +510,28 @@ document.getElementById('temperament').addEventListener('change', (event) => {
     updateActiveFrequencies();
 });
 
-document.getElementById('reference').addEventListener('input', (event) => {
-    reference = Number(event.target.value);
+document.getElementById('baseFreq').addEventListener('input', (event) => {
+    baseFreq = Number(event.target.value);
     updateActiveFrequencies();
-    //updateNoteDisplay();
 });
 
 document.getElementById('octave').addEventListener('input', (event) => {
     octave = parseInt(event.target.value);
     updateActiveFrequencies();
-    //updateNoteDisplay();
     updateKeyNames();
 });
 
 document.getElementById('key').addEventListener('input', (event) => {
     keyInMusic = parseInt(event.target.value);
     updateActiveFrequencies();
-    //updateNoteDisplay();
     updateKeyNames();
 });
 
 document.getElementById('volume').addEventListener('input', (event) => {
     rawVolume = Number(event.target.value);
-    for (let noteCode in oscillators) {
-        noteCode = parseInt(noteCode);
+    for (let noteNumber in oscillators) {
         if (soundMode === 'strings') {
-            gainNodes[noteCode].gain.value = volumeCurve(rawVolume); // set gain value
+            gainNodes[noteNumber].gain.value = volumeCurve(rawVolume); // set gain value
         }
     }
 });
@@ -726,6 +715,8 @@ function init() {
             event.preventDefault(); // prevent the default context menu from appearing
         });
     });
+
+    updateWaves();
 }
 
 document.addEventListener('DOMContentLoaded', init);
