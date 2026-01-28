@@ -271,3 +271,16 @@ function gcd(...numbers) {
     const firstTwoGcd = twoNumGcd(numbers[0], numbers[1]);
     return gcd(firstTwoGcd, ...numbers.slice(2));
 }
+
+function twoNumLcm(a, b) {
+    return a * b / twoNumGcd(a, b);
+}
+
+function lcm(...numbers) {
+    if (numbers.length === 0) return;
+    if (numbers.length === 1) return Math.abs(numbers[0]);
+    if (numbers.length === 2) return twoNumLcm(numbers[0], numbers[1]);
+    
+    const firstTwoLcm = twoNumLcm(numbers[0], numbers[1]);
+    return lcm(firstTwoLcm, ...numbers.slice(2));
+}
