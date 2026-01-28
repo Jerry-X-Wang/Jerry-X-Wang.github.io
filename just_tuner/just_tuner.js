@@ -164,7 +164,7 @@ function frequency(noteNumber) {
     switch (temperament) {
         case 'autoJust':
         case '12tetPlusJust': {
-            const tuningBaseFreq = baseFreq * 2**((tuningBase + keyOffset - 9) / 12 + octave - 4);
+            const tuningBaseFreq = baseFreq * 2**((tuningBase - 9) / 12 + octave - 4);
             const ratioInOctave = justRatio[mod(noteNumber + keyOffset - tuningBase, 12)];
             const ratioOctave = 2 ** Math.floor((noteNumber + keyOffset - tuningBase - 60) / 12);
             return tuningBaseFreq * ratioInOctave * ratioOctave;
