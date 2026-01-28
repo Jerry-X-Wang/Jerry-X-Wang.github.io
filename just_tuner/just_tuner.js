@@ -193,8 +193,24 @@ function frequency(noteNumber) {
     }
 }
 
-function volumeCurve(rawVolume) {
+function volumeCurve(rawVolume, freq) {
     let volume = (rawVolume / 2) ** 2;
+        switch (waveType) { // set gain value in different cases
+        case 'sine':
+            volume *= (440/freq)**0.5;
+            break;
+        case 'square':
+        case 'sawtooth':
+            break;
+        case 'triangle':
+            volume *= 1.5 * (440/freq)**0.3;
+            break;
+        default:
+            break;
+    } 
+    if (soundMode == 'strings') {
+        volume *= 0.7;
+    }
     return volume;
 }
 
@@ -281,7 +297,7 @@ function playSound(noteNumber, velocity=95) {
     const gainNode = audioContext.createGain();
     gainNode.connect(masterGainNode);
     gainNodes[noteNumber] = gainNode;
-    gainNode.gain.value = volumeCurve(rawVolume) * (velocity/127)**2
+    gainNode.gain.value = volumeCurve(rawVolume, freq) * (velocity/127)**2
 
     const oscillator = audioContext.createOscillator();
     oscillator.type = waveType; // wave type
@@ -307,7 +323,7 @@ function playSound(noteNumber, velocity=95) {
 
     switch (soundMode) {
         case 'piano':
-            halfLife = 0.5 * (440/freq)**0.5;
+            halfLife = (440/freq)**0.5;
 
             for (; gain > 0.0001; gain -= 0.0001) { // set the gains from now on, until it's too quiet
                 time = timeCurve(gain);
@@ -321,7 +337,7 @@ function playSound(noteNumber, velocity=95) {
             }, time * 1000);
             break;
         case 'bells':
-            halfLife = (440/freq)**0.5;
+            halfLife = 1.2 * (440/freq)**0.5;
 
             for (; gain > 0.0001; gain -= 0.0001) { // set the gains from now on, until it's too quiet
                 time = timeCurve(gain);
