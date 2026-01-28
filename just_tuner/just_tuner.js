@@ -3,10 +3,10 @@ let tuningBase = document.getElementById('tuningBase').value; // Base of tuning,
 let rawVolume = Number(document.getElementById('volume').value) // raw volume
 let baseFreq = Number(document.getElementById('baseFreq').value); // Base frequency
 let octave = Number(document.getElementById('octave').value); // Octave number
-let keyOffset = 0; // key in music
+let keyOffset = 0; // Key offset
 let waveType = document.getElementById('waveType').value; // Wave type: sine, square, sawtooth, or triangle
 let soundMode = document.getElementById('soundMode').value; // Sound mode: piano, strings, or bells
-let phaseDiff = document.getElementById('phaseDiff').checked; // whether to consider phase difference
+let phaseDiff = document.getElementById('phaseDiff').checked; // Whether to consider phase difference
 
 let pedal = false; // Whether the pedal is pressed or not
 
@@ -29,7 +29,7 @@ let keys;
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const oscillators = {};
 const gainNodes = {};
-const activeNotes = new Set();
+const pressedNotes = new Set();
 const timeoutStopSound = {};
 
 let midiAccess;
@@ -147,12 +147,12 @@ function updateKeyNames() {
 
 function noteName(noteNumber) {
     return notes[mod(noteNumber + keyOffset, 12)] + (Math.floor((noteNumber + keyOffset) / 12) + octave - 5);
-    //     note name                                  octave
+    //     note name                                octave
 }
 
 function keyName(noteNumber) {
     let keyName = noteName(noteNumber);
-    if (keyName.includes('(')) { // change name like E♯(F♭)4 into E♯4 \n F♭4
+    if (keyName.includes('(')) { // change name like C♯(D♭)4 into C♯4 \n D♭4
         const octave = keyName.slice(-1);
         keyName = keyName.slice(0, keyName.indexOf('(')) + octave + '\n' +
             keyName.slice(keyName.indexOf('(') + 1, keyName.indexOf(')')) + octave;
@@ -163,7 +163,6 @@ function keyName(noteNumber) {
 function frequency(noteNumber) {
     switch (temperament) {
         case 'autoJust':
-            return;
         case '12tetPlusJust': {
             const tuningBaseFreq = baseFreq * 2**((tuningBase + keyOffset - 9) / 12 + octave - 4);
             const ratioInOctave = justRatio[mod(noteNumber + keyOffset - tuningBase, 12)];
@@ -195,9 +194,23 @@ function volumeCurve(rawVolume) {
     return volume;
 }
 
+function dissonance(...simplfiedFreqs) { // uses Euler's formula to calculate dissonance
+    const freqLcm = lcm(...simplfiedFreqs);
+    const factors = primeFactors(freqLcm);
+    let sum = 1; 
+    
+    for (const [prime, exponent] of Object.entries(factors)) {
+        const p = parseInt(prime); 
+        const a = exponent;
+        sum += a * (p - 1);
+    }
+    
+    return sum;
+}
+
 function playSound(noteNumber, velocity=95) {
     const freq = frequency(noteNumber);
-    console.log(`Playing sound: ${freq} Hz` )
+    console.log(`Playing sound: ${freq.toFixed(3)} Hz` )
     
     const gainNode = audioContext.createGain();
     gainNode.connect(audioContext.destination);
@@ -242,7 +255,7 @@ function playSound(noteNumber, velocity=95) {
             }, time * 1000);
             break;
         case 'bells':
-            halfLife = 0.5 * (440/freq)**0.5;
+            halfLife = (440/freq)**0.5;
 
             for (; gain > 0.0001; gain -= 0.0001) { // set the gains from now on, until it's too quiet
                 time = timeCurve(gain);
@@ -310,7 +323,55 @@ function playNote(noteNumber, velocity=95) {
     if (oscillators[noteNumber]) {
         stopSound(noteNumber); // if the note is already playing, stop the sound first, then we can start the new sound
     }
-    activeNotes.add(noteNumber);
+
+    if (temperament == 'autoJust') {
+        if (Object.keys(oscillators).length == 0) {
+            tuningBase = mod(noteNumber, 12);
+        } else { // find the purest key of tuning base
+            const dissonances = [];
+            const lastTuningBase = tuningBase;
+            for (let i = 0; i < 12; i++) { // try all tuning bases and calculate their dissonance
+                tuningBase = i;
+                const freqs = [frequency(noteNumber)];
+                for (let i in oscillators) {
+                    freqs.push(frequency(Number(i)));
+                }
+                // console.log(freqs);
+                const freqGcd = gcd(...freqs);
+                const simplfiedFreqs = freqs.map(freq => Math.round(freq / freqGcd));
+                dissonances.push(dissonance(...simplfiedFreqs));
+            }
+            const harmonyTuningBases = findAllIndexesOfMin(dissonances);
+            if (harmonyTuningBases.includes(lastTuningBase)) {
+                tuningBase = lastTuningBase; // if last tuning base is great, continue applying it
+            } else {
+                const lastNotes = Object.keys(oscillators).sort();
+                tuningBase = lastTuningBase;
+                const lastFreqs = lastNotes.map(noteNumber => frequency(Number(noteNumber)))
+                const rmses = [];
+                const meanErrors = [];
+                for (let base of harmonyTuningBases) { // try all harmony tuning bases and find the one with the least frequency variation 
+                    tuningBase = base; 
+                    const currentfreqs = [];
+                    for (let noteNumber of lastNotes) {
+                        currentfreqs.push(frequency(Number(noteNumber)))
+                    }
+                    rmses.push(rmse(lastFreqs, currentfreqs));
+                    meanErrors.push(meanError(lastFreqs, currentfreqs));
+                }
+                const indexesOfLeastRmse = findAllIndexesOfMin(rmses);
+                if (indexesOfLeastRmse.length == 1) {
+                    tuningBase = harmonyTuningBases[indexesOfLeastRmse[0]]; // if there is only one with the least RMSE, choose it
+                } else {
+                    const indexesOfLeastMeanError = findAllIndexesOfMin(meanErrors).filter(index => indexesOfLeastRmse.includes(index));
+                    tuningBase = harmonyTuningBases[indexesOfLeastMeanError[0]]; // choose the first of the ones with least mean error
+                }
+            }
+        }
+        document.getElementById('tuningBase').value = tuningBase;
+    }
+
+    pressedNotes.add(noteNumber);
     playSound(noteNumber, velocity);
 }
 
@@ -336,8 +397,8 @@ function stopNote(noteNumber) {
             break;
     }
     
-    if (activeNotes.has(noteNumber)) {
-        activeNotes.delete(noteNumber);
+    if (pressedNotes.has(noteNumber)) {
+        pressedNotes.delete(noteNumber);
     }
 }
 
@@ -364,7 +425,7 @@ function releasePedal() {
         case 'piano':
         case 'strings':
             for (let noteNumber in oscillators) {
-                if (!activeNotes.has(Number(noteNumber))) {
+                if (!pressedNotes.has(Number(noteNumber))) {
                     stopSound(noteNumber);
                 }
             }
@@ -493,7 +554,7 @@ window.addEventListener('keydown', (event) => {
     const freq = frequency(noteNumber);
     
     if (freq) {
-        if (!activeNotes.has(noteNumber)) {
+        if (!pressedNotes.has(noteNumber)) {
             playNote(noteNumber);
         }
     } else {
