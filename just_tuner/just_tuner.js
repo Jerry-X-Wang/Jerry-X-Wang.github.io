@@ -1,6 +1,7 @@
 let temperament = document.getElementById('temperament').value; // autoJust, or 12tet
 let tuningBase = document.getElementById('tuningBase').value; // Base of tuning, only for (auto) just tuning
-let rawVolume = Number(document.getElementById('volume').value) // raw volume
+const rawVolume = 0.7; // raw volume, a preset constant
+let masterVolume = Number(document.getElementById('volume').value); // master volume controlled by slider
 let baseFreq = Number(document.getElementById('baseFreq').value); // Base frequency
 let octave = Number(document.getElementById('octave').value); // Octave number
 let keyOffset = 0; // Key offset
@@ -27,6 +28,9 @@ const blackKeyNumbers = [1, 3, 6, 8, 10];
 let keys;
 
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const masterGainNode = audioContext.createGain();
+masterGainNode.connect(audioContext.destination);
+masterGainNode.gain.value = masterVolume;
 const oscillators = {};
 const gainNodes = {};
 const pressedNotes = new Set();
@@ -208,12 +212,74 @@ function dissonance(...simplfiedFreqs) { // uses Euler's formula to calculate di
     return sum;
 }
 
+function adjustTuningBase(newNote=null) {
+    let playingNoteCount = Object.keys(oscillators).length;
+    if (newNote) { // when note plays sound
+        playingNoteCount++
+    }
+
+    if (playingNoteCount == 0) {
+        return; // do nothing
+    } else if (playingNoteCount == 1) {
+        if (newNote) {
+            tuningBase = mod(newNote, 12);
+        } else {
+            tuningBase = mod(Number(Object.keys(oscillators)[0]), 12);
+        }
+    } else { // find the purest tuning base
+        const dissonances = [];
+        const lastTuningBase = tuningBase;
+        for (let i = 0; i < 12; i++) { // try all tuning bases and calculate their dissonance
+            tuningBase = i;
+            const freqs = [];
+            if (newNote) {
+                freqs.push([frequency(newNote)]);
+            } 
+            for (let i in oscillators) {
+                freqs.push(frequency(Number(i)));
+            }
+            const freqGcd = gcd(...freqs);
+            const simplfiedFreqs = freqs.map(freq => Math.round(freq / freqGcd));
+            dissonances.push(dissonance(...simplfiedFreqs));
+        }
+        const harmonyTuningBases = findAllIndexesOfMin(dissonances);
+        if (harmonyTuningBases.includes(lastTuningBase)) {
+            tuningBase = lastTuningBase; // if last tuning base is great, continue applying it
+        } else {
+            const lastNotes = Object.keys(oscillators).sort();
+            tuningBase = lastTuningBase;
+            const lastFreqs = lastNotes.map(noteNumber => frequency(Number(noteNumber)))
+            const rmses = [];
+            const meanErrors = [];
+            for (let base of harmonyTuningBases) { // try all harmony tuning bases and find the one with the least frequency variation 
+                tuningBase = base; 
+                const currentfreqs = [];
+                for (let noteNumber of lastNotes) {
+                    currentfreqs.push(frequency(Number(noteNumber)))
+                }
+                rmses.push(rmse(lastFreqs, currentfreqs));
+                meanErrors.push(meanError(lastFreqs, currentfreqs));
+            }
+            const indexesOfLeastRmse = findAllIndexesOfMin(rmses);
+            if (indexesOfLeastRmse.length == 1) {
+                tuningBase = harmonyTuningBases[indexesOfLeastRmse[0]]; // if there is only one with the least RMSE, choose it
+            } else {
+                const indexesOfLeastMeanError = findAllIndexesOfMin(meanErrors).filter(index => indexesOfLeastRmse.includes(index));
+                tuningBase = harmonyTuningBases[indexesOfLeastMeanError[0]]; // choose the first of the ones with least mean error
+            }
+        }
+    }
+
+    document.getElementById('tuningBase').value = tuningBase;
+    updateActiveFrequencies();
+}
+
 function playSound(noteNumber, velocity=95) {
     const freq = frequency(noteNumber);
     console.log(`Playing sound: ${freq.toFixed(3)} Hz` )
-    
+
     const gainNode = audioContext.createGain();
-    gainNode.connect(audioContext.destination);
+    gainNode.connect(masterGainNode);
     gainNodes[noteNumber] = gainNode;
     gainNode.gain.value = volumeCurve(rawVolume) * (velocity/127)**2
 
@@ -305,6 +371,7 @@ function stopSound(noteNumber) {
     oscillators[noteNumber].stop(currentTime + time);
     delete oscillators[noteNumber];
     delete gainNodes[noteNumber];
+    adjustTuningBase();
     removeWave(noteNumber);
 }
 
@@ -325,50 +392,7 @@ function playNote(noteNumber, velocity=95) {
     }
 
     if (temperament == 'autoJust') {
-        if (Object.keys(oscillators).length == 0) {
-            tuningBase = mod(noteNumber, 12);
-        } else { // find the purest key of tuning base
-            const dissonances = [];
-            const lastTuningBase = tuningBase;
-            for (let i = 0; i < 12; i++) { // try all tuning bases and calculate their dissonance
-                tuningBase = i;
-                const freqs = [frequency(noteNumber)];
-                for (let i in oscillators) {
-                    freqs.push(frequency(Number(i)));
-                }
-                // console.log(freqs);
-                const freqGcd = gcd(...freqs);
-                const simplfiedFreqs = freqs.map(freq => Math.round(freq / freqGcd));
-                dissonances.push(dissonance(...simplfiedFreqs));
-            }
-            const harmonyTuningBases = findAllIndexesOfMin(dissonances);
-            if (harmonyTuningBases.includes(lastTuningBase)) {
-                tuningBase = lastTuningBase; // if last tuning base is great, continue applying it
-            } else {
-                const lastNotes = Object.keys(oscillators).sort();
-                tuningBase = lastTuningBase;
-                const lastFreqs = lastNotes.map(noteNumber => frequency(Number(noteNumber)))
-                const rmses = [];
-                const meanErrors = [];
-                for (let base of harmonyTuningBases) { // try all harmony tuning bases and find the one with the least frequency variation 
-                    tuningBase = base; 
-                    const currentfreqs = [];
-                    for (let noteNumber of lastNotes) {
-                        currentfreqs.push(frequency(Number(noteNumber)))
-                    }
-                    rmses.push(rmse(lastFreqs, currentfreqs));
-                    meanErrors.push(meanError(lastFreqs, currentfreqs));
-                }
-                const indexesOfLeastRmse = findAllIndexesOfMin(rmses);
-                if (indexesOfLeastRmse.length == 1) {
-                    tuningBase = harmonyTuningBases[indexesOfLeastRmse[0]]; // if there is only one with the least RMSE, choose it
-                } else {
-                    const indexesOfLeastMeanError = findAllIndexesOfMin(meanErrors).filter(index => indexesOfLeastRmse.includes(index));
-                    tuningBase = harmonyTuningBases[indexesOfLeastMeanError[0]]; // choose the first of the ones with least mean error
-                }
-            }
-        }
-        document.getElementById('tuningBase').value = tuningBase;
+        adjustTuningBase(noteNumber);
     }
 
     pressedNotes.add(noteNumber);
@@ -620,7 +644,8 @@ document.getElementById('tuningBase').addEventListener('change', (event) => {
 });
 
 document.getElementById('volume').addEventListener('input', (event) => {
-    rawVolume = Number(event.target.value);
+    masterVolume = Number(event.target.value);
+    masterGainNode.gain.value = masterVolume;
 });
 
 document.getElementById('baseFreq').addEventListener('input', (event) => {
