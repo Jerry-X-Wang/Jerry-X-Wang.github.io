@@ -387,7 +387,6 @@ function stopSound(noteNumber) {
     oscillators[noteNumber].stop(currentTime + time);
     delete oscillators[noteNumber];
     delete gainNodes[noteNumber];
-    adjustTuningBase();
     removeWave(noteNumber);
 }
 
@@ -427,6 +426,7 @@ function stopNote(noteNumber) {
             if (!pedal) {
                 if (oscillators[noteNumber]) {
                     stopSound(noteNumber);
+                    adjustTuningBase();
                 }
             }
             break;
