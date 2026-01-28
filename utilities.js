@@ -205,3 +205,69 @@ function randomInt(min, max) {
         console.error("Invalid range for randomInt: min must be less than or equal to max.");
     }
 }
+
+function twoIntGcd(a, b, tolerance=1e-10) { // two numbers
+    x = Math.abs(Math.round(a));
+    y = Math.abs(Math.round(b));
+
+    if (Math.abs(x - a) > tolerance || Math.abs(y - b) > tolerance) {
+        console.error('intGcd can only accept integers');
+        return;
+    }
+    
+    while (y !== 0) {
+        [x, y] = [y, x % y];
+    }
+    return x;
+}
+
+function twoNumGcd(a, b, tolerance=1e-10) {
+    if (a == 0 || b == 0) {
+        console.error('gcd cannot accept 0');
+        return;
+    }
+
+    // convert a, b to fractions
+    const toFraction = (x) => {
+        let a0 = 0, a1 = 1;
+        let b0 = 1, b1 = 0;
+        let remainder = Math.abs(x);
+        
+        for (let i = 0; i < 15; i++) {
+            const floor = Math.floor(remainder);
+            const nextA = floor * a1 + a0;
+            const nextB = floor * b1 + b0;
+            
+            a0 = a1; a1 = nextA;
+            b0 = b1; b1 = nextB;
+            
+            if (Math.abs(x - a1/b1) < tolerance) break;
+            remainder = 1 / (remainder - floor);
+            if (!isFinite(remainder)) break;
+        }
+        
+        const g = twoIntGcd(a1, b1);
+        return {
+            n: (x < 0 ? -1 : 1) * (a1 / g),
+            d: b1 / g
+        };
+    };
+    
+    const fracA = toFraction(a);
+    const fracB = toFraction(b);
+    
+    // gcd(n1/d1, n2/d2) = gcd(n1*d2, n2*d1) / (d1*d2)
+    const numGcd = twoIntGcd(fracA.n * fracB.d, fracB.n * fracA.d);
+    const denLcm = (fracA.d * fracB.d) / twoIntGcd(fracA.d, fracB.d);
+    
+    return numGcd / denLcm;
+}
+
+function gcd(...numbers) {
+    if (numbers.length === 0) return;
+    if (numbers.length === 1) return Math.abs(numbers[0]);
+    if (numbers.length === 2) return twoNumGcd(numbers[0], numbers[1]);
+    
+    const firstTwoGcd = twoNumGcd(numbers[0], numbers[1]);
+    return gcd(firstTwoGcd, ...numbers.slice(2));
+}
