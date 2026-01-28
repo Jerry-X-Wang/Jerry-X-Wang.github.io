@@ -227,7 +227,7 @@ function twoNumGcd(a, b, tolerance=1e-10) {
         return;
     }
 
-    // convert a, b to fractions
+    // convert x to fraction
     const toFraction = (x) => {
         let a0 = 0, a1 = 1;
         let b0 = 1, b1 = 0;
@@ -252,15 +252,14 @@ function twoNumGcd(a, b, tolerance=1e-10) {
             d: b1 / g
         };
     };
+
+    const ratio = toFraction(a / b);
     
-    const fracA = toFraction(a);
-    const fracB = toFraction(b);
-    
-    // gcd(n1/d1, n2/d2) = gcd(n1*d2, n2*d1) / (d1*d2)
-    const numGcd = twoIntGcd(fracA.n * fracB.d, fracB.n * fracA.d);
-    const denLcm = (fracA.d * fracB.d) / twoIntGcd(fracA.d, fracB.d);
-    
-    return numGcd / denLcm;
+    if (Math.abs(a / ratio.n - b / ratio.d) < tolerance) {
+        return a / ratio.n;
+    } else {
+        console.error(`Failed to find gcd of ${a} and ${b}`)
+    }
 }
 
 function gcd(...numbers) {
@@ -283,4 +282,64 @@ function lcm(...numbers) {
     
     const firstTwoLcm = twoNumLcm(numbers[0], numbers[1]);
     return lcm(firstTwoLcm, ...numbers.slice(2));
+}
+
+function primeFactors(n) { // return each prine and its exponent
+    const factors = {};
+    let divisor = 2;
+    
+    while (n > 1) {
+        if (n % divisor === 0) {
+            factors[divisor] = (factors[divisor] || 0) + 1;
+            n /= divisor;
+        } else {
+            divisor++;
+        }
+    }
+    
+    return factors;
+}
+
+function findAllIndexesOfMin(arr) {
+    if (arr.length === 0) return [];
+
+    const minValue = Math.min(...arr);
+    return arr.reduce((indices, value, index) => {
+        if (value === minValue) indices.push(index);
+        return indices;
+    }, []);
+}
+
+function rmse(arr1, arr2) {
+    if (arr1.length != arr2.length) {
+        console.error('RMSE can only accept 2 arrays which have the same length');
+        return;
+    }
+
+    let rmseSquare = 0;
+
+    for (let i in arr1) {
+        rmseSquare += (arr2[i] - arr1[i]) ** 2;
+    }
+
+    rmseSquare /= arr1.length;
+
+    return rmseSquare ** 0.5;
+}
+
+function meanError(arr1, arr2) {
+    if (arr1.length != arr2.length) {
+        console.error('Mean Error can only accept 2 arrays which have the same length');
+        return;
+    }
+
+    let meanError = 0;
+
+    for (let i in arr1) {
+        meanError += arr2[i] - arr1[i];
+    }
+
+    meanError /= arr1.length;
+
+    return meanError;
 }
