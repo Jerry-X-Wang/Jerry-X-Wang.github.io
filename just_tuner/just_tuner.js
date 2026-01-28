@@ -323,7 +323,7 @@ function playSound(noteNumber, velocity=95) {
 
     switch (soundMode) {
         case 'piano':
-            halfLife = (440/freq)**0.5;
+            halfLife = 0.8 * (440/freq)**0.5;
 
             for (; gain > 0.0001; gain -= 0.0001) { // set the gains from now on, until it's too quiet
                 time = timeCurve(gain);
@@ -467,6 +467,7 @@ function releasePedal() {
             for (let noteNumber in oscillators) {
                 if (!pressedNotes.has(Number(noteNumber))) {
                     stopSound(noteNumber);
+                    adjustTuningBase();
                 }
             }
             break;
