@@ -8,6 +8,7 @@ let keyOffset = 0; // Key offset
 let waveType = document.getElementById('waveType').value; // Wave type: sine, square, sawtooth, or triangle
 let soundMode = document.getElementById('soundMode').value; // Sound mode: piano, strings, or bells
 let phaseDiff = document.getElementById('phaseDiff').checked; // Whether to consider phase difference
+let debounceTime = 50; // ms
 
 let pedal = false; // Whether the pedal is pressed or not
 
@@ -239,7 +240,12 @@ function transposeTuningBase(newNote=null) {
         return;
     }
 
-    let playingNoteCount = Object.keys(oscillators).length;
+    const playingNotes = new Set(Object.keys(oscillators).map(noteNumber => Number(noteNumber)));
+    if (playingNotes.has(newNote)) {
+        newNote = null;
+    }
+
+    let playingNoteCount = playingNotes.size;
     if (newNote) { // when note plays sound
         playingNoteCount++
     }
@@ -300,6 +306,8 @@ function transposeTuningBase(newNote=null) {
     document.getElementById('tuningBase').value = tuningBase;
     updateActiveFrequencies();
 }
+
+const debounceTransposeTuningBase = debounce(transposeTuningBase, debounceTime);
 
 function playSound(noteNumber, velocity=95) {
     noteNumber = Number(noteNumber);
@@ -422,7 +430,7 @@ function playNote(noteNumber, velocity=95) {
     }
 
     if (temperament == 'autoJust') {
-        transposeTuningBase(noteNumber);
+        debounceTransposeTuningBase(noteNumber);
     }
 
     pressedNotes.add(noteNumber);
@@ -457,7 +465,7 @@ function stopNote(noteNumber) {
     }
 
     if (temperament == 'autoJust') {
-        transposeTuningBase();
+        debounceTransposeTuningBase();
     }
 }
 
@@ -488,7 +496,7 @@ function releasePedal() {
                 if (!pressedNotes.has(noteNumber)) {
                     stopSound(noteNumber);
                     if (temperament == 'autoJust') {
-                        transposeTuningBase();
+                        debounceTransposeTuningBase();
                     }
                 }
             }

@@ -343,3 +343,20 @@ function meanError(arr1, arr2) {
 
     return meanError;
 }
+
+function debounce(func, delay) {
+    let timeoutId;
+    
+    return function(...args) {
+        // save the context
+        const context = this;
+        
+        // clear last timer
+        clearTimeout(timeoutId);
+
+        // set new timer
+        timeoutId = setTimeout(() => {
+        func.apply(context, args);
+        }, delay);
+    };
+}
