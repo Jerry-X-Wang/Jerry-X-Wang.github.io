@@ -8,7 +8,7 @@ let keyOffset = 0; // Key offset
 let waveType = document.getElementById('waveType').value; // Wave type: sine, square, sawtooth, or triangle
 let soundMode = document.getElementById('soundMode').value; // Sound mode: piano, strings, or bells
 let phaseDiff = document.getElementById('phaseDiff').checked; // Whether to consider phase difference
-let debounceTime = 50; // ms
+let debounceTime = 0; // ms
 
 let pedal = false; // Whether the pedal is pressed or not
 
@@ -252,12 +252,12 @@ function transposeTuningBase(newNote=null) {
 
     if (playingNoteCount == 0) {
         return; // do nothing
-    } else if (playingNoteCount == 1) {
-        if (newNote) {
-            tuningBase = mod(newNote, 12);
-        } else {
-            tuningBase = mod(Number(Object.keys(oscillators)[0]), 12);
-        }
+    // } else if (playingNoteCount == 1) {
+    //     if (newNote) {
+    //         tuningBase = mod(newNote, 12);
+    //     } else {
+    //         tuningBase = mod(Number(Object.keys(oscillators)[0]), 12);
+    //     }
     } else { // find the purest tuning base
         const dissonances = [];
         const lastTuningBase = tuningBase;
