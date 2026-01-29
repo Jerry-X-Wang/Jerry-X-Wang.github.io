@@ -89,6 +89,7 @@ const keyMap = {
 }
 
 function keyPosition(noteNumber) {
+    noteNumber = Number(noteNumber);
     let position;
     switch (mod(noteNumber, 12)) {
         case 0:
@@ -150,11 +151,13 @@ function updateKeyNames() {
 }
 
 function noteName(noteNumber) {
+    noteNumber = Number(noteNumber);
     return notes[mod(noteNumber + keyOffset, 12)] + (Math.floor((noteNumber + keyOffset) / 12) + octave - 5);
     //     note name                                octave
 }
 
 function keyName(noteNumber) {
+    noteNumber = Number(noteNumber);
     let keyName = noteName(noteNumber);
     if (keyName.includes('(')) { // change name like C♯(D♭)4 into C♯4 \n D♭4
         const octave = keyName.slice(-1);
@@ -165,6 +168,7 @@ function keyName(noteNumber) {
 }
 
 function frequency(noteNumber) {
+    noteNumber = Number(noteNumber);
     switch (temperament) {
         case 'autoJust':
         case '12tetPlusJust': {
@@ -228,7 +232,13 @@ function dissonance(...simplfiedFreqs) { // uses Euler's formula to calculate di
     return sum;
 }
 
-function adjustTuningBase(newNote=null) {
+function transposeTuningBase(newNote=null) {
+    newNote = Number(newNote);
+    if (temperament != 'autoJust') {
+        console.warn('transposeTuningBase can only work in auto just intonation')
+        return;
+    }
+
     let playingNoteCount = Object.keys(oscillators).length;
     if (newNote) { // when note plays sound
         playingNoteCount++
@@ -249,7 +259,7 @@ function adjustTuningBase(newNote=null) {
             tuningBase = i;
             const freqs = [];
             if (newNote) {
-                freqs.push([frequency(newNote)]);
+                freqs.push(frequency(newNote));
             } 
             for (let i in oscillators) {
                 freqs.push(frequency(Number(i)));
@@ -271,7 +281,8 @@ function adjustTuningBase(newNote=null) {
                 tuningBase = base; 
                 const currentfreqs = [];
                 for (let noteNumber of lastNotes) {
-                    currentfreqs.push(frequency(Number(noteNumber)))
+                    noteNumber = Number(noteNumber);
+                    currentfreqs.push(frequency(noteNumber))
                 }
                 rmses.push(rmse(lastFreqs, currentfreqs));
                 meanErrors.push(meanError(lastFreqs, currentfreqs));
@@ -291,6 +302,7 @@ function adjustTuningBase(newNote=null) {
 }
 
 function playSound(noteNumber, velocity=95) {
+    noteNumber = Number(noteNumber);
     const freq = frequency(noteNumber);
     console.log(`Playing sound: ${freq.toFixed(3)} Hz` )
 
@@ -369,6 +381,7 @@ function playSound(noteNumber, velocity=95) {
 }
 
 function stopSound(noteNumber) {
+    noteNumber = Number(noteNumber);
     clearTimeout(timeoutStopSound[noteNumber]);
     gainNodes[noteNumber].gain.cancelScheduledValues(audioContext.currentTime); // cancel the schedule before
 
@@ -392,11 +405,13 @@ function stopSound(noteNumber) {
 
 function stopAllSounds() {
     for (let noteNumber in oscillators) {
+        noteNumber = Number(noteNumber);
         stopSound(noteNumber);
     }
 }
 
 function playNote(noteNumber, velocity=95) {
+    noteNumber = Number(noteNumber);
     keys.forEach(key => {
         if (key.noteNumber == noteNumber && !key.classList.contains('active')) {
             key.classList.add('active');
@@ -407,7 +422,7 @@ function playNote(noteNumber, velocity=95) {
     }
 
     if (temperament == 'autoJust') {
-        adjustTuningBase(noteNumber);
+        transposeTuningBase(noteNumber);
     }
 
     pressedNotes.add(noteNumber);
@@ -415,6 +430,7 @@ function playNote(noteNumber, velocity=95) {
 }
 
 function stopNote(noteNumber) {
+    noteNumber = Number(noteNumber);
     keys.forEach(key => {
         if (key.noteNumber == noteNumber && key.classList.contains('active')) {
             key.classList.remove('active');
@@ -426,7 +442,6 @@ function stopNote(noteNumber) {
             if (!pedal) {
                 if (oscillators[noteNumber]) {
                     stopSound(noteNumber);
-                    adjustTuningBase();
                 }
             }
             break;
@@ -439,6 +454,10 @@ function stopNote(noteNumber) {
     
     if (pressedNotes.has(noteNumber)) {
         pressedNotes.delete(noteNumber);
+    }
+
+    if (temperament == 'autoJust') {
+        transposeTuningBase();
     }
 }
 
@@ -465,9 +484,12 @@ function releasePedal() {
         case 'piano':
         case 'strings':
             for (let noteNumber in oscillators) {
-                if (!pressedNotes.has(Number(noteNumber))) {
+                noteNumber = Number(noteNumber);
+                if (!pressedNotes.has(noteNumber)) {
                     stopSound(noteNumber);
-                    adjustTuningBase();
+                    if (temperament == 'autoJust') {
+                        transposeTuningBase();
+                    }
                 }
             }
             break;
@@ -591,7 +613,7 @@ window.addEventListener('keydown', (event) => {
     }
     
     const keyCode = event.key;
-    const noteNumber = keyMap[keyCode];
+    const noteNumber = Number(keyMap[keyCode]);
     const freq = frequency(noteNumber);
     
     if (freq) {
@@ -625,7 +647,7 @@ window.addEventListener('keydown', (event) => {
 
 window.addEventListener('keyup', (event) => {
     const keyCode = event.key;
-    const noteNumber = keyMap[keyCode];
+    const noteNumber = Number(keyMap[keyCode]);
 
     switch (keyCode) {
         case ' ':
@@ -819,38 +841,38 @@ function init() {
     keys.forEach(key => {
         key.addEventListener('touchstart', function(event) {
             event.preventDefault(); // prevent the page from scrolling
-            const noteNumber = parseInt(key.noteNumber);
+            const noteNumber = Number(key.noteNumber);
             playNote(noteNumber);
         });
 
         key.addEventListener('touchend', function() {
-            const noteNumber = parseInt(key.noteNumber);
+            const noteNumber = Number(key.noteNumber);
             stopNote(noteNumber);
         });
 
         key.addEventListener('touchleave', function() {
-            const noteNumber = parseInt(key.noteNumber);
+            const noteNumber = Number(key.noteNumber);
             stopNote(noteNumber);
         });
 
         key.addEventListener('mousedown', function() {
-            const noteNumber = parseInt(key.noteNumber);
+            const noteNumber = Number(key.noteNumber);
             playNote(noteNumber);
         });
 
         key.addEventListener('mouseup', function() {
-            const noteNumber = parseInt(key.noteNumber);
+            const noteNumber = Number(key.noteNumber);
             stopNote(noteNumber);
         });
 
         key.addEventListener('mouseleave', function() {
-            const noteNumber = parseInt(key.noteNumber);
+            const noteNumber = Number(key.noteNumber);
             stopNote(noteNumber);
         });
 
         key.addEventListener('mousemove', function(event) {
             if (event.buttons == 1 && !key.classList.contains('active')) { // left mouse button is down
-                const noteNumber = parseInt(key.noteNumber);
+                const noteNumber = Number(key.noteNumber);
                 playNote(noteNumber);
             }
         });
